@@ -212,3 +212,10 @@ const GameState = {
     }
   }
 };
+
+if (typeof window !== "undefined") {
+  window.GameState = GameState;
+}
+if (typeof global !== "undefined") {
+  global.GameState = GameState;
+}

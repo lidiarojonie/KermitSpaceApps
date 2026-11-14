@@ -250,11 +250,10 @@ function loadCurrentSol() {
 
 // 9. Manejo de la decisión elegida (abre briefing si hay minijuego o resuelve de inmediato)
 function handleChoiceSelection(choice) {
+  const is3DMinigame = typeof Minigames3D !== "undefined" && Minigames3D.has(choice.minigame);
   const hasMinigameScene =
     choice.minigame &&
-    phaserGame &&
-    phaserGame.scene &&
-    phaserGame.scene.getScene(choice.minigame);
+    ((phaserGame && phaserGame.scene && phaserGame.scene.getScene(choice.minigame)) || is3DMinigame);
 
   if (hasMinigameScene) {
     pendingMinigameChoice = choice;
@@ -279,6 +278,14 @@ function showMinigameBriefing(choice) {
 
 function getMinigameControlsHelp(minigameKey) {
   switch (minigameKey) {
+    case "MinigameRoverRace3D":
+      return "Usa A / D, las Flechas o arrastra el ratón para guiar a ROVI, esquivar rocas rojas y recoger cristales de hielo.";
+    case "MinigameMavLaunch3D":
+      return "Usa W,A,S,D, las Flechas o arrastra el ratón para guiar el cohete a través de los anillos verdes hacia la órbita de Marte.";
+    case "MinigameEvaRepair3D":
+      return "Muévete hacia los paneles dañados y mantén pulsado Clic o Barra Espaciadora para soldar y reparar con el rayo láser.";
+    case "MinigamePixlLaser3D":
+      return "Apunta el rayo láser con el ratón o flechas a los 4 minerales de la roca marciana y haz Clic para analizarlos.";
     case "MinigameMoxie":
       return "Mantén pulsado la BARRA ESPACIADORA o haz CLIC en el botón para mantener la aguja en la zona verde de 800 °C.";
     case "MinigameDrill":
@@ -317,6 +324,23 @@ document.getElementById("btn-start-minigame").onclick = () => {
   toggleViewBtn.style.opacity = "0.5";
 
   if (typeof SoundFx !== "undefined") SoundFx.playClick();
+
+  const is3DMinigame = typeof Minigames3D !== "undefined" && Minigames3D.has(pendingMinigameChoice.minigame);
+
+  if (is3DMinigame) {
+    if (typeof Scene3D !== "undefined") Scene3D.stop();
+    if (phaserGame && phaserGame.scene) {
+      phaserGame.scene.pause("MainScene");
+    }
+    const hud3d = document.getElementById("hud-3d-controls");
+    if (hud3d) hud3d.classList.add("hidden");
+
+    GameState.modifyResources(pendingMinigameChoice.cost || {}, true);
+    Minigames3D.start(pendingMinigameChoice.minigame, pendingMinigameChoice, (result) => {
+      window.onMinigameComplete(result, pendingMinigameChoice);
+    });
+    return;
+  }
 
   const phaserCont = document.getElementById("phaser-container");
   const threeCont = document.getElementById("threejs-container");
@@ -366,6 +390,10 @@ window.onMinigameComplete = function (result, choice) {
   isMinigameRunning = false;
   toggleViewBtn.disabled = false;
   toggleViewBtn.style.opacity = "1";
+
+  if (typeof Minigames3D !== "undefined") {
+    Minigames3D.cleanup();
+  }
 
   let tier = "good";
   let score = 100;
@@ -443,7 +471,10 @@ window.onMinigameComplete = function (result, choice) {
     if (choice.minigame === "MinigameShield") DiscoverySystem.unlock("radiation_donki", true);
     if (choice.minigame === "MinigameWaterFilter") DiscoverySystem.unlock("water_mars", true);
     if (choice.minigame === "MinigameCircuit") DiscoverySystem.unlock("solar_power", true);
-    if (choice.minigame === "MinigameRoverDrive") DiscoverySystem.unlock("rovers_exploration", true);
+    if (choice.minigame === "MinigameRoverDrive" || choice.minigame === "MinigameRoverRace3D") DiscoverySystem.unlock("rovers_exploration", true);
+    if (choice.minigame === "MinigameMavLaunch3D") DiscoverySystem.unlock("mav_rocket", true);
+    if (choice.minigame === "MinigameEvaRepair3D") DiscoverySystem.unlock("solar_power", true);
+    if (choice.minigame === "MinigamePixlLaser3D" || choice.minigame === "MinigameSpectro") DiscoverySystem.unlock("water_mars", true);
   }
 
   // Aplicar recompensa al estado
@@ -650,6 +681,240 @@ document.getElementById("btn-new-game").onclick = () => {
   switchViewMode("2d");
   loadCurrentSol();
 };
+
+// =========================================================================
+// SALA DE ENTRENAMIENTO / SELECTOR DIRECTO DE MINIJUEGOS (ARCADE NASA)
+// =========================================================================
+const ARCADE_MINIGAMES_3D = [
+  {
+    minigame: "MinigameRoverRace3D",
+    minigameTitle: "Carrera del Rover ROVI en el Cañón Marciano",
+    minigameBrief: "Conduce a ROVI por el cañón de Marte en 3D, esquiva rocas rojas basálticas y recoge cristales de hielo azul y turbo solar.",
+    badge: "ACCIÓN 3D",
+    desc: "Pilotaje 3D de alta velocidad por el cañón marciano con recolección de recursos.",
+    cost: {},
+    successReward: { water: 26, food: 22 },
+    failReward: { water: 14, food: 10 },
+    nasaFact: "Los rovers de la NASA analizan el terreno marciano para localizar depósitos de agua congelada accesibles."
+  },
+  {
+    minigame: "MinigameMavLaunch3D",
+    minigameTitle: "Ascenso y Vuelo a Órbita del Cohete MAV",
+    minigameBrief: "Guía el cohete de retorno MAV a través de los anillos de navegación verde mientras el cielo pasa del atardecer rojizo al negro espacial estrellado.",
+    badge: "VUELO Y ÓRBITA 3D",
+    desc: "Simulador de ascenso orbital 3D atravesando capas atmosféricas de Marte.",
+    cost: {},
+    successReward: { mav: 1, energy: 25, oxygen: 25 },
+    failReward: { mav: 1, energy: 15, oxygen: 15 },
+    nasaFact: "El MAV alcanza la órbita marciana en unos 8 minutos para acoplarse con la nave que vuelve a la Tierra."
+  },
+  {
+    minigame: "MinigameEvaRepair3D",
+    minigameTitle: "Paseo Espacial EVA en Gravedad Cero",
+    minigameBrief: "Flota en gravedad cero con tu traje espacial y repara los 4 paneles solares dañados usando el rayo láser de microsoldadura.",
+    badge: "GRAVEDAD CERO 3D",
+    desc: "Actividad extravehicular (EVA) en ingravidez para reparar paneles de la estación.",
+    cost: {},
+    successReward: { energy: 30, shield: 15 },
+    failReward: { energy: 15, shield: 8 },
+    nasaFact: "Los paseos espaciales (EVA) requieren trajes presurizados EMU para trabajar en el vacío del espacio."
+  },
+  {
+    minigame: "MinigamePixlLaser3D",
+    minigameTitle: "Espectrometría Láser PIXL en 3D",
+    minigameBrief: "Apunta el láser del brazo robótico a la roca marciana en rotación y analiza sus 4 minerales clave (hielo, silicato, carbonato y hierro).",
+    badge: "LABORATORIO 3D",
+    desc: "Análisis geológico tridimensional disparando pulsos láser ultravioleta.",
+    cost: {},
+    successReward: { water: 25, energy: 20 },
+    failReward: { water: 12, energy: 10 },
+    nasaFact: "El instrumento PIXL de Perseverance usa rayos X y luz UV para mapear elementos químicos en rocas."
+  }
+];
+
+const ARCADE_MINIGAMES_2D = [
+  {
+    minigame: "MinigameMoxie",
+    minigameTitle: "Reactor MOXIE: Síntesis de Oxígeno",
+    minigameBrief: "Mantén pulsada la barra espaciadora para regular la temperatura en 800 °C y convertir CO2 en oxígeno respirable.",
+    badge: "SOPORTE VITAL",
+    desc: "Control térmico electrolítico de 800 °C para producir oxígeno.",
+    cost: {},
+    successReward: { oxygen: 28 },
+    failReward: { oxygen: 14 }
+  },
+  {
+    minigame: "MinigameDrill",
+    minigameTitle: "Perforación Glaciar Arcadia",
+    minigameBrief: "Mueve la broca a los lados para extraer cristales de hielo puro y esquivar las rocas subterráneas.",
+    badge: "EXTRACCIÓN AGUA",
+    desc: "Perforación del glaciar subterráneo para extraer bloques de agua potable.",
+    cost: {},
+    successReward: { water: 30 },
+    failReward: { water: 15 }
+  },
+  {
+    minigame: "MinigameSolar",
+    minigameTitle: "Mantenimiento Solar de Emergencia",
+    minigameBrief: "Haz clic rápido sobre todas las motas de polvo marciano en los paneles solares y pulsa el interruptor.",
+    badge: "ENERGÍA SOLAR",
+    desc: "Limpieza electrostática de paneles solares y rearme del disyuntor.",
+    cost: {},
+    successReward: { energy: 30 },
+    failReward: { energy: 15 }
+  },
+  {
+    minigame: "MinigameBiodome",
+    minigameTitle: "Cultivo Hidropónico en el Biodomo",
+    minigameBrief: "Riega y equilibra la luz de las 3 bandejas de cultivo para cosechar microgreens y espirulina fresca.",
+    badge: "ALIMENTOS Y BIOLOGÍA",
+    desc: "Gestión de nutrientes y luces LED en el huerto hidropónico.",
+    cost: {},
+    successReward: { food: 30, oxygen: 12 },
+    failReward: { food: 15, oxygen: 6 }
+  },
+  {
+    minigame: "MinigameShield",
+    minigameTitle: "Deflector de Radiación Solar DONKI",
+    minigameBrief: "Mueve el deflector magnético para interceptar los protones solares antes de que impacten la base.",
+    badge: "DEFENSA SOLAR",
+    desc: "Intercepción de llamaradas solares con la barrera magnética.",
+    cost: {},
+    successReward: { shield: 25, energy: 15 },
+    failReward: { shield: 10, energy: 8 }
+  },
+  {
+    minigame: "MinigameWaterFilter",
+    minigameTitle: "Purificación de Agua y Percloratos",
+    minigameBrief: "Activa los 3 filtros en orden (sedimentos, neutralización química y ósmosis) para depurar el agua.",
+    badge: "QUÍMICA Y FILTRADO",
+    desc: "Filtrado en tres fases para eliminar sales perclorato tóxicas.",
+    cost: {},
+    successReward: { water: 28 },
+    failReward: { water: 14 }
+  },
+  {
+    minigame: "MinigameLeakRepair",
+    minigameTitle: "Sellado de Fugas del Hábitat",
+    minigameBrief: "Haz clic en las 5 fugas marcadas en la pared para sellarlas con espuma polimérica antes de perder presión.",
+    badge: "REPARACIÓN CABINA",
+    desc: "Parcheo rápido de fracturas de micrometeoritos en el refugio.",
+    cost: {},
+    successReward: { oxygen: 25, shield: 15 },
+    failReward: { oxygen: 12, shield: 8 }
+  },
+  {
+    minigame: "MinigameCircuit",
+    minigameTitle: "Conexión de Circuitos y Relés",
+    minigameBrief: "Haz clic en los 4 relés rotatorios para alinearlos y restablecer el flujo de corriente eléctrica.",
+    badge: "INGENIERÍA ELÉCTRICA",
+    desc: "Puzzle de alineación de relés para reconectar las baterías.",
+    cost: {},
+    successReward: { energy: 30 },
+    failReward: { energy: 15 }
+  },
+  {
+    minigame: "MinigameDustDefense",
+    minigameTitle: "Defensa ante Megatormenta Marciana",
+    minigameBrief: "Bloquea y asegura a tiempo los 4 sistemas críticos de la base antes de que la tormenta impacte.",
+    badge: "EMERGENCIA CLIMA",
+    desc: "Protocolo de aseguramiento ante ráfagas de viento huracanado.",
+    cost: {},
+    successReward: { shield: 25, oxygen: 15 },
+    failReward: { shield: 10, oxygen: 8 }
+  },
+  {
+    minigame: "MinigameRoverDrive",
+    minigameTitle: "Exploración y Conducción 2D con ROVI",
+    minigameBrief: "Conduce el rover con las flechas o WASD para desplegar 4 balizas científicas esquivando cráteres.",
+    badge: "CONDUCCIÓN TÁCTICA",
+    desc: "Navegación sobre terreno rocoso para balizar suministros caídos.",
+    cost: {},
+    successReward: { water: 25, food: 20 },
+    failReward: { water: 14, food: 10 }
+  }
+];
+
+function openArcadeModal() {
+  const modal = document.getElementById("arcade-modal");
+  const grid3d = document.getElementById("arcade-3d-grid");
+  const grid2d = document.getElementById("arcade-2d-grid");
+
+  if (!modal || !grid3d || !grid2d) return;
+
+  grid3d.innerHTML = "";
+  ARCADE_MINIGAMES_3D.forEach(g => {
+    const card = document.createElement("div");
+    card.className = "arcade-item-card";
+    card.innerHTML = `
+      <div>
+        <div class="arcade-item-header">
+          <span class="arcade-item-badge badge-3d">${g.badge}</span>
+        </div>
+        <h4 class="arcade-item-title">${g.minigameTitle}</h4>
+        <p class="arcade-item-desc">${g.desc}</p>
+      </div>
+      <button class="btn-primary btn-arcade-play">¡JUGAR 3D!</button>
+    `;
+    card.querySelector("button").onclick = () => {
+      modal.classList.add("hidden");
+      startScreen.classList.add("hidden");
+      if (typeof SoundFx !== "undefined") SoundFx.playClick();
+      handleChoiceSelection(g);
+    };
+    grid3d.appendChild(card);
+  });
+
+  grid2d.innerHTML = "";
+  ARCADE_MINIGAMES_2D.forEach(g => {
+    const card = document.createElement("div");
+    card.className = "arcade-item-card";
+    card.innerHTML = `
+      <div>
+        <div class="arcade-item-header">
+          <span class="arcade-item-badge badge-2d">${g.badge}</span>
+        </div>
+        <h4 class="arcade-item-title">${g.minigameTitle}</h4>
+        <p class="arcade-item-desc">${g.desc}</p>
+      </div>
+      <button class="btn-primary btn-arcade-play">¡JUGAR 2D!</button>
+    `;
+    card.querySelector("button").onclick = () => {
+      modal.classList.add("hidden");
+      startScreen.classList.add("hidden");
+      if (typeof SoundFx !== "undefined") SoundFx.playClick();
+      handleChoiceSelection(g);
+    };
+    grid2d.appendChild(card);
+  });
+
+  modal.classList.remove("hidden");
+}
+
+const btnOpenArcade = document.getElementById("btn-open-arcade");
+if (btnOpenArcade) {
+  btnOpenArcade.onclick = () => {
+    if (typeof SoundFx !== "undefined") SoundFx.playClick();
+    openArcadeModal();
+  };
+}
+
+const btnOpenArcadeHud = document.getElementById("btn-open-arcade-hud");
+if (btnOpenArcadeHud) {
+  btnOpenArcadeHud.onclick = () => {
+    if (typeof SoundFx !== "undefined") SoundFx.playClick();
+    openArcadeModal();
+  };
+}
+
+const btnCloseArcade = document.getElementById("btn-close-arcade");
+if (btnCloseArcade) {
+  btnCloseArcade.onclick = () => {
+    if (typeof SoundFx !== "undefined") SoundFx.playClick();
+    const modal = document.getElementById("arcade-modal");
+    if (modal) modal.classList.add("hidden");
+  };
+}
 
 document.getElementById("btn-Reset-save").onclick = () => {
   if (typeof SoundFx !== "undefined") SoundFx.playClick();

@@ -1101,3 +1101,345 @@ body {
   from { opacity: 0; transform: translate(-50%, -10px); }
   to { opacity: 1; transform: translate(-50%, 0); }
 }
+
+/* ==========================================================================
+   MINIJUEGOS 3D EN THREE.JS (PANTALLA COMPLETA Y HUD TÁCTIL INFANTIL)
+   ========================================================================== */
+.minigame-3d-screen {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 150;
+  background: #020617;
+  overflow: hidden;
+  font-family: 'Fredoka', 'Nunito', sans-serif;
+}
+
+#minigame-3d-canvas-wrap {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.m3d-hud-top {
+  position: absolute;
+  top: 18px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.m3d-badge-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.m3d-tag {
+  align-self: flex-start;
+  background: #38bdf8;
+  color: #041226;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 99px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 3px 0 #0284c7;
+}
+
+#m3d-game-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #ffffff;
+  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(56, 189, 248, 0.4);
+}
+
+.m3d-stats-cluster {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.m3d-stat-pill {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 4px solid #0f172a;
+  border-radius: 18px;
+  padding: 8px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 90px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+.m3d-stat-lbl {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.m3d-stat-pill strong {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.m3d-stars-pill {
+  border-color: #ffd000;
+  border-bottom-color: #b45309;
+}
+
+.m3d-stars-pill strong {
+  color: #ffd000;
+  font-size: 1.05rem;
+}
+
+.m3d-timer-pill {
+  border-color: #ef4444;
+  border-bottom-color: #991b1b;
+}
+
+.m3d-timer-pill strong {
+  color: #f87171;
+}
+
+.m3d-controls-overlay {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  z-index: 20;
+  pointer-events: auto;
+  width: 90%;
+  max-width: 640px;
+}
+
+.m3d-help-bubble {
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 2px solid #38bdf8;
+  border-radius: 99px;
+  padding: 8px 24px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+#m3d-instructions-text {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0;
+}
+
+.m3d-touch-controls {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+}
+
+.m3d-touch-btn {
+  background: #1e293b;
+  color: #ffffff;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 800;
+  font-size: 1.6rem;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 5px solid #0f172a;
+  border-radius: 20px;
+  width: 68px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.08s, background 0.15s;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+.m3d-touch-btn:hover {
+  background: #334155;
+  border-color: #38bdf8;
+}
+
+.m3d-touch-btn:active {
+  transform: translateY(3px);
+  border-bottom-width: 2px;
+}
+
+.m3d-action-btn {
+  width: auto;
+  padding: 0 28px;
+  font-size: 1.05rem;
+  background: #ffd000;
+  color: #0f172a;
+  border-color: #fef08a;
+  border-bottom-color: #b45309;
+}
+
+.m3d-action-btn:hover {
+  background: #facc15;
+}
+
+/* ==========================================================================
+   ESTILOS DE SALA DE ENTRENAMIENTO / CENTRO DE MINIJUEGOS (ARCADE NASA)
+   ========================================================================== */
+.btn-gold {
+  background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%) !important;
+  border-bottom-color: #b45309 !important;
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.45) !important;
+}
+
+.btn-gold:hover {
+  box-shadow: 0 10px 24px rgba(245, 158, 11, 0.6) !important;
+}
+
+.btn-gold-mini {
+  background: rgba(245, 158, 11, 0.25) !important;
+  color: #fbbf24 !important;
+  border-color: rgba(245, 158, 11, 0.6) !important;
+}
+
+.btn-gold-mini:hover {
+  background: #f59e0b !important;
+  color: #0f172a !important;
+  border-color: #fbbf24 !important;
+}
+
+.tag-2d {
+  background: #a855f7 !important;
+  box-shadow: 0 3px 0 #7e22ce !important;
+}
+
+.arcade-card {
+  max-width: 960px !important;
+  width: 95% !important;
+  max-height: 88vh;
+  overflow-y: auto;
+  text-align: left;
+}
+
+.arcade-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 14px;
+}
+
+.arcade-header h2 {
+  font-size: 1.6rem;
+  color: #ffffff;
+  margin: 6px 0 2px 0;
+}
+
+.arcade-subtitle {
+  font-size: 0.95rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.arcade-section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.arcade-section-title h3 {
+  font-size: 1.18rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+}
+
+.arcade-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.arcade-item-card {
+  background: #1e293b;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 4px solid #0f172a;
+  border-radius: 20px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.arcade-item-card:hover {
+  border-color: #ffd000;
+  transform: translateY(-3px);
+  background: #273549;
+}
+
+.arcade-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.arcade-item-badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 99px;
+  letter-spacing: 0.5px;
+}
+
+.badge-3d {
+  background: #38bdf8;
+  color: #041226;
+}
+
+.badge-2d {
+  background: #a855f7;
+  color: #ffffff;
+}
+
+.arcade-item-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.25;
+  margin: 4px 0 0 0;
+}
+
+.arcade-item-desc {
+  font-size: 0.84rem;
+  color: #cbd5e1;
+  line-height: 1.4;
+  margin: 0;
+  flex-grow: 1;
+}
+
+.btn-arcade-play {
+  align-self: flex-end;
+  padding: 8px 20px;
+  font-size: 0.88rem;
+  border-radius: 14px;
+  margin-top: 4px;
+}

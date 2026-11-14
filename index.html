@@ -29,6 +29,7 @@
       <div class="start-buttons">
         <button id="btn-new-game" class="btn-primary btn-chunky">¡EMPEZAR MISIÓN!</button>
         <button id="btn-demo-3d" class="btn-primary btn-chunky btn-cyan">EXPLORAR BASE EN 3D</button>
+        <button id="btn-open-arcade" class="btn-primary btn-chunky btn-gold">SALA DE MINIJUEGOS (ENTRENADOR)</button>
         <button id="btn-Reset-save" class="btn-secondary btn-mini-sub">Reiniciar partida</button>
       </div>
     </div>
@@ -38,7 +39,7 @@
   <div id="discovery-popup-modal" class="overlay-screen hidden">
     <div class="modal-card discovery-pop-card">
       <div class="disc-header">
-        <div class="disc-icon-badge">NASA</div>
+        <div id="disc-pop-icon" class="disc-icon-badge">NASA</div>
         <div>
           <span id="disc-pop-cat" class="disc-badge">CIENCIA ESPACIAL</span>
           <h3 id="disc-pop-title">Nuevo Descubrimiento Marciano</h3>
@@ -135,6 +136,32 @@
     </div>
   </div>
 
+  <!-- MODAL DE SALA DE ENTRENAMIENTO / SELECTOR DE MINIJUEGOS -->
+  <div id="arcade-modal" class="overlay-screen hidden">
+    <div class="modal-card arcade-card">
+      <div class="arcade-header">
+        <div>
+          <span class="badge-nasa">SIMULADOR Y ENTRENADOR DE VUELO NASA</span>
+          <h2>Centro de Entrenamiento de Astronautas</h2>
+          <p class="arcade-subtitle">Prueba y juega directamente a cualquiera de los minijuegos 3D y 2D</p>
+        </div>
+        <button id="btn-close-arcade" class="btn-secondary">Volver al juego</button>
+      </div>
+
+      <div class="arcade-section-title">
+        <span class="m3d-tag">NUEVA GENERACIÓN 3D (THREE.JS)</span>
+        <h3>Simuladores de Acción y Vuelo en Marte</h3>
+      </div>
+      <div id="arcade-3d-grid" class="arcade-grid"></div>
+
+      <div class="arcade-section-title" style="margin-top: 28px;">
+        <span class="m3d-tag tag-2d">OPERACIONES DE BASE 2D (PHASER 3)</span>
+        <h3>Soporte Vital, Ingeniería y Gestión</h3>
+      </div>
+      <div id="arcade-2d-grid" class="arcade-grid"></div>
+    </div>
+  </div>
+
   <!-- MODAL FINAL DE VICTORIA / HIBERNACIÓN -->
   <div id="end-modal" class="overlay-screen hidden">
     <div class="modal-card end-card">
@@ -143,6 +170,48 @@
       <p id="end-desc"></p>
       <div id="end-medal-box" class="nasa-box end-medal"></div>
       <button id="btn-restart-end" class="btn-primary btn-chunky">¡JUGAR OTRA VEZ!</button>
+    </div>
+  </div>
+
+  <!-- OVERLAY PARA MINIJUEGOS 3D INTERACTIVOS (THREE.JS) -->
+  <div id="minigame-3d-overlay" class="minigame-3d-screen hidden">
+    <div id="minigame-3d-canvas-wrap"></div>
+    
+    <!-- HUD superior del minijuego 3D -->
+    <div class="m3d-hud-top">
+      <div class="m3d-badge-box">
+        <span class="m3d-tag">MINIJUEGO 3D</span>
+        <h2 id="m3d-game-title">Misión 3D en Marte</h2>
+      </div>
+      
+      <div class="m3d-stats-cluster">
+        <div class="m3d-stat-pill">
+          <span class="m3d-stat-lbl" id="m3d-score-label">Puntos</span>
+          <strong id="m3d-score-val">0</strong>
+        </div>
+        
+        <div class="m3d-stat-pill m3d-stars-pill">
+          <span class="m3d-stat-lbl">Calificación</span>
+          <strong id="m3d-stars-val">3 Estrellas</strong>
+        </div>
+        
+        <div class="m3d-stat-pill m3d-timer-pill">
+          <span class="m3d-stat-lbl">Tiempo</span>
+          <strong id="m3d-timer-val">25s</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Guía y controles táctiles para niños -->
+    <div class="m3d-controls-overlay">
+      <div class="m3d-help-bubble">
+        <p id="m3d-instructions-text">¡Usa A/D, Flechas o Arrastra el ratón para jugar!</p>
+      </div>
+      <div class="m3d-touch-controls">
+        <button id="m3d-btn-left" class="m3d-touch-btn" title="Izquierda">&larr;</button>
+        <button id="m3d-btn-action" class="m3d-touch-btn m3d-action-btn" title="Acción">ACCIÓN</button>
+        <button id="m3d-btn-right" class="m3d-touch-btn" title="Derecha">&rarr;</button>
+      </div>
     </div>
   </div>
 
@@ -205,6 +274,7 @@
         <button id="btn-open-diary" class="btn-hud btn-diary" title="Ver Diario de Exploración">Diario (<span id="diary-counter-badge">0 / 10</span>)</button>
         <button id="btn-toggle-sound" class="btn-hud btn-sound" title="Sonido">Sonido: ON</button>
         <button id="btn-open-pedia" class="btn-hud btn-pedia">¿Sabías qué?</button>
+        <button id="btn-open-arcade-hud" class="btn-hud btn-gold-mini" title="Centro de Minijuegos">Minijuegos</button>
       </div>
     </header>
 
@@ -303,6 +373,7 @@
   <script src="js/minigameMoxie.js"></script>
   <script src="js/minigamesPack.js"></script>
   <script src="js/scene3d.js"></script>
+  <script src="js/minigames3D.js"></script>
   <script src="js/game.js"></script>
 </body>
 </html>

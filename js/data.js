@@ -192,18 +192,26 @@ const MISSION_DAYS = [
     description: "Si usamos a ROVI para explorar la zona y balizar el contenedor, podremos rescatar comida espacial liofilizada y bloques de hielo intactos.",
     choices: [
       {
-        label: "Analizar muestras geologicas del crater con el laser PIXL de ROVI",
-        minigame: "MinigameSpectro",
-        minigameTitle: "Espectrometria Laser PIXL (Muestras)",
-        minigameBrief: "Dispara el laser ultravioleta PIXL sobre 4 muestras de regolito para identificar minerales de agua y silicatos.",
-        costText: "Coste: -4 Energia [PWR] | Juegas: Conducción con ROVI (+25 Agua [H2O] y +20 Comida [BIO])",
+        label: " Carrera y expedición con ROVI en el Cañón Marciano",
+        costText: "Coste: -4 Energia [PWR] | Juegas: Carrera 3D de ROVI (+26 Agua [H2O] y +22 Comida [BIO])",
         cost: { energy: -4 },
-        minigame: "MinigameRoverDrive",
-        minigameTitle: "Exploración y Conducción con ROVI",
-        minigameBrief: "Conduce a ROVI con las FLECHAS o WASD para recuperar 4 balizas científicas del contenedor esquivando cráteres.",
-        successReward: { water: 25, food: 20 },
-        failReward: { water: 14, food: 10 },
-        nasaFact: "Los rovers de exploración autónoma como Curiosity y Perseverance cartografían terrenos accidentados y rescatan balizas de telemetría."
+        minigame: "MinigameRoverRace3D",
+        minigameTitle: "Carrera del Rover ROVI en el Cañón Marciano",
+        minigameBrief: "Pilota a ROVI en 3D por el cañón marciano esquivando rocas para recoger cristales de hielo puro y contenedores de víveres.",
+        successReward: { water: 26, food: 22 },
+        failReward: { water: 15, food: 12 },
+        nasaFact: "Los rovers marcianos de la NASA como Curiosity y Perseverance exploran terrenos escarpados en busca de depósitos de hielo y minerales antiguos."
+      },
+      {
+        label: " Analizar muestras del regolito con el láser PIXL en 3D",
+        costText: "Coste: -3 Energia [PWR] | Juegas: Espectrometría Láser 3D (+22 Agua [H2O] y +18 Comida [BIO])",
+        cost: { energy: -3 },
+        minigame: "MinigamePixlLaser3D",
+        minigameTitle: "Espectrometría Láser PIXL en 3D",
+        minigameBrief: "Apunta el láser del espectrómetro PIXL a las muestras marcianas para identificar vetas de hielo y silicatos.",
+        successReward: { water: 22, food: 18 },
+        failReward: { water: 12, food: 10 },
+        nasaFact: "El instrumento PIXL situado en el brazo del rover Perseverance utiliza un haz de rayos X y luz ultravioleta para mapear elementos químicos a escala milimétrica."
       },
       {
         label: " Usar las placas del contenedor para reforzar el refugio",
@@ -287,29 +295,26 @@ const MISSION_DAYS = [
     description: "La radiación solar puede sobrecargar las placas de control del refugio. Debes interceptar la oleada de partículas.",
     choices: [
       {
-        label: "Activar el protocolo de aseguramiento ante la tormenta de arena",
+        label: " Activar el protocolo de aseguramiento ante la tormenta",
+        costText: "Coste: -4 Energia [PWR] | Juegas: Defensa de Tormenta (+24% Escudo [DEF] y +15 Oxigeno [O2])",
+        cost: { energy: -4 },
         minigame: "MinigameDustDefense",
         minigameTitle: "Defensa ante Megatormenta Marciana",
-        minigameBrief: "Bloquea los 4 sistemas criticos de la base (solar, antena, esclusa, rover) antes de que la tormenta impacte.",
-        costText: "Coste: -4 Energia [PWR] | Juegas: Escudo DONKI (+22% Escudo [DEF] y +14 Oxigeno [O2])",
-        cost: { energy: -4 },
-        minigame: "MinigameShield",
-        minigameTitle: "Escudo DONKI: Protección Geomagnética",
-        minigameBrief: "Intercepta las partículas solares con el deflector magnético antes de que impacten la cúpula del refugio.",
-        successReward: { shield: 22, oxygen: 14 },
-        failReward: { shield: 8, oxygen: 6 },
+        minigameBrief: "Bloquea los 4 sistemas críticos de la base (solar, antena, esclusa, rover) antes de que la tormenta impacte.",
+        successReward: { shield: 24, oxygen: 15 },
+        failReward: { shield: 10, oxygen: 8 },
         nasaFact: "El detector RAD de Curiosity midió la radiación en superficie para determinar el blindaje necesario para las misiones tripuladas de la NASA."
       },
       {
-        label: " Limpiar paneles y derivar picos de tensión a tierra",
-        costText: "Coste: -6% Escudo [DEF] | Juegas: Mantenimiento Solar (+30 Energia [PWR])",
-        cost: { shield: -6 },
-        minigame: "MinigameSolar",
-        minigameTitle: "Mantenimiento Solar de Emergencia",
-        minigameBrief: "Limpia y ajusta los disyuntores para evitar sobretensiones en los sistemas informáticos del refugio.",
-        successReward: { energy: 30 },
-        failReward: { energy: 15 },
-        nasaFact: "Los ordenadores espaciales utilizan chips de silicio endurecidos contra radiación para prevenir que los protones solares alteren la memoria de vuelo."
+        label: " Paseo espacial EVA y reparación de paneles solares en 3D",
+        costText: "Coste: -3 Energia [PWR] | Juegas: Reparación EVA 3D (+28 Energia [PWR] y +12% Escudo [DEF])",
+        cost: { energy: -3 },
+        minigame: "MinigameEvaRepair3D",
+        minigameTitle: "Reparación Espacial EVA en 3D",
+        minigameBrief: "Flota en gravedad cero con tu traje de astronauta y suelda los 4 conectores de los paneles solares dañados.",
+        successReward: { energy: 28, shield: 12 },
+        failReward: { energy: 15, shield: 6 },
+        nasaFact: "Los paseos espaciales (EVA) permiten a los astronautas realizar reparaciones complejas en el exterior de naves y estaciones espaciales."
       }
     ]
   },
@@ -447,12 +452,12 @@ const MISSION_DAYS = [
     description: "Estás dentro del cohete con ROVI. El radar confirma cielo despejado en órbita alta. ¡Estabiliza los reactores y enciende motores!",
     choices: [
       {
-        label: " ¡IGNICIÓN DE MOTORES Y DESPEGUE HACIA LA ÓRBITA!",
-        costText: "Juegas: Estabilización de Vuelo MOXIE (+25 a todos los recursos para alcanzar la órbita marciana)",
+        label: " ¡IGNICIÓN DE MOTORES Y ASCENSO ORBITAL HACIA LAS ESTRELLAS!",
+        costText: "Juegas: Ascenso Orbital 3D (+25 a todos los recursos para alcanzar la órbita marciana)",
         cost: {},
-        minigame: "MinigameMoxie",
-        minigameTitle: "Secuencia Final de Vuelo a Órbita",
-        minigameBrief: "Mantén el flujo de encendido térmico en la zona verde para estabilizar los motores durante los primeros 8 minutos de ascenso.",
+        minigame: "MinigameMavLaunch3D",
+        minigameTitle: "Ascenso y Vuelo a Órbita del Cohete MAV",
+        minigameBrief: "Pilota el cohete MAV en 3D atravesando los anillos de telemetría para escapar de la atmósfera hacia la órbita de Marte.",
         successReward: { water: 25, oxygen: 25, energy: 25, food: 25 },
         failReward: { water: 18, oxygen: 18, energy: 18, food: 18 },
         nasaFact: "El Vehículo de Ascenso a Marte tarda apenas unos 8 minutos en ascender desde la superficie para acoplarse con el Vehículo de Tránsito a la Tierra (ERV) en órbita."
@@ -460,3 +465,10 @@ const MISSION_DAYS = [
     ]
   }
 ];
+
+if (typeof window !== "undefined") {
+  window.MISSION_DAYS = MISSION_DAYS;
+}
+if (typeof global !== "undefined") {
+  global.MISSION_DAYS = MISSION_DAYS;
+}

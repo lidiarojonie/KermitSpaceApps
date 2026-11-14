@@ -454,34 +454,45 @@ const Scene3D = {
     this.registerStation({
       id: "rover",
       name: "Rover ROVI",
-      actionText: "[E] o Clic: Conducir Rover en Marte",
+      actionText: "[E] o Clic: Carrera con ROVI en el Canon",
       position: new THREE.Vector3(7, 0, 11),
       radius: 6.0,
       color: 0xfacc15,
-      minigameKey: "MinigameRoverDrive",
+      minigameKey: "MinigameRoverRace3D",
       discoveryId: "rovers_exploration"
     });
 
     this.registerStation({
       id: "mav",
       name: "Cohete MAV",
-      actionText: "[E] o Clic: Blindar y Revisar Cohete MAV",
+      actionText: "[E] o Clic: Prueba de Ascenso Orbital MAV",
       position: new THREE.Vector3(22, 0, 16),
       radius: 8.0,
       color: 0xf43f5e,
-      minigameKey: "MinigameShield",
+      minigameKey: "MinigameMavLaunch3D",
       discoveryId: "radiation_donki"
     });
 
     this.registerStation({
       id: "spectro",
       name: "Analizador Laser PIXL",
-      actionText: "[E] o Clic: Analizar Muestras con Laser PIXL",
+      actionText: "[E] o Clic: Analizar Minerales con Laser PIXL 3D",
       position: new THREE.Vector3(14, 0, -15),
       radius: 6.5,
       color: 0x38bdf8,
-      minigameKey: "MinigameSpectro",
+      minigameKey: "MinigamePixlLaser3D",
       discoveryId: "water_mars"
+    });
+
+    this.registerStation({
+      id: "solar",
+      name: "Parque Solar",
+      actionText: "[E] o Clic: Paseo Espacial y Reparacion de Paneles",
+      position: new THREE.Vector3(16, 0, 0),
+      radius: 8.0,
+      color: 0xfacc15,
+      minigameKey: "MinigameEvaRepair3D",
+      discoveryId: "solar_power"
     });
 
     this.registerStation({

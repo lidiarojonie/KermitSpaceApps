@@ -141,10 +141,14 @@ const DiscoverySystem = {
     const modal = document.getElementById("discovery-popup-modal");
     if (!modal) return;
 
-    document.getElementById("disc-pop-icon").textContent = pill.icon;
-    document.getElementById("disc-pop-cat").textContent = pill.category.toUpperCase();
-    document.getElementById("disc-pop-title").textContent = pill.title;
-    document.getElementById("disc-pop-text").textContent = pill.text;
+    const iconEl = document.getElementById("disc-pop-icon");
+    if (iconEl) iconEl.textContent = pill.icon;
+    const catEl = document.getElementById("disc-pop-cat");
+    if (catEl) catEl.textContent = pill.category.toUpperCase();
+    const titleEl = document.getElementById("disc-pop-title");
+    if (titleEl) titleEl.textContent = pill.title;
+    const textEl = document.getElementById("disc-pop-text");
+    if (textEl) textEl.textContent = pill.text;
 
     modal.classList.remove("hidden");
 
@@ -206,3 +210,10 @@ const DiscoverySystem = {
     if (modal) modal.classList.add("hidden");
   }
 };
+
+if (typeof window !== "undefined") {
+  window.DiscoverySystem = DiscoverySystem;
+}
+if (typeof global !== "undefined") {
+  global.DiscoverySystem = DiscoverySystem;
+}
