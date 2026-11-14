@@ -848,6 +848,13 @@ body {
   color: #f8fafc;
 }
 
+.hud-3d-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: auto;
+}
+
 .station-prompt-box {
   background: rgba(20, 28, 44, 0.95);
   border: 2px solid #F7E396;

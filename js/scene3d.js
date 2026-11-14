@@ -17,15 +17,37 @@ const Scene3D = {
   playerSpeed: 14,
   keys: {},
 
+  // Físicas marcianas: Gravedad reducida (0.38g) y Salto
+  jumpY: 0,
+  jumpVelocity: 0,
+  isGrounded: true,
+
+  // Partículas de polvo al pisar y aterrizar
+  dustParticles: [],
+  lastStepTime: 0,
+
   // Cámara en tercera persona
   cameraOffset: { x: 0, y: 7, z: 12 },
   cameraAngle: 0,
   isMouseDown: false,
   prevMouseX: 0,
 
-  // Estaciones interactivas
+  // Estaciones interactivas y obstáculos físicos
   stations: [],
+  obstacles: [],
   activePromptStation: null,
+
+  // Función matemática de relieve marciano continuo (evita hundimientos en montañas)
+  getTerrainHeight(x, z) {
+    const dist = Math.sqrt(x * x + z * z);
+    // Zona central plana para la base (radio 18m)
+    if (dist <= 18) return 0;
+    // Relieve ondulado para montes y cráteres circundantes
+    const rawH = Math.sin(x * 0.08) * Math.cos(z * 0.08) * 1.8 + Math.sin(x * 0.03 + z * 0.03) * 3.2;
+    // Transición suave entre la base y las montañas
+    const blend = Math.min(1, (dist - 18) / 12);
+    return rawH * blend;
+  },
 
   init(containerId = "threejs-container") {
     this.container = document.getElementById(containerId);
@@ -46,8 +68,8 @@ const Scene3D = {
 
     // 1. Escena y atmósfera marciana
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0xb84b2e); // Color cielo/horizonte marciano
-    this.scene.fog = new THREE.Fog(0xb84b2e, 25, 220); // Niebla suave sin tapar lo cercano
+    this.scene.background = new THREE.Color(0xb84b2e); // Cielo marciano terracota
+    this.scene.fog = new THREE.Fog(0xb84b2e, 25, 230); // Niebla marciana suave
 
     // 2. Dimensiones robustas garantizadas (mínimo 900x500)
     const width = Math.max(900, this.container.clientWidth || 900);
@@ -55,7 +77,6 @@ const Scene3D = {
 
     // 3. Cámara en tercera persona
     this.camera = new THREE.PerspectiveCamera(55, width / height, 0.5, 350);
-    // Posicionar la cámara inicialmente en las coordenadas del jugador para evitar (0,0,0)
     this.camera.position.set(0, 7, 26);
     this.camera.lookAt(0, 1.6, 14);
 
@@ -71,7 +92,6 @@ const Scene3D = {
       this.renderer.shadowMap.enabled = true;
       this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-      // Limpiar contenedor y añadir canvas
       this.container.innerHTML = "";
       this.container.appendChild(this.renderer.domElement);
     } catch (err) {
@@ -79,16 +99,13 @@ const Scene3D = {
       return;
     }
 
-    // 5. Iluminación ambiental y solar realista de Marte
-    // Luz hemisférica: cielo cálido anaranjado y rebote de suelo terracota
+    // 5. Iluminación realista de Marte
     const hemiLight = new THREE.HemisphereLight(0xffeedd, 0x8a3822, 0.85);
     this.scene.add(hemiLight);
 
-    // Luz ambiental adicional
     const ambientLight = new THREE.AmbientLight(0xffeedd, 0.5);
     this.scene.add(ambientLight);
 
-    // Sol marciano direccional
     const sunLight = new THREE.DirectionalLight(0xfff5dd, 1.3);
     sunLight.position.set(40, 55, -30);
     sunLight.castShadow = true;
@@ -96,7 +113,7 @@ const Scene3D = {
     sunLight.shadow.mapSize.height = 1024;
     sunLight.shadow.camera.near = 0.5;
     sunLight.shadow.camera.far = 160;
-    const d = 45;
+    const d = 50;
     sunLight.shadow.camera.left = -d;
     sunLight.shadow.camera.right = d;
     sunLight.shadow.camera.top = d;
@@ -107,6 +124,7 @@ const Scene3D = {
     this.buildMartianLandscape();
     this.buildBaseOutpost();
     this.buildPlayer();
+    this.buildDustParticleSystem();
 
     // 7. Event listeners de entrada
     this.setupInputs();
@@ -115,25 +133,19 @@ const Scene3D = {
 
     // Renderizado inmediato del primer frame
     this.renderOnce();
-    console.log("🪐 Scene3D: Inicializado con éxito. Resolución:", width, "x", height);
+    console.log("Scene3D: Inicializado con exito. Resolucion:", width, "x", height);
   },
 
   buildMartianLandscape() {
-    // Suelo marciano con relieve suave
-    const groundGeo = new THREE.PlaneGeometry(260, 260, 48, 48);
+    // Suelo marciano con relieve continuo computado
+    const groundGeo = new THREE.PlaneGeometry(260, 260, 64, 64);
     groundGeo.rotateX(-Math.PI / 2);
 
     const pos = groundGeo.attributes.position;
     for (let i = 0; i < pos.count; i++) {
       const x = pos.getX(i);
       const z = pos.getZ(i);
-      const distFromCenter = Math.sqrt(x * x + z * z);
-      if (distFromCenter > 20) {
-        const h = Math.sin(x * 0.08) * Math.cos(z * 0.08) * 1.8 + Math.sin(x * 0.03 + z * 0.03) * 3.2;
-        pos.setY(i, h);
-      } else {
-        pos.setY(i, 0);
-      }
+      pos.setY(i, this.getTerrainHeight(x, z));
     }
     groundGeo.computeVertexNormals();
 
@@ -147,7 +159,7 @@ const Scene3D = {
     ground.receiveShadow = true;
     this.scene.add(ground);
 
-    // Rocas y bloques basálticos marcianos
+    // Rocas y bloques basálticos colocados exactamente sobre el terreno
     const rockGeo = new THREE.DodecahedronGeometry(1, 1);
     const rockMat = new THREE.MeshStandardMaterial({ color: 0x8a3822, roughness: 0.9 });
 
@@ -158,12 +170,19 @@ const Scene3D = {
       const rx = Math.cos(angle) * radius;
       const rz = Math.sin(angle) * radius;
       const scale = 0.6 + Math.random() * 2.2;
+      const ry = this.getTerrainHeight(rx, rz);
+
       rock.scale.set(scale, scale * 0.7, scale);
-      rock.position.set(rx, scale * 0.35, rz);
+      rock.position.set(rx, ry + scale * 0.35, rz);
       rock.rotation.set(Math.random(), Math.random(), Math.random());
       rock.castShadow = true;
       rock.receiveShadow = true;
       this.scene.add(rock);
+
+      // Registrar rocas grandes como obstáculos físicos
+      if (scale > 1.8) {
+        this.obstacles.push({ x: rx, z: rz, r: scale * 0.8 });
+      }
     }
 
     // Sol marciano en el cielo
@@ -176,6 +195,7 @@ const Scene3D = {
 
   buildBaseOutpost() {
     this.stations = [];
+    this.obstacles = [];
 
     // 1. Cúpula Central del Hábitat (Outpost Beta)
     const habGeo = new THREE.SphereGeometry(7, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
@@ -190,7 +210,6 @@ const Scene3D = {
     habDome.receiveShadow = true;
     this.scene.add(habDome);
 
-    // Anillo tecnológico azul en la base de la cúpula
     const ringGeo = new THREE.TorusGeometry(7.1, 0.25, 12, 48);
     ringGeo.rotateX(Math.PI / 2);
     const ringMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
@@ -214,7 +233,11 @@ const Scene3D = {
     dish.position.set(0, 7.8, 0);
     this.scene.add(dish);
 
-    // 2. Invernadero Biodomo Hidropónico (Cúpula translúcida verdosa universal)
+    // Obstáculo físico del hábitat
+    this.obstacles.push({ x: 0, z: 0, r: 7.3 });
+    this.obstacles.push({ x: 0, z: 7, r: 2.2 });
+
+    // 2. Invernadero Biodomo Hidropónico
     const bioDomeGeo = new THREE.SphereGeometry(4.2, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2);
     const bioDomeMat = new THREE.MeshStandardMaterial({
       color: 0x4ade80,
@@ -228,13 +251,15 @@ const Scene3D = {
     bioDome.castShadow = true;
     this.scene.add(bioDome);
 
-    // Luz interior LED rosada del cultivo
     const growLight = new THREE.PointLight(0xff77aa, 2.0, 14);
     growLight.position.set(-16, 2.5, 5);
     this.scene.add(growLight);
 
+    this.obstacles.push({ x: -16, z: 5, r: 4.8 });
+
     // 3. Granja de Paneles Solares
     for (let p = 0; p < 3; p++) {
+      const pz = -6 + p * 6;
       const panelGroup = new THREE.Group();
       const mastGeo = new THREE.CylinderGeometry(0.15, 0.15, 2.4, 8);
       const mastMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8 });
@@ -250,8 +275,10 @@ const Scene3D = {
       panelPlate.castShadow = true;
       panelGroup.add(panelPlate);
 
-      panelGroup.position.set(16, 0, -6 + p * 6);
+      panelGroup.position.set(16, 0, pz);
       this.scene.add(panelGroup);
+
+      this.obstacles.push({ x: 16, z: pz, r: 2.3 });
     }
 
     // 4. Torre de Perforación de Hielo (Glaciar Arcadia)
@@ -263,7 +290,6 @@ const Scene3D = {
     tower.castShadow = true;
     rigGroup.add(tower);
 
-    // Cristal de hielo brillante en la base de la perforación
     const iceGeo = new THREE.OctahedronGeometry(1.2, 0);
     const iceMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
     const ice = new THREE.Mesh(iceGeo, iceMat);
@@ -276,6 +302,7 @@ const Scene3D = {
 
     rigGroup.position.set(-15, 0, -14);
     this.scene.add(rigGroup);
+    this.obstacles.push({ x: -15, z: -14, r: 2.8 });
 
     // 5. Cohete MAV (Vehículo de Ascenso a Marte)
     const mavGroup = new THREE.Group();
@@ -305,6 +332,7 @@ const Scene3D = {
 
     mavGroup.position.set(22, 0, 16);
     this.scene.add(mavGroup);
+    this.obstacles.push({ x: 22, z: 16, r: 2.8 });
 
     // 6. Rover ROVI en 3D
     const roverGroup = new THREE.Group();
@@ -339,12 +367,50 @@ const Scene3D = {
 
     roverGroup.position.set(7, 0, 11);
     this.scene.add(roverGroup);
+    this.obstacles.push({ x: 7, z: 11, r: 2.3 });
 
-    // Registro de estaciones interactivas con halos luminosos
+    // 7. Nueva Estación: Banco Espectrométrico Láser PIXL (Muestras de regolito)
+    const spectroGroup = new THREE.Group();
+    const benchGeo = new THREE.CylinderGeometry(2, 2.2, 0.8, 16);
+    const benchMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.7 });
+    const bench = new THREE.Mesh(benchGeo, benchMat);
+    bench.position.y = 0.4;
+    spectroGroup.add(bench);
+
+    const laserArmGeo = new THREE.CylinderGeometry(0.1, 0.1, 2.2, 8);
+    laserArmGeo.rotateZ(Math.PI / 4);
+    const laserArmMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8 });
+    const laserArm = new THREE.Mesh(laserArmGeo, laserArmMat);
+    laserArm.position.set(0, 1.4, 0);
+    spectroGroup.add(laserArm);
+
+    spectroGroup.position.set(14, 0, -15);
+    this.scene.add(spectroGroup);
+    this.obstacles.push({ x: 14, z: -15, r: 2.3 });
+
+    // 8. Nueva Estación: Mástil de Defensa y Alerta de Tormentas
+    const defenseGroup = new THREE.Group();
+    const defMastGeo = new THREE.CylinderGeometry(0.2, 0.5, 5, 8);
+    const defMastMat = new THREE.MeshStandardMaterial({ color: 0xf97316, metalness: 0.6 });
+    const defMast = new THREE.Mesh(defMastGeo, defMastMat);
+    defMast.position.y = 2.5;
+    defenseGroup.add(defMast);
+
+    const defBeaconGeo = new THREE.SphereGeometry(0.5, 12, 12);
+    const defBeaconMat = new THREE.MeshBasicMaterial({ color: 0xfb7185 });
+    const defBeacon = new THREE.Mesh(defBeaconGeo, defBeaconMat);
+    defBeacon.position.y = 5.2;
+    defenseGroup.add(defBeacon);
+
+    defenseGroup.position.set(-7, 0, 18);
+    this.scene.add(defenseGroup);
+    this.obstacles.push({ x: -7, z: 18, r: 2.2 });
+
+    // Registro de 8 estaciones interactivas (sin emojis en los textos de acción)
     this.registerStation({
       id: "drill",
-      name: "Perforación Glaciar",
-      actionText: "💧 [E] o Clic: Extraer Hielo Subterráneo",
+      name: "Perforacion Glaciar",
+      actionText: "[E] o Clic: Extraer Hielo Subterraneo",
       position: new THREE.Vector3(-15, 0, -14),
       radius: 7.0,
       color: 0x38bdf8,
@@ -355,7 +421,7 @@ const Scene3D = {
     this.registerStation({
       id: "solar",
       name: "Parque Solar",
-      actionText: "⚡ [E] o Clic: Mantenimiento y Conexión Solar",
+      actionText: "[E] o Clic: Mantenimiento y Conexion Solar",
       position: new THREE.Vector3(16, 0, 0),
       radius: 8.0,
       color: 0xfacc15,
@@ -365,8 +431,8 @@ const Scene3D = {
 
     this.registerStation({
       id: "biodome",
-      name: "Biodomo Hidropónico",
-      actionText: "🌱 [E] o Clic: Cosecha en el Biodomo",
+      name: "Biodomo Hidroponico",
+      actionText: "[E] o Clic: Cosecha en el Biodomo",
       position: new THREE.Vector3(-16, 0, 5),
       radius: 7.5,
       color: 0x4ade80,
@@ -377,7 +443,7 @@ const Scene3D = {
     this.registerStation({
       id: "hab",
       name: "Laboratorio MOXIE",
-      actionText: "🫧 [E] o Clic: Reactor MOXIE de Oxígeno",
+      actionText: "[E] o Clic: Reactor MOXIE de Oxigeno",
       position: new THREE.Vector3(0, 0, 8),
       radius: 6.0,
       color: 0x38bdf8,
@@ -388,7 +454,7 @@ const Scene3D = {
     this.registerStation({
       id: "rover",
       name: "Rover ROVI",
-      actionText: "🚙 [E] o Clic: Conducir Rover en Marte",
+      actionText: "[E] o Clic: Conducir Rover en Marte",
       position: new THREE.Vector3(7, 0, 11),
       radius: 6.0,
       color: 0xfacc15,
@@ -399,12 +465,34 @@ const Scene3D = {
     this.registerStation({
       id: "mav",
       name: "Cohete MAV",
-      actionText: "🚀 [E] o Clic: Blindar y Revisar Cohete MAV",
+      actionText: "[E] o Clic: Blindar y Revisar Cohete MAV",
       position: new THREE.Vector3(22, 0, 16),
       radius: 8.0,
       color: 0xf43f5e,
       minigameKey: "MinigameShield",
       discoveryId: "radiation_donki"
+    });
+
+    this.registerStation({
+      id: "spectro",
+      name: "Analizador Laser PIXL",
+      actionText: "[E] o Clic: Analizar Muestras con Laser PIXL",
+      position: new THREE.Vector3(14, 0, -15),
+      radius: 6.5,
+      color: 0x38bdf8,
+      minigameKey: "MinigameSpectro",
+      discoveryId: "water_mars"
+    });
+
+    this.registerStation({
+      id: "defense",
+      name: "Defensa de Tormentas",
+      actionText: "[E] o Clic: Protocolo de Emergencia de Tormenta",
+      position: new THREE.Vector3(-7, 0, 18),
+      radius: 6.5,
+      color: 0xf97316,
+      minigameKey: "MinigameDustDefense",
+      discoveryId: "dust_devils"
     });
   },
 
@@ -419,7 +507,7 @@ const Scene3D = {
     });
     const ringMesh = new THREE.Mesh(ringGeo, ringMat);
     ringMesh.position.copy(st.position);
-    ringMesh.position.y = 0.08;
+    ringMesh.position.y = this.getTerrainHeight(st.position.x, st.position.z) + 0.08;
     this.scene.add(ringMesh);
 
     st.beaconRing = ringMesh;
@@ -463,14 +551,58 @@ const Scene3D = {
     this.rightLeg.castShadow = true;
     this.player.add(this.rightLeg);
 
-    // Posición inicial cerca del hábitat
-    this.player.position.set(0, 0, 14);
+    this.player.position.set(0, this.getTerrainHeight(0, 14), 14);
     this.scene.add(this.player);
+  },
+
+  buildDustParticleSystem() {
+    this.dustParticles = [];
+    const pGeo = new THREE.SphereGeometry(0.12, 6, 6);
+    const pMat = new THREE.MeshBasicMaterial({ color: 0xc85532, transparent: true, opacity: 0.7 });
+
+    for (let i = 0; i < 24; i++) {
+      const p = new THREE.Mesh(pGeo, pMat.clone());
+      p.visible = false;
+      p.life = 0;
+      p.maxLife = 0.5;
+      p.vel = new THREE.Vector3();
+      this.scene.add(p);
+      this.dustParticles.push(p);
+    }
+  },
+
+  spawnDustPuff(x, y, z, count = 2) {
+    let spawned = 0;
+    for (let p of this.dustParticles) {
+      if (!p.visible) {
+        p.visible = true;
+        p.life = 0;
+        p.position.set(x + (Math.random() - 0.5) * 0.4, y + 0.05, z + (Math.random() - 0.5) * 0.4);
+        p.vel.set((Math.random() - 0.5) * 1.5, Math.random() * 1.2 + 0.3, (Math.random() - 0.5) * 1.5);
+        p.material.opacity = 0.7;
+        spawned++;
+        if (spawned >= count) break;
+      }
+    }
+  },
+
+  spawnDustRing(x, y, z) {
+    this.spawnDustPuff(x, y, z, 8);
   },
 
   setupInputs() {
     window.addEventListener("keydown", (e) => {
       this.keys[e.code] = true;
+
+      // Salto en baja gravedad de Marte con Barra Espaciadora
+      if (e.code === "Space" && this.active) {
+        if (this.jumpY === 0) {
+          this.jumpVelocity = 8.5; // Impulso vertical en 0.38g
+          if (typeof SoundFx !== "undefined") SoundFx.playClick();
+        }
+      }
+
+      // Tecla E para interactuar con la estación más cercana
       if (e.code === "KeyE" && this.active && this.activePromptStation) {
         this.interactWithStation(this.activePromptStation);
       }
@@ -522,19 +654,20 @@ const Scene3D = {
       minigameTitle: station.name,
       cost: {},
       successReward: {
-        water: station.id === "drill" ? 25 : 0,
-        energy: station.id === "solar" ? 25 : 0,
+        water: station.id === "drill" || station.id === "spectro" ? 25 : 0,
+        energy: station.id === "solar" || station.id === "defense" ? 25 : 0,
         food: station.id === "biodome" ? 25 : 0,
         oxygen: station.id === "hab" ? 25 : 0,
+        shield: station.id === "defense" ? 15 : 0,
         mav: station.id === "mav" ? 1 : 0
       },
       failReward: {
-        water: station.id === "drill" ? 12 : 0,
-        energy: station.id === "solar" ? 12 : 0,
+        water: station.id === "drill" || station.id === "spectro" ? 12 : 0,
+        energy: station.id === "solar" || station.id === "defense" ? 12 : 0,
         food: station.id === "biodome" ? 12 : 0,
         oxygen: station.id === "hab" ? 12 : 0
       },
-      nasaFact: `Misión completada con éxito en la estación de ${station.name}. Recursos suministrados al Outpost Beta.`
+      nasaFact: `Mision completada con exito en la estacion ${station.name}. Recursos transferidos al Outpost Beta.`
     };
 
     if (typeof showMinigameBriefing === "function") {
@@ -567,10 +700,7 @@ const Scene3D = {
     const hud3d = document.getElementById("hud-3d-controls");
     if (hud3d) hud3d.classList.remove("hidden");
 
-    // Reajustar dimensiones inmediatamente
     this.onWindowResize();
-
-    // Posición inmediata de cámara
     this.updateCameraImmediate();
     this.renderOnce();
 
@@ -606,6 +736,7 @@ const Scene3D = {
     const elapsed = this.clock.getElapsedTime();
 
     this.updatePlayerMovement(delta, elapsed);
+    this.updateParticles(delta);
     this.updateCamera();
     this.checkStationProximity(elapsed);
 
@@ -639,23 +770,73 @@ const Scene3D = {
       this.player.position.x += worldX * this.playerSpeed * delta;
       this.player.position.z += worldZ * this.playerSpeed * delta;
 
-      const distFromCenter = Math.sqrt(this.player.position.x ** 2 + this.player.position.z ** 2);
-      if (distFromCenter > 95) {
-        this.player.position.x = (this.player.position.x / distFromCenter) * 95;
-        this.player.position.z = (this.player.position.z / distFromCenter) * 95;
-      }
-
       const targetAngle = Math.atan2(worldX, worldZ);
       this.player.rotation.y = targetAngle;
 
+      // Animación de piernas
       if (this.leftLeg && this.rightLeg) {
         this.leftLeg.rotation.x = Math.sin(elapsed * 10) * 0.45;
         this.rightLeg.rotation.x = -Math.sin(elapsed * 10) * 0.45;
+      }
+
+      // Emisión de polvo al caminar
+      if (this.jumpY === 0 && elapsed - this.lastStepTime > 0.28) {
+        this.lastStepTime = elapsed;
+        this.spawnDustPuff(this.player.position.x, this.player.position.y, this.player.position.z, 2);
       }
     } else {
       if (this.leftLeg && this.rightLeg) {
         this.leftLeg.rotation.x = 0;
         this.rightLeg.rotation.x = 0;
+      }
+    }
+
+    // Físicas de Salto Marciano (Gravedad 0.38g)
+    if (this.jumpVelocity !== 0 || this.jumpY > 0) {
+      this.jumpY += this.jumpVelocity * delta;
+      this.jumpVelocity -= 14 * delta; // Gravedad marciana
+      if (this.jumpY <= 0) {
+        this.jumpY = 0;
+        this.jumpVelocity = 0;
+        this.spawnDustRing(this.player.position.x, this.player.position.y, this.player.position.z);
+      }
+    }
+
+    // Colisión física con estructuras para evitar atravesar paredes o el cohete
+    this.obstacles.forEach(obs => {
+      const dx = this.player.position.x - obs.x;
+      const dz = this.player.position.z - obs.z;
+      const dist = Math.sqrt(dx * dx + dz * dz);
+      const minSafeDist = obs.r + 0.6; // Radio del obstáculo + radio del astronauta
+
+      if (dist < minSafeDist && dist > 0.001) {
+        const push = minSafeDist - dist;
+        this.player.position.x += (dx / dist) * push;
+        this.player.position.z += (dz / dist) * push;
+      }
+    });
+
+    // Límite perimetral del campamento marciano
+    const distFromCenter = Math.sqrt(this.player.position.x ** 2 + this.player.position.z ** 2);
+    if (distFromCenter > 95) {
+      this.player.position.x = (this.player.position.x / distFromCenter) * 95;
+      this.player.position.z = (this.player.position.z / distFromCenter) * 95;
+    }
+
+    // SEGUIMIENTO DE RELIEVE: La altura Y del personaje sigue el terreno exactamente
+    const groundY = this.getTerrainHeight(this.player.position.x, this.player.position.z);
+    this.player.position.y = groundY + this.jumpY;
+  },
+
+  updateParticles(delta) {
+    for (let p of this.dustParticles) {
+      if (p.visible) {
+        p.life += delta;
+        p.position.addScaledVector(p.vel, delta);
+        p.material.opacity = Math.max(0, 0.7 * (1 - p.life / p.maxLife));
+        if (p.life >= p.maxLife) {
+          p.visible = false;
+        }
       }
     }
   },

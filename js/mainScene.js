@@ -42,8 +42,8 @@ class MainScene extends Phaser.Scene {
     this.add.polygon(108, 325, [0, 20, 10, 0, 10, 20], 0x64748b);
     this.add.polygon(152, 325, [0, 0, 10, 20, 0, 20], 0x64748b);
 
-    this.add.text(96, 345, "🚀 MAV", {
-      fontSize: "13px", fontStyle: "bold", color: "#f7e396", fontFamily: "'Segoe UI', sans-serif"
+    this.add.text(90, 345, "COHETE MAV", {
+      fontSize: "12px", fontStyle: "bold", color: "#f7e396", fontFamily: "'Segoe UI', sans-serif"
     });
 
     // Indicadores luminosos de las etapas del cohete MAV en el fuselaje
@@ -56,13 +56,13 @@ class MainScene extends Phaser.Scene {
     // 4. Hábitat Outpost Beta (Cúpula geodésica presurizada)
     this.add.arc(380, 365, 115, 180, 360, false, 0xf1f5f9).setStrokeStyle(4, 0x38bdf8);
     this.add.rectangle(380, 365, 190, 18, 0x1e293b);
-    this.add.text(305, 230, "🏠 OUTPOST BETA", {
+    this.add.text(310, 230, "OUTPOST BETA", {
       fontSize: "13px", fontStyle: "bold", color: "#38bdf8", fontFamily: "'Segoe UI', sans-serif"
     });
 
     // Biodomo invernadero hidropónico adyacente (Cúpula transparente pequeña)
     this.add.arc(520, 375, 45, 180, 360, false, 0x4ade80, 0.4).setStrokeStyle(2, 0x22c55e);
-    this.add.text(500, 325, "🌱", { fontSize: "16px" });
+    this.add.text(498, 325, "BIO", { fontSize: "12px", fontStyle: "bold", color: "#4ade80", fontFamily: "'Segoe UI', sans-serif" });
 
     // Matriz de paneles solares fotovoltaicos a la derecha
     this.add.polygon(680, 355, [0, 25, 45, 0, 90, 0, 45, 25], 0x1e3a8a).setStrokeStyle(1, 0x60a5fa);
@@ -80,7 +80,7 @@ class MainScene extends Phaser.Scene {
     this.roviWheelL = this.add.circle(412, 352, 5, 0x1e293b);
     this.roviWheelR = this.add.circle(428, 352, 5, 0x1e293b);
     this.roviSensor = this.add.circle(420, 330, 4, 0x38bdf8);
-    this.roviLabel = this.add.text(402, 310, "🤖 ROVI", {
+    this.roviLabel = this.add.text(402, 310, "ROVI", {
       fontSize: "11px", fontStyle: "bold", color: "#F7E396", fontFamily: "'Segoe UI', sans-serif"
     });
 

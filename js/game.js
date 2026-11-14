@@ -12,6 +12,8 @@ if (typeof MinigameWaterFilter !== "undefined") scenesList.push(MinigameWaterFil
 if (typeof MinigameLeakRepair !== "undefined") scenesList.push(MinigameLeakRepair);
 if (typeof MinigameCircuit !== "undefined") scenesList.push(MinigameCircuit);
 if (typeof MinigameRoverDrive !== "undefined") scenesList.push(MinigameRoverDrive);
+if (typeof MinigameSpectro !== "undefined") scenesList.push(MinigameSpectro);
+if (typeof MinigameDustDefense !== "undefined") scenesList.push(MinigameDustDefense);
 
 let phaserGame = null;
 if (typeof Phaser !== "undefined") {
@@ -27,22 +29,22 @@ if (typeof Phaser !== "undefined") {
 // 2. Eventos aleatorios positivos de exploración marciana
 const RANDOM_EVENTS = [
   {
-    text: "🌪️ FENÓMENO DUST DEVIL: ¡Un remolino marciano ha limpiado el polvo de los paneles solares! (+18 ⚡ Energía)",
+    text: "FENOMENO DUST DEVIL: Un remolino marciano ha limpiado el polvo de los paneles solares (+18 Energia [PWR])",
     changes: { energy: 18 },
     pillId: "dust_devils"
   },
   {
-    text: "🧊 RADAR SHARAD: La sonda orbital detectó una bolsa de hielo puro cerca de la superficie (+18 💧 Agua)",
+    text: "RADAR SHARAD: La sonda orbital detecto una bolsa de hielo puro cerca de la superficie (+18 Agua [H2O])",
     changes: { water: 18 },
     pillId: "water_mars"
   },
   {
-    text: "🌱 BROTE ACELERADO OSDR: ¡Crecimiento extra de microgreens bajo luces LED rosas! (+16 🌱 Comida y +6 🫧 Oxígeno)",
+    text: "BROTE ACELERADO OSDR: Crecimiento extra de microgreens bajo luces LED rosas (+16 Comida [BIO] y +6 Oxigeno [O2])",
     changes: { food: 16, oxygen: 6 },
     pillId: "biodome_osdr"
   },
   {
-    text: "☀️ FLUJO SOLAR DONKI: Las partículas solares fueron absorbidas por las baterías del hábitat (+14 ⚡ Energía, +5% 🛡️ Escudo)",
+    text: "FLUJO SOLAR DONKI: Las particulas solares fueron absorbidas por las baterias del habitat (+14 Energia [PWR], +5% Blindaje)",
     changes: { energy: 14, shield: 5 },
     pillId: "radiation_donki"
   }
@@ -72,12 +74,12 @@ window.showFloatingDeltas = function (diffs) {
   if (!container) return;
 
   const labels = {
-    water: { icon: "💧", box: "box-water" },
-    oxygen: { icon: "🫧", box: "box-oxygen" },
-    energy: { icon: "⚡", box: "box-energy" },
-    food: { icon: "🌱", box: "box-food" },
-    shield: { icon: "🛡️", box: null },
-    mav: { icon: "🚀 MAV", box: null }
+    water: { icon: "H2O", box: "box-water" },
+    oxygen: { icon: "O2", box: "box-oxygen" },
+    energy: { icon: "PWR", box: "box-energy" },
+    food: { icon: "BIO", box: "box-food" },
+    shield: { icon: "ESCUDO", box: null },
+    mav: { icon: "MAV", box: null }
   };
 
   Object.keys(diffs).forEach(key => {
@@ -134,23 +136,23 @@ function updateRoviAdvice() {
   const critical = GameState.getCriticalResources();
   if (critical.length > 0) {
     const first = critical[0];
-    roviMsg.innerHTML = `⚠️ <strong>¡ALERTA ROVI!</strong> El nivel de <strong>${first.name}</strong> está bajo (${GameState[first.key]}%). ¡Elige una opción que recupere ${first.name} hoy!`;
+    roviMsg.innerHTML = `[ALERTA ROVI] El nivel de <strong>${first.name}</strong> esta bajo (${GameState[first.key]}%). Prioriza reponer ${first.name} hoy.`;
     return;
   }
 
   if (currentViewMode === "3d") {
-    roviMsg.textContent = "🤖 ROVI: ¡Modo 3D activo! Camina con [W,A,S,D] o [Flechas] hacia las estaciones y pulsa [E] para interactuar.";
+    roviMsg.textContent = "ROVI: Modo 3D activo. Camina con [W,A,S,D], salta con [Espacio] e interactua con [E] frente a las estaciones marcianas.";
     return;
   }
 
   if (GameState.sol <= 3) {
-    roviMsg.textContent = "🤖 ROVI: Fase de Emergencia. Estabiliza el hábitat reparando paneles solares y asegurando agua y oxígeno.";
+    roviMsg.textContent = "ROVI: Fase de Emergencia. Estabiliza el hábitat reparando paneles solares y asegurando agua y oxígeno.";
   } else if (GameState.sol <= 7) {
-    roviMsg.textContent = "🤖 ROVI: Fase de Reconstrucción. Cultiva en el biodomo para cosechar alimentos y mantén el escudo activo ante tormentas solares.";
+    roviMsg.textContent = "ROVI: Fase de Reconstruccion. Cultiva en el biodomo para cosechar alimentos y mantén el escudo activo ante tormentas solares.";
   } else if (GameState.sol <= 11) {
-    roviMsg.textContent = "🤖 ROVI: Fase de Recursos. Acumula reservas de agua pura y oxígeno para cuando comencemos a cargar el cohete MAV.";
+    roviMsg.textContent = "ROVI: Fase de Recursos. Acumula reservas de agua pura y oxígeno para cuando comencemos a cargar el cohete MAV.";
   } else {
-    roviMsg.textContent = `🤖 ROVI: ¡Fase de Despegue! El cohete MAV está al ${GameState.mav}/3 de preparación. ¡Prioriza las etapas del cohete!`;
+    roviMsg.textContent = `ROVI: Fase de Despegue. El cohete MAV está al ${GameState.mav}/3 de preparación. ¡Prioriza las etapas del cohete!`;
   }
 }
 
@@ -158,9 +160,9 @@ function updateRoviAdvice() {
 window.updateMavVisuals = function (mavVal) {
   const stepsEl = document.getElementById("mav-step-icons");
   if (!stepsEl) return;
-  const icons = ["⚪", "⚪", "⚪"];
+  const icons = ["[ ]", "[ ]", "[ ]"];
   for (let i = 0; i < mavVal; i++) {
-    icons[i] = "🟢";
+    icons[i] = "[OK]";
   }
   stepsEl.textContent = icons.join("");
 };
@@ -283,6 +285,10 @@ function getMinigameControlsHelp(minigameKey) {
       return "Haz CLIC en las 5 fugas de aire marcadas en la cabina para sellarlas con espuma antes de perder presión.";
     case "MinigameCircuit":
       return "Haz CLIC en cada uno de los 4 relés de circuito para rotarlos y alinear el flujo de corriente eléctrica.";
+    case "MinigameSpectro":
+      return "Haz clic en cada una de las 4 muestras para disparar el laser PIXL y analizar su mineralogia.";
+    case "MinigameDustDefense":
+      return "Haz clic rapido en el boton ASEGURAR de los 4 sistemas criticos antes de que expire el tiempo de tormenta.";
     case "MinigameRoverDrive":
       return "Conduce el rover con las FLECHAS del teclado o [W,A,S,D] para desplegar 4 balizas científicas esquivando cráteres.";
     default:
@@ -384,7 +390,7 @@ window.onMinigameComplete = function (result, choice) {
   // Generar resumen visual de recursos ganados
   const breakdownEl = document.getElementById("result-breakdown");
   breakdownEl.innerHTML = "";
-  const icons = { water: "💧 Agua", oxygen: "🫧 Oxígeno", energy: "⚡ Energía", food: "🌱 Comida", shield: "🛡️ Escudo", mav: "🚀 MAV" };
+  const icons = { water: "Agua [H2O]", oxygen: "Oxigeno [O2]", energy: "Energia [PWR]", food: "Comida [BIO]", shield: "Blindaje", mav: "Cohete MAV" };
 
   Object.keys(finalReward).forEach(k => {
     const val = finalReward[k];
@@ -401,19 +407,19 @@ window.onMinigameComplete = function (result, choice) {
   const descEl = document.getElementById("result-desc");
 
   if (tier === "excellent") {
-    starsEl.textContent = "⭐⭐⭐ ¡EXCELENTE!";
+    starsEl.textContent = "CALIFICACION: EXCELENTE (3/3)";
     titleEl.textContent = "¡RENDIMIENTO CIENTÍFICO ÓPTIMO!";
     descEl.textContent = `¡Has completado la operación con maestría! Los tanques del Outpost Beta han recibido la máxima dotación de recursos con bonus de eficiencia.`;
   } else if (tier === "good") {
-    starsEl.textContent = "⭐⭐ ¡MUY BIEN!";
+    starsEl.textContent = "CALIFICACION: MUY BIEN (2/3)";
     titleEl.textContent = "OPERACIÓN COMPLETADA CON ÉXITO";
     descEl.textContent = `Has estabilizado el sistema correctamente y los recursos previstos se han transferido a la base.`;
   } else if (tier === "fair") {
-    starsEl.textContent = "⭐ REGULAR";
+    starsEl.textContent = "CALIFICACION: BASICA (1/3)";
     titleEl.textContent = "OPERACIÓN PARCIAL";
     descEl.textContent = `Completaste parte de la tarea. Se ha recuperado un suministro parcial para asegurar la misión.`;
   } else {
-    starsEl.textContent = "⚠️ RESCATE POR ROVI";
+    starsEl.textContent = "PROTOCOLO DE CONTINGENCIA ROVI";
     titleEl.textContent = "SISTEMA DE ASISTENCIA ACTIVADO";
     descEl.textContent = `No se alcanzó el objetivo a tiempo, pero el rover ROVI desplegó el protocolo de reserva y rescató suministros de emergencia.`;
   }
@@ -429,8 +435,8 @@ function showEndScreen(isVictory, reasonText) {
     : "PROTOCOLO DE CONTINGENCIA DE TRIPULACIÓN";
 
   document.getElementById("end-title").textContent = isVictory
-    ? "🚀 ¡DESPEGUE EXITOSO HACIA LA ÓRBITA!"
-    : "🛑 MODO HIBERNACIÓN ACTIVADO";
+    ? "DESPEGUE EXITOSO HACIA LA ORBITA TERRESTRE"
+    : "MODO HIBERNACION DE EMERGENCIA ACTIVADO";
 
   document.getElementById("end-desc").textContent = reasonText;
 
@@ -438,14 +444,14 @@ function showEndScreen(isVictory, reasonText) {
   if (isVictory) {
     if (typeof SoundFx !== "undefined") SoundFx.playRocketLaunch();
     const avg = Math.round((GameState.water + GameState.oxygen + GameState.energy + GameState.food) / 4);
-    let medal = "🥉 INSIGNIA SUPERVIVIENTE AL LÍMITE (Bronce)";
+    let medal = "INSIGNIA DE HONOR: SUPERVIVIENTE AL LIMITE (Bronce)";
     let desc = "¡Has logrado escapar a tiempo antes de la tormenta!";
 
     if (avg >= 50 && GameState.shield >= 70) {
-      medal = "🥇 INSIGNIA COMANDANTE DE MARTE (Oro)";
+      medal = "INSIGNIA DE HONOR: COMANDANTE DE MARTE (Oro)";
       desc = "¡Gestión perfecta digna de una misión oficial de la NASA!";
     } else if (avg >= 30) {
-      medal = "🥈 INSIGNIA INGENIERO/A ESPACIAL (Plata)";
+      medal = "INSIGNIA DE HONOR: INGENIERO ESPACIAL (Plata)";
       desc = "¡Gran trabajo de reparación y equilibrio de soporte vital!";
     }
 
@@ -455,21 +461,21 @@ function showEndScreen(isVictory, reasonText) {
       <div class="medal-name">${medal}</div>
       <p class="medal-desc">${desc}</p>
       <div class="final-stats-grid">
-        <div>💧 Agua: <strong>${GameState.water}%</strong></div>
-        <div>🫧 Oxígeno: <strong>${GameState.oxygen}%</strong></div>
-        <div>⚡ Energía: <strong>${GameState.energy}%</strong></div>
-        <div>🌱 Comida: <strong>${GameState.food}%</strong></div>
-        <div>🛡️ Escudo: <strong>${GameState.shield}%</strong></div>
-        <div>🚀 Cohete MAV: <strong>3 / 3</strong></div>
+        <div>Agua [H2O]: <strong>${GameState.water}%</strong></div>
+        <div>Oxigeno [O2]: <strong>${GameState.oxygen}%</strong></div>
+        <div>Energia [PWR]: <strong>${GameState.energy}%</strong></div>
+        <div>Comida [BIO]: <strong>${GameState.food}%</strong></div>
+        <div>Blindaje: <strong>${GameState.shield}%</strong></div>
+        <div>Cohete MAV: <strong>3 / 3 Etapas</strong></div>
       </div>
       <p style="margin-top: 10px; font-size: 0.85rem; color: #38bdf8;">
-        📘 Secretos científicos descubiertos en tu diario: <strong>${discs} / 10</strong>
+        Secretos cientificos descubiertos en tu diario: <strong>${discs} / 10</strong>
       </p>
     `;
   } else {
     if (typeof SoundFx !== "undefined") SoundFx.playAlert();
     medalBox.innerHTML = `
-      <strong>💡 LECCIÓN DE SUPERVIVENCIA NASA:</strong>
+      <strong>LECCION DE SUPERVIVENCIA NASA:</strong>
       <p>Marte es un entorno implacable pero predecible. Recuerda que la Energía alimenta al reactor MOXIE (Oxígeno) y al desalinador (Agua). Vigila siempre que ninguna barra baje del 20% antes de avanzar al siguiente Sol.</p>
     `;
   }
@@ -511,7 +517,7 @@ function switchViewMode(mode) {
   if (mode === "3d") {
     phaserCont.classList.add("hidden");
     decisionPanel.classList.add("hidden");
-    toggleViewBtn.textContent = "🚀 VISTA 2D";
+    toggleViewBtn.textContent = "VISTA 2D";
     toggleViewBtn.classList.add("active-3d");
 
     threeCont.classList.remove("hidden");
@@ -530,7 +536,7 @@ function switchViewMode(mode) {
     threeCont.classList.add("hidden");
     if (hud3d) hud3d.classList.add("hidden");
     phaserCont.classList.remove("hidden");
-    toggleViewBtn.textContent = "🪐 MODO 3D";
+    toggleViewBtn.textContent = "MODO 3D";
     toggleViewBtn.classList.remove("active-3d");
     decisionPanel.classList.remove("hidden");
   }
@@ -599,7 +605,7 @@ closeDiscoveryBtn.onclick = () => {
 soundBtn.onclick = () => {
   if (typeof SoundFx !== "undefined") {
     const isNowOn = SoundFx.toggleSound();
-    soundBtn.textContent = isNowOn ? "🔊" : "🔇";
+    soundBtn.textContent = isNowOn ? "SONIDO: ON" : "SONIDO: OFF";
     soundBtn.title = isNowOn ? "Silenciar sonido" : "Activar sonido";
   }
 };
@@ -614,3 +620,18 @@ if (typeof DiscoverySystem !== "undefined") {
 if (typeof DiscoverySystem !== "undefined") {
   DiscoverySystem.init();
 }
+// Control del Panel de Mision en Modo 3D
+const btnToggle3dMission = document.getElementById("btn-toggle-3d-mission");
+if (btnToggle3dMission) {
+  btnToggle3dMission.onclick = () => {
+    if (typeof SoundFx !== "undefined") SoundFx.playClick();
+    decisionPanel.classList.toggle("hidden");
+  };
+}
+
+window.addEventListener("keydown", (e) => {
+  if (e.code === "KeyM" && currentViewMode === "3d") {
+    decisionPanel.classList.toggle("hidden");
+    if (typeof SoundFx !== "undefined") SoundFx.playClick();
+  }
+});

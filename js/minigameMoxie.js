@@ -16,14 +16,14 @@ class MinigameMoxie extends Phaser.Scene {
     this.add.rectangle(450, 250, 880, 480, 0x161e31).setStrokeStyle(2, 0x38bdf8, 0.4);
 
     // Cabecera e instrucciones para el astronauta junior
-    this.add.text(450, 36, "⚙️ REACTOR MOXIE: SÍNTESIS DE OXÍGENO", {
+    this.add.text(450, 36, "REACTOR MOXIE: SINTESIS DE OXIGENO", {
       fontSize: "22px",
       fontStyle: "bold",
       color: "#F7E396",
       fontFamily: "'Segoe UI', sans-serif"
     }).setOrigin(0.5);
 
-    this.add.text(450, 68, "Mantén pulsado ESPACIO o haz CLIC en el botón para mantener la temperatura en la ZONA VERDE (800 °C)", {
+    this.add.text(450, 68, "Manten pulsado ESPACIO o haz CLIC en el boton para mantener la temperatura en la ZONA VERDE (800 C)", {
       fontSize: "14px",
       color: "#cbd5e1",
       fontFamily: "'Segoe UI', sans-serif"
@@ -38,9 +38,9 @@ class MinigameMoxie extends Phaser.Scene {
       .setStrokeStyle(2, 0x4ade80);
     
     // Marcas térmicas
-    this.add.text(215, 125, "1000°C\nCRÍTICO", { fontSize: "11px", color: "#fb7185", align: "right" });
-    this.add.text(215, 230, "800°C\nÓPTIMO", { fontSize: "12px", fontStyle: "bold", color: "#4ade80", align: "right" });
-    this.add.text(215, 365, "200°C\nFRÍO", { fontSize: "11px", color: "#94a3b8", align: "right" });
+    this.add.text(215, 125, "1000 C\nCRITICO", { fontSize: "11px", color: "#fb7185", align: "right" });
+    this.add.text(215, 230, "800 C\nOPTIMO", { fontSize: "12px", fontStyle: "bold", color: "#4ade80", align: "right" });
+    this.add.text(215, 365, "200 C\nFRIO", { fontSize: "11px", color: "#94a3b8", align: "right" });
 
     // Aguja indicadora
     this.needleY = 365;
@@ -51,14 +51,14 @@ class MinigameMoxie extends Phaser.Scene {
     const panelBg = this.add.rectangle(600, 235, 460, 230, 0x1e293b, 0.8)
       .setStrokeStyle(2, 0x334155);
 
-    this.tempDisplay = this.add.text(400, 150, "🌡️ Temperatura: 200 °C", {
+    this.tempDisplay = this.add.text(400, 150, "Temperatura: 200 C", {
       fontSize: "18px",
       fontStyle: "bold",
       color: "#f8fafc",
       fontFamily: "'Segoe UI', sans-serif"
     });
 
-    this.progressText = this.add.text(400, 195, "🫧 Tanque de O2: 0%", {
+    this.progressText = this.add.text(400, 195, "Tanque de O2: 0%", {
       fontSize: "20px",
       fontStyle: "bold",
       color: "#38bdf8",
@@ -69,7 +69,7 @@ class MinigameMoxie extends Phaser.Scene {
     this.add.rectangle(600, 235, 380, 20, 0x0f172a).setStrokeStyle(1, 0x475569);
     this.tankBar = this.add.rectangle(410, 235, 0, 18, 0x38bdf8).setOrigin(0, 0.5);
 
-    this.timerText = this.add.text(400, 265, "⏱️ Tiempo de reacción: 12.0s", {
+    this.timerText = this.add.text(400, 265, "Tiempo restante: 12.0s", {
       fontSize: "17px",
       color: "#f7e396",
       fontFamily: "'Segoe UI', sans-serif"
@@ -80,7 +80,7 @@ class MinigameMoxie extends Phaser.Scene {
       .setInteractive({ useHandCursor: true })
       .setStrokeStyle(3, 0xffffff);
 
-    this.btnText = this.add.text(600, 390, "🔥 MANTENER CALOR (800°C)", {
+    this.btnText = this.add.text(600, 390, "MANTENER CALOR (800 C)", {
       fontSize: "17px",
       fontStyle: "bold",
       color: "#0f172a",
@@ -139,7 +139,7 @@ class MinigameMoxie extends Phaser.Scene {
     // Calcular temperatura aproximada para el display
     // Y=375 -> 200°C, Y=130 -> 1000°C
     const currentTemp = Math.round(1000 - ((this.needleY - 130) / (375 - 130)) * 800);
-    this.tempDisplay.setText(`🌡️ Temperatura: ${currentTemp} °C`);
+    this.tempDisplay.setText(`Temperatura: ${currentTemp} C`);
 
     // Comprobar si está en la zona verde óptima (Y entre 200 y 280, aprox 750°C a 850°C)
     if (this.needleY >= 200 && this.needleY <= 280) {
@@ -149,7 +149,7 @@ class MinigameMoxie extends Phaser.Scene {
       this.progress += 0.024 * delta;
       
       const pct = Math.min(100, Math.floor(this.progress));
-      this.progressText.setText(`🫧 Tanque de O2: ${pct}%`);
+      this.progressText.setText(`Tanque de O2: ${pct}%`);
       this.tankBar.width = (pct / 100) * 380;
 
       if (this.progress >= 100) {

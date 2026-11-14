@@ -27,15 +27,15 @@
         gestionar los recursos vitales (Agua, Oxígeno, Energía y Comida), explorar la superficie y preparar el cohete antes de la megatormenta de polvo marciana.
       </p>
       <div class="start-features">
-        <div class="feat-badge">🪐 Prototipo 3D y Modo 2D</div>
-        <div class="feat-badge">🎮 8 Minijuegos Educativos</div>
-        <div class="feat-badge">🔬 Ciencia Real NASA</div>
-        <div class="feat-badge">📕 10 Píldoras de Descubrimiento</div>
+        <div class="feat-badge">EXPLORACION 3D Y VISTA 2D</div>
+        <div class="feat-badge">10 MINIJUEGOS EDUCATIVOS</div>
+        <div class="feat-badge">CIENCIA OFICIAL NASA</div>
+        <div class="feat-badge">DIARIO DE DESCUBRIMIENTOS</div>
       </div>
       <div class="start-buttons">
-        <button id="btn-new-game" class="btn-primary">🚀 INICIAR CAMPAÑA 2D (SOL 1)</button>
-        <button id="btn-demo-3d" class="btn-primary btn-3d-glow">🪐 MODO EXPLORACIÓN 3D</button>
-        <button id="btn-Reset-save" class="btn-secondary">🔄 Borrar partida</button>
+        <button id="btn-new-game" class="btn-primary">INICIAR CAMPAÑA 2D (SOL 1)</button>
+        <button id="btn-demo-3d" class="btn-primary btn-3d-glow">MODO EXPLORACION 3D</button>
+        <button id="btn-Reset-save" class="btn-secondary">Reiniciar Partida</button>
       </div>
     </div>
   </div>
@@ -44,15 +44,15 @@
   <div id="discovery-popup-modal" class="overlay-screen hidden">
     <div class="modal-card discovery-pop-card">
       <div class="disc-header">
-        <span id="disc-pop-icon" class="disc-large-icon">💡</span>
+        <span id="disc-pop-icon" class="disc-large-icon">[NASA]</span>
         <div>
           <span id="disc-pop-cat" class="disc-badge">CIENCIA ESPACIAL</span>
-          <h3 id="disc-pop-title">¡Nuevo Descubrimiento Marciano!</h3>
+          <h3 id="disc-pop-title">Nuevo Descubrimiento Marciano</h3>
         </div>
       </div>
       <p id="disc-pop-text" class="disc-body-text">Curiosidad científica de la NASA...</p>
       <div class="disc-actions">
-        <button id="btn-close-discovery" class="btn-primary">🌟 ¡ENTENDIDO! (Añadido a mi diario)</button>
+        <button id="btn-close-discovery" class="btn-primary">ENTENDIDO (Registrar en el Diario)</button>
       </div>
     </div>
   </div>
@@ -62,10 +62,10 @@
     <div class="modal-card diary-modal-card">
       <div class="pedia-header">
         <div>
-          <h2>📕 DIARIO DE EXPLORACIÓN ESPACIAL</h2>
+          <h2>DIARIO DE EXPLORACION ESPACIAL</h2>
           <p id="diary-stats-text" class="diary-subtitle">Has descubierto 0 de 10 secretos marcianos</p>
         </div>
-        <button id="btn-close-diary" class="btn-secondary">✖ Cerrar</button>
+        <button id="btn-close-diary" class="btn-secondary">[X] Cerrar</button>
       </div>
       <div id="diary-cards-grid" class="diary-grid"></div>
     </div>
@@ -79,18 +79,18 @@
       <p id="brief-desc" class="brief-objective">Instrucciones de la tarea...</p>
       
       <div class="brief-controls-box">
-        <h3>🎮 CÓMO JUGAR:</h3>
+        <h3>OBJETIVO TECNICO:</h3>
         <p id="brief-controls">Usa el ratón o las teclas para interactuar.</p>
       </div>
 
       <div class="brief-rewards-preview">
-        <div class="reward-pill"><span class="stars">⭐⭐⭐</span> Excelente: 100% recursos + Bonus</div>
-        <div class="reward-pill"><span class="stars">⭐⭐</span> Bien: 100% recursos estándar</div>
-        <div class="reward-pill"><span class="stars">⭐</span> Regular: Suministro parcial</div>
+        <div class="reward-pill"><span class="stars">[3/3]</span> Rendimiento Optimo: 100% recursos + Bonus</div>
+        <div class="reward-pill"><span class="stars">[2/3]</span> Operacion Estandar: 100% recursos estándar</div>
+        <div class="reward-pill"><span class="stars">[1/3]</span> Operacion Parcial: Suministro de contingencia</div>
       </div>
 
       <div class="brief-actions">
-        <button id="btn-start-minigame" class="btn-primary">🚀 ¡COMENZAR OPERACIÓN!</button>
+        <button id="btn-start-minigame" class="btn-primary">COMENZAR OPERACION</button>
         <button id="btn-cancel-briefing" class="btn-secondary">Volver</button>
       </div>
     </div>
@@ -100,37 +100,37 @@
   <div id="nasapedia-modal" class="overlay-screen hidden">
     <div class="modal-card pedia-card">
       <div class="pedia-header">
-        <h2>📘 NASA PEDIA: CIENCIA REAL VS. VIDEOJUEGO</h2>
-        <button id="btn-close-pedia" class="btn-secondary">✖ Cerrar</button>
+        <h2>NASA PEDIA: CIENCIA REAL APLICADA</h2>
+        <button id="btn-close-pedia" class="btn-secondary">[X] Cerrar</button>
       </div>
       <div class="pedia-grid">
         <div class="pedia-item">
-          <h3>⚙️ MOXIE (Oxígeno en Marte)</h3>
+          <h3>[ECLSS] MOXIE: Oxigeno en Marte</h3>
           <p><strong>Dato Real NASA:</strong> Instrumento en el rover Perseverance que demostró la electrólisis de CO₂ marciano a 800 °C para producir oxígeno respirable ($2CO_2 \rightarrow 2CO + O_2$).</p>
           <p><strong>En el juego:</strong> Regulamos la temperatura del reactor para recargar las reservas de aire y el oxidante del MAV.</p>
         </div>
         <div class="pedia-item">
-          <h3>☀️ DONKI (Clima Espacial)</h3>
+          <h3>[CLIMA ESPACIAL] DONKI: Radiacion Solar</h3>
           <p><strong>Dato Real NASA:</strong> Database of Notifications, Knowledge, and Information de NASA monitoriza llamaradas solares y Eyecciones de Masa Coronal (CME).</p>
           <p><strong>En el juego:</strong> El deflector magnético DONKI neutraliza partículas solares que dañarían baterías y sistemas.</p>
         </div>
         <div class="pedia-item">
-          <h3>🌱 OSDR (Biología Espacial)</h3>
+          <h3>[BIOLOGIA] OSDR: Cultivos Hidroponicos</h3>
           <p><strong>Dato Real NASA:</strong> El Open Science Data Repository investiga microgreens y espirulina de crecimiento acelerado (7-10 días) con luces LED y bajo consumo de agua.</p>
           <p><strong>En el juego:</strong> Mantenemos las bandejas hidropónicas para cosechar comida fresca y regenerar aire de forma pasiva.</p>
         </div>
         <div class="pedia-item">
-          <h3>🧊 Arcadia Planitia e ISRU</h3>
+          <h3>[ISRU] Arcadia Planitia y Hielo Subterraneo</h3>
           <p><strong>Dato Real NASA:</strong> El radar SHARAD en MRO descubrió capas de hielo glaciar a pocos metros del suelo. Sin embargo, el suelo contiene sales perclorato que deben filtrarse.</p>
           <p><strong>En el juego:</strong> Extraemos y purificamos hielo para obtener agua potable y refrigerar las toberas del cohete MAV.</p>
         </div>
         <div class="pedia-item">
-          <h3>🚀 MAV (Vehículo de Ascenso a Marte)</h3>
+          <h3>[PROPULSION] Cohete MAV: Vehiculo de Retorno</h3>
           <p><strong>Dato Real NASA:</strong> El cohete de retorno utiliza metano líquido y oxígeno líquido criogénico. El oxígeno representa el 75% del propelente y se fabrica in-situ.</p>
           <p><strong>En el juego:</strong> Conectamos la energía, cargamos el oxígeno criogénico y blindamos la antena en los Soles 12 a 15.</p>
         </div>
         <div class="pedia-item">
-          <h3>🏠 Soporte Vital Regenerativo (ECLSS)</h3>
+          <h3>[INGENIERIA] Soporte Vital Regenerativo</h3>
           <p><strong>Dato Real NASA:</strong> En la Estación Espacial Internacional se recicla más del 98% del agua y se eliminan impurezas para que los recursos nunca se agoten en un solo día.</p>
           <p><strong>En el juego:</strong> Consumos equilibrados y protocolo de contingencia que impiden derrotas injustas.</p>
         </div>
@@ -145,7 +145,7 @@
       <h1 id="end-title">MISIÓN FINALIZADA</h1>
       <p id="end-desc"></p>
       <div id="end-medal-box" class="nasa-box end-medal"></div>
-      <button id="btn-restart-end" class="btn-primary">🔄 JUGAR NUEVA SIMULACIÓN (SOL 1)</button>
+      <button id="btn-restart-end" class="btn-primary">NUEVA SIMULACION (SOL 1)</button>
     </div>
   </div>
 
@@ -160,36 +160,36 @@
 
       <div class="resources-container">
         <div id="box-water" class="res-box" title="Agua potable disponible">
-          <div class="res-header"><span>💧 AGUA</span><span id="val-water">50%</span></div>
+          <div class="res-header"><span>AGUA [H2O]</span><span id="val-water">50%</span></div>
           <div class="progress-bg"><div id="bar-water" class="progress-fill water-fill"></div></div>
         </div>
 
         <div id="box-oxygen" class="res-box" title="Oxígeno respirable en el hábitat">
-          <div class="res-header"><span>🫧 OXÍGENO</span><span id="val-oxygen">60%</span></div>
+          <div class="res-header"><span>OXÍGENO [O2]</span><span id="val-oxygen">60%</span></div>
           <div class="progress-bg"><div id="bar-oxygen" class="progress-fill oxygen-fill"></div></div>
         </div>
 
         <div id="box-energy" class="res-box" title="Baterías solares y calefacción">
-          <div class="res-header"><span>⚡ ENERGÍA</span><span id="val-energy">50%</span></div>
+          <div class="res-header"><span>ENERGÍA [PWR]</span><span id="val-energy">50%</span></div>
           <div class="progress-bg"><div id="bar-energy" class="progress-fill energy-fill"></div></div>
         </div>
 
         <div id="box-food" class="res-box" title="Raciones y microgreens hidropónicos">
-          <div class="res-header"><span>🌱 COMIDA</span><span id="val-food">55%</span></div>
+          <div class="res-header"><span>COMIDA [BIO]</span><span id="val-food">55%</span></div>
           <div class="progress-bg"><div id="bar-food" class="progress-fill food-fill"></div></div>
         </div>
       </div>
 
       <div class="status-badges">
-        <div class="mini-status" title="Blindaje del Outpost Beta">🛡️ <strong id="val-shield">80%</strong></div>
+        <div class="mini-status" title="Blindaje del Outpost Beta">ESCUDO: <strong id="val-shield">80%</strong></div>
         <div class="mini-status mav-status" title="Fases del cohete de retorno MAV">
-          🚀 MAV: <strong id="val-mav">0 / 3</strong>
-          <span id="mav-step-icons" class="mav-steps">⚪⚪⚪</span>
+          MAV: <strong id="val-mav">0 / 3</strong>
+          <span id="mav-step-icons" class="mav-steps">[0 / 3]</span>
         </div>
-        <button id="btn-toggle-view" class="btn-mode-toggle" title="Alternar entre Vista 2D Clásica y Exploración 3D">🪐 MODO 3D</button>
-        <button id="btn-open-diary" class="btn-diary" title="Ver Diario de Exploración">📕 Diario (<span id="diary-counter-badge">0 / 10</span>)</button>
-        <button id="btn-toggle-sound" class="btn-sound" title="Activar/Silenciar sonido">🔊</button>
-        <button id="btn-open-pedia" class="btn-pedia">📘 NASA Pedia</button>
+        <button id="btn-toggle-view" class="btn-mode-toggle" title="Alternar entre Vista 2D Clásica y Exploración 3D">MODO 3D</button>
+        <button id="btn-open-diary" class="btn-diary" title="Ver Diario de Exploración">DIARIO (<span id="diary-counter-badge">0 / 10</span>)</button>
+        <button id="btn-toggle-sound" class="btn-sound" title="Activar/Silenciar sonido">SONIDO</button>
+        <button id="btn-open-pedia" class="btn-pedia">NASA PEDIA</button>
       </div>
     </header>
 
@@ -204,13 +204,17 @@
       <!-- Overlay de controles para el modo 3D -->
       <div id="hud-3d-controls" class="hud-3d-bar hidden">
         <div class="controls-guide">
-          <span>🚶 Mover: <strong>[W,A,S,D]</strong> o <strong>[Flechas]</strong></span>
-          <span>🔄 Girar cámara: <strong>Arrastrar ratón</strong></span>
-          <span>⚡ Interactuar: <strong>[E]</strong> al acercarte a una estación</span>
+          <span>Mover: <strong>[W,A,S,D]</strong> o <strong>[Flechas]</strong></span>
+          <span>Salto marciano (0.38g): <strong>[Espacio]</strong></span>
+          <span>Girar cámara: <strong>Arrastrar ratón</strong></span>
+          <span>Interactuar: <strong>[E]</strong> al acercarte a una estación</span>
         </div>
-        <div id="station-prompt-card" class="station-prompt-box hidden">
-          <span id="station-prompt-text">Acércate a una estación</span>
-          <button id="btn-3d-interact" class="btn-primary btn-mini">ACTIVAR [E]</button>
+        <div class="hud-3d-actions-row">
+          <button id="btn-toggle-3d-mission" class="btn-secondary btn-mini" title="Ver objetivos y decisiones del Sol actual">PANEL DE DECISIÓN [M]</button>
+          <div id="station-prompt-card" class="station-prompt-box hidden">
+            <span id="station-prompt-text">Acércate a una estación</span>
+            <button id="btn-3d-interact" class="btn-primary btn-mini">ACTIVAR [E]</button>
+          </div>
         </div>
       </div>
 
@@ -220,7 +224,7 @@
       <!-- ASISTENTE ROVI (CONSEJOS DINÁMICOS PARA NIÑOS) -->
       <div id="rovi-assistant" class="rovi-bubble">
         <div class="rovi-bubble-header">
-          <span class="rovi-avatar">🤖</span>
+          <span class="rovi-avatar">[ROVI]</span>
           <strong>ROVI — Asistente de Misión</strong>
         </div>
         <p id="rovi-msg">¡Bienvenido a Arcadia Planitia, Comandante! Revisa los paneles solares hoy para que no falte energía.</p>
@@ -229,8 +233,8 @@
       <!-- PANEL DE COMUNICACIÓN CON LA TIERRA -->
       <aside id="earth-comm" class="comm-panel">
         <div class="comm-header">
-          <span>📡 HOUSTON CAPCOM</span>
-          <span class="delay-tag">⏱️ RETRASO: 14 MIN</span>
+          <span>HOUSTON // CAPCOM</span>
+          <span class="delay-tag">RETRASO: 14 MIN</span>
         </div>
         <p id="comm-text">Conectando con antena de Espacio Profundo...</p>
       </aside>
@@ -245,7 +249,7 @@
 
       <!-- TARJETA DE RESULTADO Y CÁPSULA CIENTÍFICA NASA -->
       <section id="result-panel" class="decision-card hidden">
-        <div id="result-stars" class="stars-header">⭐⭐⭐</div>
+        <div id="result-stars" class="stars-header">CALIFICACIÓN: EXCELENTE</div>
         <span class="phase-tag">INFORME DE INGENIERÍA</span>
         <h2 id="result-title">Resultado de la operación</h2>
         <p id="result-desc"></p>
@@ -253,10 +257,10 @@
         <div id="result-breakdown" class="resources-breakdown-box"></div>
 
         <div class="nasa-box">
-          <strong>🔬 CIENCIA REAL DE LA NASA:</strong>
+          <strong>CIENCIA REAL DE LA NASA:</strong>
           <p id="nasa-fact"></p>
         </div>
-        <button id="btn-next-sol" class="btn-primary">🌙 DORMIR Y AVANZAR AL SIGUIENTE SOL (Consumo Nocturno Equilibrado)</button>
+        <button id="btn-next-sol" class="btn-primary">AVANZAR AL SIGUIENTE SOL (Consumo Nocturno)</button>
       </section>
     </main>
   </div>

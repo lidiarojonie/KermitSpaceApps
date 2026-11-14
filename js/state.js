@@ -111,7 +111,7 @@ const GameState = {
       if (this[res] <= 0 && !this.emergencyUsed) {
         this.emergencyUsed = true;
         this[res] = 18;
-        this.contingencyAlert = `⚠️ PROTOCOLO DE CONTINGENCIA ROVI: Se ha inyectado la reserva de emergencia de ${res.toUpperCase()} (+18%). ¡Debes reponer este recurso inmediatamente hoy!`;
+        this.contingencyAlert = `[ALERTA DE CONTINGENCIA ROVI] Se ha inyectado la reserva de emergencia de ${res.toUpperCase()} (+18%). Repon este recurso inmediatamente hoy.`;
         if (typeof SoundFx !== "undefined") SoundFx.playAlert();
         break;
       }
@@ -123,20 +123,20 @@ const GameState = {
 
   // Comprueba si algún recurso vital ha caído a 0 de forma definitiva
   checkFailure() {
-    if (this.water <= 0) return "Te has quedado sin AGUA potable. El traje activó la hibernación de emergencia.";
-    if (this.oxygen <= 0) return "El nivel de OXÍGENO cayó a cero. ROVI selló tu casco en modo rescate.";
-    if (this.energy <= 0) return "Sin ENERGÍA eléctrica, la calefacción se apagó durante la noche marciana de -65 °C.";
-    if (this.food <= 0) return "Sin ALIMENTOS, no tienes fuerzas para operar los sistemas del hábitat.";
+    if (this.water <= 0) return "Te has quedado sin AGUA potable. El traje activo la hibernacion de emergencia.";
+    if (this.oxygen <= 0) return "El nivel de OXIGENO cayo a cero. ROVI sello tu casco en modo rescate.";
+    if (this.energy <= 0) return "Sin ENERGIA electrica, la calefaccion se apago durante la noche marciana de -65 C.";
+    if (this.food <= 0) return "Sin ALIMENTOS, no tienes fuerzas para operar los sistemas del habitat.";
     return null;
   },
 
   // Devuelve los recursos que están en estado crítico (< 25%)
   getCriticalResources() {
     const list = [];
-    if (this.water < 25) list.push({ key: "water", name: "Agua", icon: "💧" });
-    if (this.oxygen < 25) list.push({ key: "oxygen", name: "Oxígeno", icon: "🫧" });
-    if (this.energy < 25) list.push({ key: "energy", name: "Energía", icon: "⚡" });
-    if (this.food < 25) list.push({ key: "food", name: "Comida", icon: "🌱" });
+    if (this.water < 25) list.push({ key: "water", name: "Agua", icon: "[H2O]" });
+    if (this.oxygen < 25) list.push({ key: "oxygen", name: "Oxigeno", icon: "[O2]" });
+    if (this.energy < 25) list.push({ key: "energy", name: "Energia", icon: "[PWR]" });
+    if (this.food < 25) list.push({ key: "food", name: "Comida", icon: "[BIO]" });
     return list;
   },
 

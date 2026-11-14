@@ -10,8 +10,8 @@ const MISSION_DAYS = [
     description: "El polvo levantado por el aterrizaje forzoso cubre las placas solares y las baterías están bajando por el frío marciano de -65 °C.",
     choices: [
       {
-        label: "☀️ Salir en traje EVA a limpiar y reconectar los paneles",
-        costText: "Coste: -4 🫧 Oxígeno | Juegas: Mantenimiento Solar (+32 ⚡ Energía si ganas)",
+        label: " Salir en traje EVA a limpiar y reconectar los paneles",
+        costText: "Coste: -4 Oxigeno [O2] | Juegas: Mantenimiento Solar (+32 Energia [PWR] si ganas)",
         cost: { oxygen: -4 },
         minigame: "MinigameSolar",
         minigameTitle: "Mantenimiento Solar: Limpieza de Polvo",
@@ -21,8 +21,8 @@ const MISSION_DAYS = [
         nasaFact: "Marte recibe menos de la mitad de luz solar que la Tierra. Además, el polvo fino marciano se adhiere a los paneles por electricidad estática."
       },
       {
-        label: "🔋 Encender célula química de reserva en el interior",
-        costText: "Coste: -4 💧 Agua | Recompensa segura: +22 ⚡ Energía",
+        label: " Encender célula química de reserva en el interior",
+        costText: "Coste: -4 Agua [H2O] | Recompensa segura: +22 Energia [PWR]",
         cost: { water: -4 },
         minigame: null,
         successReward: { energy: 22 },
@@ -39,7 +39,7 @@ const MISSION_DAYS = [
     choices: [
       {
         label: "🫧 Sellar las fugas del casco con espuma selladora",
-        costText: "Coste: -4 ⚡ Energía | Juegas: Sellado de Fugas (+28 🫧 Oxígeno si ganas)",
+        costText: "Coste: -4 Energia [PWR] | Juegas: Sellado de Fugas (+28 Oxigeno [O2] si ganas)",
         cost: { energy: -4 },
         minigame: "MinigameLeakRepair",
         minigameTitle: "Sellado de Fugas de Oxígeno",
@@ -49,8 +49,8 @@ const MISSION_DAYS = [
         nasaFact: "Las estaciones espaciales como la ISS monitorizan caídas microscópicas de presión y usan selladores térmicos rápidos para proteger la vida de los astronautas."
       },
       {
-        label: "⚙️ Encender el reactor MOXIE para compensar la fuga",
-        costText: "Coste: -5 ⚡ Energía | Juegas: Reactor MOXIE (+26 🫧 Oxígeno si ganas)",
+        label: " Encender el reactor MOXIE para compensar la fuga",
+        costText: "Coste: -5 Energia [PWR] | Juegas: Reactor MOXIE (+26 Oxigeno [O2] si ganas)",
         cost: { energy: -5 },
         minigame: "MinigameMoxie",
         minigameTitle: "Reactor MOXIE: Síntesis Térmica",
@@ -69,8 +69,8 @@ const MISSION_DAYS = [
     description: "El tanque de agua sufrió daños en el impacto. Es momento de extraer el hielo subterráneo y purificarlo para el consumo.",
     choices: [
       {
-        label: "🧊 Perforar el glaciar subterráneo con ROVI",
-        costText: "Coste: -4 ⚡ Energía | Juegas: Perforación Glaciar (+30 💧 Agua si ganas)",
+        label: " Perforar el glaciar subterráneo con ROVI",
+        costText: "Coste: -4 Energia [PWR] | Juegas: Perforación Glaciar (+30 Agua [H2O] si ganas)",
         cost: { energy: -4 },
         minigame: "MinigameDrill",
         minigameTitle: "Perforación Glaciar Arcadia",
@@ -80,8 +80,8 @@ const MISSION_DAYS = [
         nasaFact: "Arcadia Planitia contiene enormes depósitos de hielo de agua pura a poca profundidad, detectados por el radar SHARAD del orbitador MRO de la NASA."
       },
       {
-        label: "💧 Filtrar y desalinizar el hielo en el laboratorio",
-        costText: "Coste: -4 ⚡ Energía | Juegas: Purificación de Agua (+28 💧 Agua si ganas)",
+        label: " Filtrar y desalinizar el hielo en el laboratorio",
+        costText: "Coste: -4 Energia [PWR] | Juegas: Purificación de Agua (+28 Agua [H2O] si ganas)",
         cost: { energy: -4 },
         minigame: "MinigameWaterFilter",
         minigameTitle: "Purificación de Agua y Percloratos",
@@ -102,8 +102,8 @@ const MISSION_DAYS = [
     description: "Marte carece de un campo magnético global protector. Debes desviar las partículas de alta radiación antes de que dañen las baterías y cultivos.",
     choices: [
       {
-        label: "🛡️ Activar el deflector magnético y barrera DONKI",
-        costText: "Coste: -4 ⚡ Energía | Juegas: Escudo DONKI (+20% 🛡️ Escudo y +15 ⚡ Energía)",
+        label: " Activar el deflector magnético y barrera DONKI",
+        costText: "Coste: -4 Energia [PWR] | Juegas: Escudo DONKI (+20% Escudo [DEF] y +15 Energia [PWR])",
         cost: { energy: -4 },
         minigame: "MinigameShield",
         minigameTitle: "Deflector de Radiación Solar DONKI",
@@ -113,8 +113,8 @@ const MISSION_DAYS = [
         nasaFact: "El sistema DONKI de la NASA predice el clima espacial para alertar de tormentas de radiación que podrían afectar a astronautas fuera de la magnetosfera terrestre."
       },
       {
-        label: "⛺ Refugiarse en el búnker interior rodeado de agua",
-        costText: "Coste: -4 🌱 Comida | Recompensa segura: +15% 🛡️ Escudo y +12 💧 Agua",
+        label: " Refugiarse en el búnker interior rodeado de agua",
+        costText: "Coste: -4 Comida [BIO] | Recompensa segura: +15% Escudo [DEF] y +12 Agua [H2O]",
         cost: { food: -4 },
         minigame: null,
         successReward: { shield: 15, water: 12 },
@@ -130,8 +130,8 @@ const MISSION_DAYS = [
     description: "Las raciones envasadas bajan. El biodomo hidropónico puede generar alimentos frescos y ricos en vitaminas si cuidas el riego y la luz.",
     choices: [
       {
-        label: "🌱 Cosecha intensiva en el Biodomo OSDR",
-        costText: "Coste: -4 💧 Agua | Juegas: Cultivo Hidropónico (+32 🌱 Comida y +8 🫧 Oxígeno)",
+        label: " Cosecha intensiva en el Biodomo OSDR",
+        costText: "Coste: -4 Agua [H2O] | Juegas: Cultivo Hidropónico (+32 Comida [BIO] y +8 Oxigeno [O2])",
         cost: { water: -4 },
         minigame: "MinigameBiodome",
         minigameTitle: "Biodomo Hidropónico OSDR",
@@ -141,8 +141,8 @@ const MISSION_DAYS = [
         nasaFact: "El Open Science Data Repository (OSDR) de la NASA investiga cómo cultivar microgreens de crecimiento rápido para la nutrición de futuros astronautas."
       },
       {
-        label: "☀️ Optimizar paneles solares y compartir energía con el invernadero",
-        costText: "Coste: -4 🫧 Oxígeno | Juegas: Mantenimiento Solar (+26 ⚡ Energía y +14 🌱 Comida)",
+        label: " Optimizar paneles solares y compartir energía con el invernadero",
+        costText: "Coste: -4 Oxigeno [O2] | Juegas: Mantenimiento Solar (+26 Energia [PWR] y +14 Comida [BIO])",
         cost: { oxygen: -4 },
         minigame: "MinigameSolar",
         minigameTitle: "Mantenimiento y Recarga Solar",
@@ -162,7 +162,7 @@ const MISSION_DAYS = [
     choices: [
       {
         label: "🫧 Inyectar flujo de CO2 marciano al reactor MOXIE",
-        costText: "Coste: -4 ⚡ Energía | Juegas: Reactor MOXIE (+30 🫧 Oxígeno)",
+        costText: "Coste: -4 Energia [PWR] | Juegas: Reactor MOXIE (+30 Oxigeno [O2])",
         cost: { energy: -4 },
         minigame: "MinigameMoxie",
         minigameTitle: "Reactor MOXIE: Flujo Forzado",
@@ -172,8 +172,8 @@ const MISSION_DAYS = [
         nasaFact: "El filtro HEPA de MOXIE impide la entrada de granos de arena y polvo marciano a las micro-celdas cerámicas electrolíticas."
       },
       {
-        label: "⚡ Reconfigurar y alinear relés de circuito del Outpost",
-        costText: "Coste: 0 | Juegas: Conexión de Circuitos (+30 ⚡ Energía)",
+        label: " Reconfigurar y alinear relés de circuito del Outpost",
+        costText: "Coste: 0 | Juegas: Conexión de Circuitos (+30 Energia [PWR])",
         cost: {},
         minigame: "MinigameCircuit",
         minigameTitle: "Conexión de Circuitos y Relés",
@@ -192,8 +192,11 @@ const MISSION_DAYS = [
     description: "Si usamos a ROVI para explorar la zona y balizar el contenedor, podremos rescatar comida espacial liofilizada y bloques de hielo intactos.",
     choices: [
       {
-        label: "🚙 Desplegar a ROVI en modo exploración y rescate de suministros",
-        costText: "Coste: -4 ⚡ Energía | Juegas: Conducción con ROVI (+25 💧 Agua y +20 🌱 Comida)",
+        label: "Analizar muestras geologicas del crater con el laser PIXL de ROVI",
+        minigame: "MinigameSpectro",
+        minigameTitle: "Espectrometria Laser PIXL (Muestras)",
+        minigameBrief: "Dispara el laser ultravioleta PIXL sobre 4 muestras de regolito para identificar minerales de agua y silicatos.",
+        costText: "Coste: -4 Energia [PWR] | Juegas: Conducción con ROVI (+25 Agua [H2O] y +20 Comida [BIO])",
         cost: { energy: -4 },
         minigame: "MinigameRoverDrive",
         minigameTitle: "Exploración y Conducción con ROVI",
@@ -203,8 +206,8 @@ const MISSION_DAYS = [
         nasaFact: "Los rovers de exploración autónoma como Curiosity y Perseverance cartografían terrenos accidentados y rescatan balizas de telemetría."
       },
       {
-        label: "🛡️ Usar las placas del contenedor para reforzar el refugio",
-        costText: "Coste: -4 ⚡ Energía | Recompensa segura: +15% 🛡️ Escudo y +15 🌱 Comida",
+        label: " Usar las placas del contenedor para reforzar el refugio",
+        costText: "Coste: -4 Energia [PWR] | Recompensa segura: +15% Escudo [DEF] y +15 Comida [BIO]",
         cost: { energy: -4 },
         minigame: null,
         successReward: { shield: 15, food: 15 },
@@ -222,8 +225,8 @@ const MISSION_DAYS = [
     description: "Es momento de llenar las reservas al máximo nivel tanto para consumo de la tripulación como para los preparativos de despegue.",
     choices: [
       {
-        label: "💧 Purificar agua a gran escala mediante ósmosis y destilación",
-        costText: "Coste: -4 ⚡ Energía | Juegas: Purificación de Agua (+30 💧 Agua)",
+        label: " Purificar agua a gran escala mediante ósmosis y destilación",
+        costText: "Coste: -4 Energia [PWR] | Juegas: Purificación de Agua (+30 Agua [H2O])",
         cost: { energy: -4 },
         minigame: "MinigameWaterFilter",
         minigameTitle: "Purificación de Agua y Percloratos",
@@ -233,8 +236,8 @@ const MISSION_DAYS = [
         nasaFact: "En la Estación Espacial Internacional (ISS), el sistema ECLSS recicla hasta el 98% del agua utilizada por la tripulación."
       },
       {
-        label: "🌱 Ciclo de transpiración vegetal en el Biodomo",
-        costText: "Coste: -4 ⚡ Energía | Juegas: Cultivo Hidropónico (+16 💧 Agua y +22 🌱 Comida)",
+        label: " Ciclo de transpiración vegetal en el Biodomo",
+        costText: "Coste: -4 Energia [PWR] | Juegas: Cultivo Hidropónico (+16 Agua [H2O] y +22 Comida [BIO])",
         cost: { energy: -4 },
         minigame: "MinigameBiodome",
         minigameTitle: "Reciclaje Biológico en el Biodomo",
@@ -253,8 +256,8 @@ const MISSION_DAYS = [
     description: "El cohete MAV necesita oxígeno líquido puro para combinarse con el metano de sus propulsores.",
     choices: [
       {
-        label: "⚙️ Producción de oxígeno de alta pureza con MOXIE",
-        costText: "Coste: -4 ⚡ Energía | Juegas: Reactor MOXIE (+30 🫧 Oxígeno)",
+        label: " Producción de oxígeno de alta pureza con MOXIE",
+        costText: "Coste: -4 Energia [PWR] | Juegas: Reactor MOXIE (+30 Oxigeno [O2])",
         cost: { energy: -4 },
         minigame: "MinigameMoxie",
         minigameTitle: "MOXIE: Producción Intensiva",
@@ -265,7 +268,7 @@ const MISSION_DAYS = [
       },
       {
         label: "🫧 Sellado preventivo de conductos y juntas del hábitat",
-        costText: "Coste: -4 ⚡ Energía | Juegas: Sellado de Fugas (+26 🫧 Oxígeno y +12 ⚡ Energía)",
+        costText: "Coste: -4 Energia [PWR] | Juegas: Sellado de Fugas (+26 Oxigeno [O2] y +12 Energia [PWR])",
         cost: { energy: -4 },
         minigame: "MinigameLeakRepair",
         minigameTitle: "Sellado de Fugas y Aislamiento",
@@ -284,8 +287,11 @@ const MISSION_DAYS = [
     description: "La radiación solar puede sobrecargar las placas de control del refugio. Debes interceptar la oleada de partículas.",
     choices: [
       {
-        label: "🛡️ Activar la barrera deflectora de campo magnético",
-        costText: "Coste: -4 ⚡ Energía | Juegas: Escudo DONKI (+22% 🛡️ Escudo y +14 🫧 Oxígeno)",
+        label: "Activar el protocolo de aseguramiento ante la tormenta de arena",
+        minigame: "MinigameDustDefense",
+        minigameTitle: "Defensa ante Megatormenta Marciana",
+        minigameBrief: "Bloquea los 4 sistemas criticos de la base (solar, antena, esclusa, rover) antes de que la tormenta impacte.",
+        costText: "Coste: -4 Energia [PWR] | Juegas: Escudo DONKI (+22% Escudo [DEF] y +14 Oxigeno [O2])",
         cost: { energy: -4 },
         minigame: "MinigameShield",
         minigameTitle: "Escudo DONKI: Protección Geomagnética",
@@ -295,8 +301,8 @@ const MISSION_DAYS = [
         nasaFact: "El detector RAD de Curiosity midió la radiación en superficie para determinar el blindaje necesario para las misiones tripuladas de la NASA."
       },
       {
-        label: "☀️ Limpiar paneles y derivar picos de tensión a tierra",
-        costText: "Coste: -6% 🛡️ Escudo | Juegas: Mantenimiento Solar (+30 ⚡ Energía)",
+        label: " Limpiar paneles y derivar picos de tensión a tierra",
+        costText: "Coste: -6% Escudo [DEF] | Juegas: Mantenimiento Solar (+30 Energia [PWR])",
         cost: { shield: -6 },
         minigame: "MinigameSolar",
         minigameTitle: "Mantenimiento Solar de Emergencia",
@@ -315,8 +321,8 @@ const MISSION_DAYS = [
     description: "El biodomo hidropónico ha alcanzado su punto álgido de floración de microgreens y biomasa de microalgas.",
     choices: [
       {
-        label: "🌱 Gran cosecha de microgreens y espirulina",
-        costText: "Coste: -4 💧 Agua | Juegas: Cultivo Hidropónico (+32 🌱 Comida y +12 🫧 Oxígeno)",
+        label: " Gran cosecha de microgreens y espirulina",
+        costText: "Coste: -4 Agua [H2O] | Juegas: Cultivo Hidropónico (+32 Comida [BIO] y +12 Oxigeno [O2])",
         cost: { water: -4 },
         minigame: "MinigameBiodome",
         minigameTitle: "Gran Cosecha en el Biodomo",
@@ -326,8 +332,8 @@ const MISSION_DAYS = [
         nasaFact: "La espirulina es rica en proteínas completas, hierro y betacarotenos, tolerando condiciones controladas de luz y espacio reducido."
       },
       {
-        label: "🧊 Extracción profunda de agua para la despensa",
-        costText: "Coste: -4 ⚡ Energía | Juegas: Perforación Glaciar (+28 💧 Agua y +16 ⚡ Energía)",
+        label: " Extracción profunda de agua para la despensa",
+        costText: "Coste: -4 Energia [PWR] | Juegas: Perforación Glaciar (+28 Agua [H2O] y +16 Energia [PWR])",
         cost: { energy: -4 },
         minigame: "MinigameDrill",
         minigameTitle: "Extracción Glaciar Profunda",
@@ -348,8 +354,8 @@ const MISSION_DAYS = [
     description: "¡Comienza la cuenta atrás para el regreso! Completar esta operación activa la Etapa 1/3 del cohete MAV.",
     choices: [
       {
-        label: "🚀 Conectar línea eléctrica del MAV y limpiar paneles",
-        costText: "Coste: -4 🫧 Oxígeno | Juegas: Mantenimiento Solar (🚀 MAV +1/3 y +26 ⚡ Energía)",
+        label: " Conectar línea eléctrica del MAV y limpiar paneles",
+        costText: "Coste: -4 Oxigeno [O2] | Juegas: Mantenimiento Solar (Cohete MAV +1/3 y +26 Energia [PWR])",
         cost: { oxygen: -4 },
         minigame: "MinigameSolar",
         minigameTitle: "Enlace Eléctrico del MAV",
@@ -359,8 +365,8 @@ const MISSION_DAYS = [
         nasaFact: "El Vehículo de Ascenso a Marte (MAV) requiere energía eléctrica continua para mantener sus ordenadores calientes y listos para la secuencia de despegue."
       },
       {
-        label: "🚀 Suministro eléctrico de respaldo desde el biodomo",
-        costText: "Coste: -4 💧 Agua | Juegas: Cultivo Hidropónico (🚀 MAV +1/3, +18 🌱 Comida, +14 ⚡ Energía)",
+        label: " Suministro eléctrico de respaldo desde el biodomo",
+        costText: "Coste: -4 Agua [H2O] | Juegas: Cultivo Hidropónico (Cohete MAV +1/3, +18 Comida [BIO], +14 Energia [PWR])",
         cost: { water: -4 },
         minigame: "MinigameBiodome",
         minigameTitle: "Transferencia de Potencia al MAV",
@@ -379,8 +385,8 @@ const MISSION_DAYS = [
     description: "Los motores del MAV usan metano criogénico y oxígeno líquido (LOX). Con esta operación completarás la Etapa 2/3.",
     choices: [
       {
-        label: "🚀 Bombeo de oxígeno criogénico con el reactor MOXIE",
-        costText: "Coste: -4 ⚡ Energía | Juegas: Reactor MOXIE (🚀 MAV +2/3 y +30 🫧 Oxígeno)",
+        label: " Bombeo de oxígeno criogénico con el reactor MOXIE",
+        costText: "Coste: -4 Energia [PWR] | Juegas: Reactor MOXIE (Cohete MAV +2/3 y +30 Oxigeno [O2])",
         cost: { energy: -4 },
         minigame: "MinigameMoxie",
         minigameTitle: "Bombeo Criogénico de Oxígeno al MAV",
@@ -390,8 +396,8 @@ const MISSION_DAYS = [
         nasaFact: "Fabricar el propelente oxidante directamente en Marte ahorra tener que lanzar más de 25 toneladas de peso extra desde la superficie terrestre."
       },
       {
-        label: "🚀 Sellado de tuberías criogénicas del cohete MAV",
-        costText: "Coste: -4 ⚡ Energía | Juegas: Sellado de Fugas (🚀 MAV +2/3, +24 🫧 Oxígeno, +14 💧 Agua)",
+        label: " Sellado de tuberías criogénicas del cohete MAV",
+        costText: "Coste: -4 Energia [PWR] | Juegas: Sellado de Fugas (Cohete MAV +2/3, +24 Oxigeno [O2], +14 Agua [H2O])",
         cost: { energy: -4 },
         minigame: "MinigameLeakRepair",
         minigameTitle: "Sellado de Válvulas Criogénicas",
@@ -410,8 +416,8 @@ const MISSION_DAYS = [
     description: "Último paso antes del Sol 15. Con esta operación el cohete quedará en estado 3/3 con sus motores listos para ignición.",
     choices: [
       {
-        label: "🚀 Blindar la antena de guiado con el deflector DONKI",
-        costText: "Coste: -4 ⚡ Energía | Juegas: Escudo DONKI (🚀 MAV 3/3, +20 💧 Agua, +18 🌱 Comida)",
+        label: " Blindar la antena de guiado con el deflector DONKI",
+        costText: "Coste: -4 Energia [PWR] | Juegas: Escudo DONKI (Cohete MAV 3/3, +20 Agua [H2O], +18 Comida [BIO])",
         cost: { energy: -4 },
         minigame: "MinigameShield",
         minigameTitle: "Blindaje de Guía del Cohete MAV",
@@ -421,8 +427,8 @@ const MISSION_DAYS = [
         nasaFact: "Las tormentas de polvo en Marte generan fuertes descargas de electricidad estática en la atmósfera que pueden perturbar las antenas de telemetría."
       },
       {
-        label: "🚀 Inyectar agua refrigerante en la plataforma de toberas",
-        costText: "Coste: -4 ⚡ Energía | Juegas: Purificación de Agua (🚀 MAV 3/3, +26 💧 Agua, +16 ⚡ Energía)",
+        label: " Inyectar agua refrigerante en la plataforma de toberas",
+        costText: "Coste: -4 Energia [PWR] | Juegas: Purificación de Agua (Cohete MAV 3/3, +26 Agua [H2O], +16 Energia [PWR])",
         cost: { energy: -4 },
         minigame: "MinigameWaterFilter",
         minigameTitle: "Refrigeración Acústica de Lanzamiento",
@@ -441,7 +447,7 @@ const MISSION_DAYS = [
     description: "Estás dentro del cohete con ROVI. El radar confirma cielo despejado en órbita alta. ¡Estabiliza los reactores y enciende motores!",
     choices: [
       {
-        label: "🔥 ¡IGNICIÓN DE MOTORES Y DESPEGUE HACIA LA ÓRBITA!",
+        label: " ¡IGNICIÓN DE MOTORES Y DESPEGUE HACIA LA ÓRBITA!",
         costText: "Juegas: Estabilización de Vuelo MOXIE (+25 a todos los recursos para alcanzar la órbita marciana)",
         cost: {},
         minigame: "MinigameMoxie",
