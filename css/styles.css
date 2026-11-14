@@ -1,12 +1,14 @@
+/* css/styles.css — Estilos profesionales inspirados en la estética aeroespacial de la NASA */
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
 }
 
 body {
-  background-color: #0e121b;
+  background: radial-gradient(circle at top center, #172033, #090d16 75%);
   color: #f8fafc;
   overflow: hidden;
   height: 100vh;
@@ -18,84 +20,146 @@ body {
   display: none !important;
 }
 
-/* PANTALLA DE INICIO */
+/* ==========================================================================
+   PANTALLAS MODALES SUPERPUESTAS (OVERLAYS)
+   ========================================================================== */
 .overlay-screen {
   position: fixed;
   inset: 0;
-  background: radial-gradient(circle at center, rgba(22, 27, 40, 0.92), #090c12);
+  background: rgba(9, 13, 22, 0.88);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  z-index: 200;
+  animation: fadeIn 0.25s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 .modal-card {
-  background: #161B28;
-  border: 2px solid #F7E396;
-  border-radius: 16px;
-  padding: 32px;
-  max-width: 580px;
+  background: #141c2c;
+  border: 2px solid #38bdf8;
+  border-radius: 20px;
+  padding: 32px 36px;
+  max-width: 620px;
+  width: 90%;
   text-align: center;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(56, 189, 248, 0.2);
 }
 
 .badge-nasa {
-  background: rgba(247, 227, 150, 0.15);
-  color: #F7E396;
-  padding: 6px 14px;
+  display: inline-block;
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  padding: 6px 16px;
   border-radius: 99px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 1px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  margin-bottom: 12px;
 }
 
 .start-card h1 {
-  font-size: 2.3rem;
-  margin: 16px 0 12px;
+  font-size: 2.4rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+  margin: 6px 0 4px;
   color: #F7E396;
+  text-shadow: 0 0 20px rgba(247, 227, 150, 0.3);
+}
+
+.subtitle-text {
+  font-size: 0.88rem;
+  color: #38bdf8;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
 }
 
 .start-card p {
   line-height: 1.6;
   color: #cbd5e1;
+  font-size: 0.96rem;
+  margin-bottom: 20px;
+}
+
+.start-features {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
   margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.feat-badge {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid #334155;
+  padding: 6px 14px;
+  border-radius: 99px;
+  font-size: 0.82rem;
+  color: #94a3b8;
+  font-weight: 600;
 }
 
 .start-buttons {
   display: flex;
-  gap: 12px;
+  gap: 14px;
   justify-content: center;
 }
 
-/* BOTONES */
+/* ==========================================================================
+   BOTONES Y CONTROLES INTERACTIVOS
+   ========================================================================== */
 .btn-primary {
-  background: #F7E396;
-  color: #161B28;
+  background: linear-gradient(135deg, #F7E396 0%, #fbbf24 100%);
+  color: #0f172a;
   border: none;
-  padding: 12px 22px;
-  border-radius: 10px;
+  padding: 12px 24px;
+  border-radius: 12px;
   font-weight: 800;
-  font-size: 0.95rem;
+  font-size: 0.98rem;
   cursor: pointer;
-  transition: transform 0.15s, background 0.2s;
+  box-shadow: 0 4px 15px rgba(251, 191, 36, 0.35);
+  transition: all 0.2s ease;
 }
 
 .btn-primary:hover {
-  background: #fde047;
+  background: linear-gradient(135deg, #fde047 0%, #f59e0b 100%);
   transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(251, 191, 36, 0.5);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
 }
 
 .btn-secondary {
-  background: transparent;
-  color: #94a3b8;
+  background: rgba(30, 41, 59, 0.8);
+  color: #cbd5e1;
   border: 1px solid #475569;
-  padding: 12px 18px;
-  border-radius: 10px;
+  padding: 12px 20px;
+  border-radius: 12px;
   font-weight: 600;
+  font-size: 0.92rem;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-/* BARRA SUPERIOR HUD */
+.btn-secondary:hover {
+  background: #334155;
+  color: #ffffff;
+  border-color: #64748b;
+}
+
+/* ==========================================================================
+   BARRA SUPERIOR DE TELEMETRÍA (HUD)
+   ========================================================================== */
 #game-wrapper {
   display: flex;
   flex-direction: column;
@@ -103,103 +167,231 @@ body {
 }
 
 #hud-bar {
-  background: #161B28;
-  border-bottom: 2px solid #263044;
-  padding: 10px 20px;
+  background: rgba(18, 25, 39, 0.95);
+  border-bottom: 2px solid #23314a;
+  padding: 8px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  z-index: 50;
 }
 
 .sol-badge {
-  background: #20283a;
-  border: 1px solid #F7E396;
-  padding: 8px 16px;
+  background: #141c2c;
+  border: 1.5px solid #F7E396;
+  padding: 6px 14px;
   border-radius: 10px;
   text-align: center;
-  min-width: 130px;
+  min-width: 140px;
+  box-shadow: 0 0 12px rgba(247, 227, 150, 0.15);
 }
 
 .sol-label {
   display: block;
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   color: #F7E396;
-  letter-spacing: 1px;
+  letter-spacing: 1.2px;
+  font-weight: 800;
 }
 
 #sol-counter {
-  font-size: 1.15rem;
+  font-size: 1.18rem;
+  font-weight: 900;
   color: #ffffff;
+}
+
+.sol-phase-badge {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #38bdf8;
+  letter-spacing: 0.8px;
+  margin-top: 2px;
 }
 
 .resources-container {
   display: flex;
   flex: 1;
-  gap: 16px;
-  max-width: 760px;
+  gap: 12px;
+  max-width: 740px;
 }
 
 .res-box {
   flex: 1;
-  background: #1e2536;
+  background: #192234;
   padding: 8px 12px;
   border-radius: 10px;
+  border: 1.5px solid #283750;
+  transition: all 0.25s ease;
+}
+
+.box-warning-pulse {
+  animation: criticalPulse 1.4s infinite;
+}
+
+@keyframes criticalPulse {
+  0%, 100% {
+    border-color: #fb7185;
+    box-shadow: 0 0 10px rgba(251, 113, 133, 0.4);
+  }
+  50% {
+    border-color: #f43f5e;
+    box-shadow: 0 0 20px rgba(244, 63, 94, 0.8);
+  }
 }
 
 .res-header {
   display: flex;
   justify-content: space-between;
   font-size: 0.82rem;
-  font-weight: 700;
-  margin-bottom: 6px;
+  font-weight: 800;
+  margin-bottom: 5px;
+  letter-spacing: 0.5px;
 }
 
 .progress-bg {
   width: 100%;
   height: 10px;
-  background: #0f141f;
+  background: #090d16;
   border-radius: 99px;
   overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .progress-fill {
   height: 100%;
   width: 50%;
-  transition: width 0.35s ease;
+  border-radius: 99px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.water-fill { background: #38bdf8; }
-.oxygen-fill { background: #4ade80; }
-.energy-fill { background: #facc15; }
-.food-fill { background: #fb7185; }
+.water-fill { background: linear-gradient(90deg, #0284c7, #38bdf8); }
+.oxygen-fill { background: linear-gradient(90deg, #16a34a, #4ade80); }
+.energy-fill { background: linear-gradient(90deg, #d97706, #facc15); }
+.food-fill { background: linear-gradient(90deg, #e11d48, #fb7185); }
+
+.bar-critical {
+  background: #f43f5e !important;
+}
 
 .status-badges {
   display: flex;
-  gap: 12px;
-  font-size: 0.88rem;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.86rem;
 }
 
 .mini-status {
-  background: #1e2536;
-  padding: 8px 12px;
+  background: #192234;
+  padding: 6px 12px;
   border-radius: 8px;
   border: 1px solid #334155;
+  font-weight: 700;
 }
 
-/* ZONA DEL ESCENARIO Y TARJETAS */
+.mav-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mav-steps {
+  font-size: 0.78rem;
+  letter-spacing: 2px;
+}
+
+.btn-sound {
+  background: #192234;
+  color: #f8fafc;
+  border: 1px solid #334155;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-sound:hover {
+  background: #283750;
+}
+
+.btn-pedia {
+  background: #0284c7;
+  color: #ffffff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-pedia:hover {
+  background: #38bdf8;
+  color: #0f172a;
+  transform: scale(1.04);
+}
+
+/* ==========================================================================
+   ESCENARIO Y ZONA CENTRAL
+   ========================================================================== */
 #stage-area {
   position: relative;
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #111520;
+  background: #090d16;
 }
 
 #phaser-container canvas {
-  border-radius: 12px;
+  border-radius: 14px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7);
+  border: 1px solid #23314a;
+}
+
+/* ==========================================================================
+   BURBUJA DEL ASISTENTE ROVI (CONSEJOS DINÁMICOS)
+   ========================================================================== */
+.rovi-bubble {
+  position: absolute;
+  top: 18px;
+  right: 28px;
+  width: 380px;
+  background: rgba(20, 28, 44, 0.94);
+  border: 2px solid #F7E396;
+  border-radius: 14px;
+  padding: 12px 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  z-index: 40;
+  animation: slideInDown 0.3s ease-out;
+}
+
+@keyframes slideInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.rovi-bubble-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: #F7E396;
+  margin-bottom: 6px;
+}
+
+.rovi-avatar {
+  font-size: 1.2rem;
+}
+
+#rovi-msg {
+  font-size: 0.86rem;
+  line-height: 1.4;
+  color: #cbd5e1;
 }
 
 /* COMUNICACIÓN CON TIERRA */
@@ -207,18 +399,19 @@ body {
   position: absolute;
   bottom: 20px;
   left: 20px;
-  width: 340px;
-  background: rgba(22, 27, 40, 0.94);
+  width: 330px;
+  background: rgba(20, 28, 44, 0.94);
   border-left: 4px solid #38bdf8;
   padding: 12px 16px;
-  border-radius: 10px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+  z-index: 40;
 }
 
 .comm-header {
   display: flex;
   justify-content: space-between;
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   font-weight: 800;
   color: #38bdf8;
   margin-bottom: 6px;
@@ -231,41 +424,52 @@ body {
 }
 
 #comm-text {
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   color: #e2e8f0;
   line-height: 1.4;
 }
 
-/* TARJETA DE DECISIÓN Y RESULTADOS */
+/* ==========================================================================
+   TARJETAS DE DECISIÓN Y RESULTADOS
+   ========================================================================== */
 .decision-card {
   position: absolute;
   right: 28px;
   top: 50%;
   transform: translateY(-50%);
-  width: 420px;
-  background: rgba(22, 27, 40, 0.96);
-  border: 2px solid #F7E396;
-  border-radius: 16px;
-  padding: 22px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75);
+  width: 440px;
+  background: rgba(18, 25, 39, 0.97);
+  border: 2px solid #38bdf8;
+  border-radius: 18px;
+  padding: 22px 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), 0 0 25px rgba(56, 189, 248, 0.15);
+  z-index: 45;
+  animation: slideInRight 0.25s ease-out;
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translate(15px, -50%); }
+  to { opacity: 1; transform: translate(0, -50%); }
 }
 
 .phase-tag {
+  display: inline-block;
   font-size: 0.72rem;
   font-weight: 800;
-  color: #F7E396;
+  color: #38bdf8;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 .decision-card h2 {
   margin: 6px 0 10px;
-  font-size: 1.35rem;
+  font-size: 1.3rem;
   color: #ffffff;
+  line-height: 1.3;
 }
 
 .decision-card p {
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   color: #cbd5e1;
   line-height: 1.5;
   margin-bottom: 16px;
@@ -278,19 +482,21 @@ body {
 }
 
 .choice-btn {
-  background: #232b3e;
+  background: #192234;
   color: #f8fafc;
-  border: 1px solid #475569;
+  border: 1.5px solid #334155;
   padding: 12px 14px;
-  border-radius: 10px;
+  border-radius: 12px;
   text-align: left;
   cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
+  transition: all 0.2s ease;
 }
 
 .choice-btn:hover {
-  background: #2d3850;
+  background: #24324a;
   border-color: #F7E396;
+  transform: translateX(4px);
+  box-shadow: 0 4px 15px rgba(247, 227, 150, 0.2);
 }
 
 .choice-cost {
@@ -301,48 +507,127 @@ body {
   font-weight: 700;
 }
 
-.nasa-box {
-  background: rgba(56, 189, 248, 0.12);
-  border: 1px solid #38bdf8;
-  padding: 12px;
-  border-radius: 10px;
-  margin-bottom: 16px;
+.stars-header {
+  font-size: 1.5rem;
+  letter-spacing: 3px;
+  margin-bottom: 6px;
+}
+
+.resources-breakdown-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.resource-gain-pill {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border: 1px solid #22c55e;
+  padding: 5px 12px;
+  border-radius: 99px;
   font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.nasa-box {
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  padding: 12px 14px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  font-size: 0.84rem;
+  text-align: left;
 }
 
 .nasa-box strong {
   color: #38bdf8;
   display: block;
   margin-bottom: 4px;
+  font-size: 0.8rem;
 }
 
-/* BOTÓN Y MODAL DE NASA PEDIA */
-.btn-pedia {
-  background: #38bdf8;
-  color: #0f172a;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: transform 0.15s;
-}
-
-.btn-pedia:hover {
-  transform: scale(1.05);
-}
-
-.pedia-card {
-  max-width: 780px;
+/* ==========================================================================
+   BRIEFING MODAL PREVIO A MINIJUEGOS
+   ========================================================================== */
+.brief-card {
+  max-width: 580px;
   text-align: left;
+}
+
+.brief-card h2 {
+  font-size: 1.5rem;
+  color: #F7E396;
+  margin-bottom: 8px;
+}
+
+.brief-objective {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #e2e8f0;
+  margin-bottom: 16px;
+}
+
+.brief-controls-box {
+  background: #192234;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.brief-controls-box h3 {
+  font-size: 0.85rem;
+  color: #38bdf8;
+  margin-bottom: 4px;
+}
+
+.brief-controls-box p {
+  font-size: 0.9rem;
+  color: #cbd5e1;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.brief-rewards-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.reward-pill {
+  font-size: 0.84rem;
+  color: #cbd5e1;
+}
+
+.reward-pill .stars {
+  font-weight: 800;
+  margin-right: 4px;
+}
+
+.brief-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* ==========================================================================
+   MODAL DE NASA PEDIA
+   ========================================================================== */
+.pedia-card {
+  max-width: 820px;
+  text-align: left;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .pedia-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 18px;
-  border-bottom: 1px solid #334155;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #23314a;
   padding-bottom: 10px;
 }
 
@@ -358,54 +643,397 @@ body {
 }
 
 .pedia-item {
-  background: #1e2536;
-  border: 1px solid #334155;
+  background: #192234;
+  border: 1px solid #283750;
   padding: 14px;
-  border-radius: 10px;
+  border-radius: 12px;
 }
 
 .pedia-item h3 {
   color: #38bdf8;
-  font-size: 1rem;
-  margin-bottom: 8px;
+  font-size: 0.98rem;
+  margin-bottom: 6px;
 }
 
 .pedia-item p {
-  font-size: 0.82rem;
+  font-size: 0.83rem;
   color: #cbd5e1;
   margin-bottom: 6px;
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
-/* BANNER DE EVENTO ALEATORIO AL AMANECER */
+/* ==========================================================================
+   EVENTOS ALEATORIOS Y DELTAS FLOTANTES
+   ========================================================================== */
 .event-toast {
   position: absolute;
   top: 18px;
   left: 20px;
-  background: rgba(247, 227, 150, 0.96);
-  color: #161B28;
+  background: linear-gradient(135deg, #F7E396 0%, #facc15 100%);
+  color: #0f172a;
   padding: 10px 18px;
-  border-radius: 10px;
+  border-radius: 12px;
   font-weight: 800;
-  font-size: 0.9rem;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
-  z-index: 30;
+  font-size: 0.88rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+  z-index: 35;
+  animation: bounceIn 0.3s ease-out;
 }
 
-/* ILUMINACIÓN DE RECURSOS AL PASAR EL RATÓN POR UNA DECISIÓN */
-.res-box {
-  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
-  border: 2px solid transparent;
+@keyframes bounceIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
 }
 
+/* Indicadores flotantes de números (+25, -4) */
+.floating-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+}
+
+.floating-delta {
+  position: absolute;
+  font-size: 1.15rem;
+  font-weight: 900;
+  padding: 4px 10px;
+  border-radius: 99px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  animation: floatUpAndFade 1.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.floating-delta.gain {
+  background: #22c55e;
+  color: #0f172a;
+  border: 1px solid #86efac;
+}
+
+.floating-delta.cost {
+  background: #f43f5e;
+  color: #ffffff;
+  border: 1px solid #fda4af;
+}
+
+@keyframes floatUpAndFade {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.85);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(-8px) scale(1.1);
+  }
+  75% {
+    opacity: 1;
+    transform: translateY(-32px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-48px) scale(0.9);
+  }
+}
+
+/* Efectos de iluminar barras */
 .res-highlight-cost {
   border-color: #fb7185 !important;
-  box-shadow: 0 0 12px rgba(251, 113, 133, 0.45);
+  box-shadow: 0 0 15px rgba(251, 113, 133, 0.5);
   transform: translateY(-2px);
 }
 
 .res-highlight-gain {
   border-color: #4ade80 !important;
-  box-shadow: 0 0 12px rgba(74, 222, 128, 0.45);
+  box-shadow: 0 0 15px rgba(74, 222, 128, 0.5);
   transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   BOTONES DE MODO Y DIARIO EN EL HUD
+   ========================================================================== */
+.btn-mode-toggle {
+  background: #1e293b;
+  color: #38bdf8;
+  border: 1.5px solid #38bdf8;
+  padding: 7px 14px;
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
+}
+
+.btn-mode-toggle:hover {
+  background: #38bdf8;
+  color: #0f172a;
+  transform: translateY(-2px);
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.4);
+}
+
+.btn-mode-toggle.active-3d {
+  background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+  color: #ffffff;
+  border-color: #7dd3fc;
+}
+
+.btn-diary {
+  background: #192234;
+  color: #facc15;
+  border: 1px solid #eab308;
+  padding: 7px 12px;
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-diary:hover {
+  background: #facc15;
+  color: #0f172a;
+  transform: translateY(-2px);
+}
+
+.btn-3d-glow {
+  background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 20px rgba(56, 189, 248, 0.45) !important;
+}
+
+/* ==========================================================================
+   PROTOTIPO 3D THREE.JS Y OVERLAY DE CONTROLES
+   ========================================================================== */
+#threejs-container {
+  width: 900px;
+  height: 500px;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7);
+  border: 1px solid #38bdf8;
+  position: relative;
+}
+
+#threejs-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+.hud-3d-bar {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 45;
+  pointer-events: none;
+}
+
+.controls-guide {
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(6px);
+  border: 1px solid #334155;
+  padding: 6px 16px;
+  border-radius: 99px;
+  font-size: 0.78rem;
+  color: #94a3b8;
+  display: flex;
+  gap: 14px;
+}
+
+.controls-guide strong {
+  color: #f8fafc;
+}
+
+.station-prompt-box {
+  background: rgba(20, 28, 44, 0.95);
+  border: 2px solid #F7E396;
+  border-radius: 14px;
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  pointer-events: auto;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7), 0 0 20px rgba(247, 227, 150, 0.35);
+  animation: bouncePrompt 1.6s infinite ease-in-out;
+}
+
+@keyframes bouncePrompt {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+#station-prompt-text {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #F7E396;
+}
+
+.btn-mini {
+  padding: 6px 14px !important;
+  font-size: 0.8rem !important;
+}
+
+/* ==========================================================================
+   POPUP DE PÍLDORA EDUCATIVA (DISCOVERY CARD)
+   ========================================================================== */
+.discovery-pop-card {
+  max-width: 540px;
+  text-align: left;
+  border-color: #F7E396;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(247, 227, 150, 0.3);
+  animation: slideUpScale 0.3s ease-out;
+}
+
+@keyframes slideUpScale {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.disc-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.disc-large-icon {
+  font-size: 2.8rem;
+}
+
+.disc-badge {
+  display: inline-block;
+  background: rgba(247, 227, 150, 0.15);
+  color: #F7E396;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 99px;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.disc-header h3 {
+  font-size: 1.25rem;
+  color: #ffffff;
+  line-height: 1.3;
+}
+
+.disc-body-text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 14px;
+  border-radius: 12px;
+  border-left: 3px solid #38bdf8;
+  margin-bottom: 20px;
+}
+
+.disc-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ==========================================================================
+   DIARIO DE EXPLORACIÓN / ENCICLOPEDIA ESPACIAL
+   ========================================================================== */
+.diary-modal-card {
+  max-width: 860px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.diary-subtitle {
+  font-size: 0.85rem;
+  color: #38bdf8;
+  margin-top: 4px;
+}
+
+.diary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+  overflow-y: auto;
+  padding-right: 6px;
+  margin-top: 14px;
+}
+
+.diary-card {
+  background: #192234;
+  border: 1px solid #283750;
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+}
+
+.diary-card.unlocked {
+  border-color: #38bdf8;
+  background: #162238;
+}
+
+.diary-card.unlocked:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.2);
+}
+
+.diary-card.locked {
+  opacity: 0.65;
+  border-style: dashed;
+}
+
+.diary-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.diary-icon {
+  font-size: 1.6rem;
+}
+
+.diary-cat {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #F7E396;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.diary-card h4 {
+  font-size: 0.95rem;
+  color: #ffffff;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.diary-card p {
+  font-size: 0.82rem;
+  color: #cbd5e1;
+  line-height: 1.45;
+  flex: 1;
+  margin-bottom: 10px;
+}
+
+.locked-hint {
+  font-style: italic;
+  color: #64748b !important;
+}
+
+.diary-status-tag {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #4ade80;
+}
+
+.locked-tag {
+  color: #94a3b8 !important;
 }

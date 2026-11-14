@@ -1,0 +1,713 @@
+// js/scene3d.js — Prototipo 3D Interactivo de Exploración en Marte (Three.js)
+// Reto NASA Space Apps Challenge 2026: Build a Junior Astronaut Mission Trainer
+
+const Scene3D = {
+  container: null,
+  scene: null,
+  camera: null,
+  renderer: null,
+  clock: null,
+  active: false,
+  animId: null,
+
+  // Entidades del mundo 3D
+  player: null,
+  leftLeg: null,
+  rightLeg: null,
+  playerSpeed: 14,
+  keys: {},
+
+  // Cámara en tercera persona
+  cameraOffset: { x: 0, y: 7, z: 12 },
+  cameraAngle: 0,
+  isMouseDown: false,
+  prevMouseX: 0,
+
+  // Estaciones interactivas
+  stations: [],
+  activePromptStation: null,
+
+  init(containerId = "threejs-container") {
+    this.container = document.getElementById(containerId);
+    if (!this.container) {
+      console.error("Scene3D: Container #" + containerId + " not found!");
+      return;
+    }
+
+    if (typeof THREE === "undefined") {
+      console.error("Scene3D: THREE is not defined! Check three.js script tag.");
+      return;
+    }
+
+    // Asegurar que el contenedor sea visible para calcular dimensiones
+    this.container.classList.remove("hidden");
+
+    this.clock = new THREE.Clock();
+
+    // 1. Escena y atmósfera marciana
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(0xb84b2e); // Color cielo/horizonte marciano
+    this.scene.fog = new THREE.Fog(0xb84b2e, 25, 220); // Niebla suave sin tapar lo cercano
+
+    // 2. Dimensiones robustas garantizadas (mínimo 900x500)
+    const width = Math.max(900, this.container.clientWidth || 900);
+    const height = Math.max(500, this.container.clientHeight || 500);
+
+    // 3. Cámara en tercera persona
+    this.camera = new THREE.PerspectiveCamera(55, width / height, 0.5, 350);
+    // Posicionar la cámara inicialmente en las coordenadas del jugador para evitar (0,0,0)
+    this.camera.position.set(0, 7, 26);
+    this.camera.lookAt(0, 1.6, 14);
+
+    // 4. Renderizador WebGL
+    try {
+      this.renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: false,
+        powerPreference: "high-performance"
+      });
+      this.renderer.setSize(width, height, false);
+      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      this.renderer.shadowMap.enabled = true;
+      this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+      // Limpiar contenedor y añadir canvas
+      this.container.innerHTML = "";
+      this.container.appendChild(this.renderer.domElement);
+    } catch (err) {
+      console.error("Scene3D: WebGLRenderer creation failed", err);
+      return;
+    }
+
+    // 5. Iluminación ambiental y solar realista de Marte
+    // Luz hemisférica: cielo cálido anaranjado y rebote de suelo terracota
+    const hemiLight = new THREE.HemisphereLight(0xffeedd, 0x8a3822, 0.85);
+    this.scene.add(hemiLight);
+
+    // Luz ambiental adicional
+    const ambientLight = new THREE.AmbientLight(0xffeedd, 0.5);
+    this.scene.add(ambientLight);
+
+    // Sol marciano direccional
+    const sunLight = new THREE.DirectionalLight(0xfff5dd, 1.3);
+    sunLight.position.set(40, 55, -30);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width = 1024;
+    sunLight.shadow.mapSize.height = 1024;
+    sunLight.shadow.camera.near = 0.5;
+    sunLight.shadow.camera.far = 160;
+    const d = 45;
+    sunLight.shadow.camera.left = -d;
+    sunLight.shadow.camera.right = d;
+    sunLight.shadow.camera.top = d;
+    sunLight.shadow.camera.bottom = -d;
+    this.scene.add(sunLight);
+
+    // 6. Construcción del entorno marciano
+    this.buildMartianLandscape();
+    this.buildBaseOutpost();
+    this.buildPlayer();
+
+    // 7. Event listeners de entrada
+    this.setupInputs();
+
+    window.addEventListener("resize", () => this.onWindowResize());
+
+    // Renderizado inmediato del primer frame
+    this.renderOnce();
+    console.log("🪐 Scene3D: Inicializado con éxito. Resolución:", width, "x", height);
+  },
+
+  buildMartianLandscape() {
+    // Suelo marciano con relieve suave
+    const groundGeo = new THREE.PlaneGeometry(260, 260, 48, 48);
+    groundGeo.rotateX(-Math.PI / 2);
+
+    const pos = groundGeo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i);
+      const z = pos.getZ(i);
+      const distFromCenter = Math.sqrt(x * x + z * z);
+      if (distFromCenter > 20) {
+        const h = Math.sin(x * 0.08) * Math.cos(z * 0.08) * 1.8 + Math.sin(x * 0.03 + z * 0.03) * 3.2;
+        pos.setY(i, h);
+      } else {
+        pos.setY(i, 0);
+      }
+    }
+    groundGeo.computeVertexNormals();
+
+    const groundMat = new THREE.MeshStandardMaterial({
+      color: 0xc85532,
+      roughness: 0.88,
+      metalness: 0.05
+    });
+
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.receiveShadow = true;
+    this.scene.add(ground);
+
+    // Rocas y bloques basálticos marcianos
+    const rockGeo = new THREE.DodecahedronGeometry(1, 1);
+    const rockMat = new THREE.MeshStandardMaterial({ color: 0x8a3822, roughness: 0.9 });
+
+    for (let i = 0; i < 50; i++) {
+      const rock = new THREE.Mesh(rockGeo, rockMat);
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 20 + Math.random() * 85;
+      const rx = Math.cos(angle) * radius;
+      const rz = Math.sin(angle) * radius;
+      const scale = 0.6 + Math.random() * 2.2;
+      rock.scale.set(scale, scale * 0.7, scale);
+      rock.position.set(rx, scale * 0.35, rz);
+      rock.rotation.set(Math.random(), Math.random(), Math.random());
+      rock.castShadow = true;
+      rock.receiveShadow = true;
+      this.scene.add(rock);
+    }
+
+    // Sol marciano en el cielo
+    const sunMarkerGeo = new THREE.SphereGeometry(3.5, 16, 16);
+    const sunMarkerMat = new THREE.MeshBasicMaterial({ color: 0xfff0aa });
+    const sunMarker = new THREE.Mesh(sunMarkerGeo, sunMarkerMat);
+    sunMarker.position.set(80, 75, -80);
+    this.scene.add(sunMarker);
+  },
+
+  buildBaseOutpost() {
+    this.stations = [];
+
+    // 1. Cúpula Central del Hábitat (Outpost Beta)
+    const habGeo = new THREE.SphereGeometry(7, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+    const habMat = new THREE.MeshStandardMaterial({
+      color: 0xedf2f7,
+      roughness: 0.35,
+      metalness: 0.2
+    });
+    const habDome = new THREE.Mesh(habGeo, habMat);
+    habDome.position.set(0, 0, 0);
+    habDome.castShadow = true;
+    habDome.receiveShadow = true;
+    this.scene.add(habDome);
+
+    // Anillo tecnológico azul en la base de la cúpula
+    const ringGeo = new THREE.TorusGeometry(7.1, 0.25, 12, 48);
+    ringGeo.rotateX(Math.PI / 2);
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.position.set(0, 0.4, 0);
+    this.scene.add(ring);
+
+    // Esclusa de entrada (Airlock)
+    const airlockGeo = new THREE.BoxGeometry(2.8, 3.2, 3);
+    const airlockMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.4 });
+    const airlock = new THREE.Mesh(airlockGeo, airlockMat);
+    airlock.position.set(0, 1.6, 7);
+    airlock.castShadow = true;
+    this.scene.add(airlock);
+
+    // Antena parabólica sobre el hábitat
+    const dishGeo = new THREE.ConeGeometry(1.6, 0.8, 16, 1, true);
+    dishGeo.rotateX(-Math.PI / 3);
+    const dishMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, metalness: 0.5 });
+    const dish = new THREE.Mesh(dishGeo, dishMat);
+    dish.position.set(0, 7.8, 0);
+    this.scene.add(dish);
+
+    // 2. Invernadero Biodomo Hidropónico (Cúpula translúcida verdosa universal)
+    const bioDomeGeo = new THREE.SphereGeometry(4.2, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+    const bioDomeMat = new THREE.MeshStandardMaterial({
+      color: 0x4ade80,
+      transparent: true,
+      opacity: 0.65,
+      roughness: 0.2,
+      metalness: 0.1
+    });
+    const bioDome = new THREE.Mesh(bioDomeGeo, bioDomeMat);
+    bioDome.position.set(-16, 0, 5);
+    bioDome.castShadow = true;
+    this.scene.add(bioDome);
+
+    // Luz interior LED rosada del cultivo
+    const growLight = new THREE.PointLight(0xff77aa, 2.0, 14);
+    growLight.position.set(-16, 2.5, 5);
+    this.scene.add(growLight);
+
+    // 3. Granja de Paneles Solares
+    for (let p = 0; p < 3; p++) {
+      const panelGroup = new THREE.Group();
+      const mastGeo = new THREE.CylinderGeometry(0.15, 0.15, 2.4, 8);
+      const mastMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8 });
+      const mast = new THREE.Mesh(mastGeo, mastMat);
+      mast.position.y = 1.2;
+      panelGroup.add(mast);
+
+      const panelGeo = new THREE.BoxGeometry(4.2, 0.15, 2.6);
+      panelGeo.rotateX(-Math.PI / 5);
+      const panelMat = new THREE.MeshStandardMaterial({ color: 0x172554, roughness: 0.2, metalness: 0.7 });
+      const panelPlate = new THREE.Mesh(panelGeo, panelMat);
+      panelPlate.position.y = 2.4;
+      panelPlate.castShadow = true;
+      panelGroup.add(panelPlate);
+
+      panelGroup.position.set(16, 0, -6 + p * 6);
+      this.scene.add(panelGroup);
+    }
+
+    // 4. Torre de Perforación de Hielo (Glaciar Arcadia)
+    const rigGroup = new THREE.Group();
+    const towerGeo = new THREE.CylinderGeometry(0.3, 1.4, 7, 4);
+    const towerMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.6 });
+    const tower = new THREE.Mesh(towerGeo, towerMat);
+    tower.position.y = 3.5;
+    tower.castShadow = true;
+    rigGroup.add(tower);
+
+    // Cristal de hielo brillante en la base de la perforación
+    const iceGeo = new THREE.OctahedronGeometry(1.2, 0);
+    const iceMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+    const ice = new THREE.Mesh(iceGeo, iceMat);
+    ice.position.y = 0.8;
+    rigGroup.add(ice);
+
+    const iceLight = new THREE.PointLight(0x38bdf8, 2.5, 12);
+    iceLight.position.set(0, 1.2, 0);
+    rigGroup.add(iceLight);
+
+    rigGroup.position.set(-15, 0, -14);
+    this.scene.add(rigGroup);
+
+    // 5. Cohete MAV (Vehículo de Ascenso a Marte)
+    const mavGroup = new THREE.Group();
+    const rocketGeo = new THREE.CylinderGeometry(1.6, 1.8, 12, 24);
+    const rocketMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, metalness: 0.3, roughness: 0.3 });
+    const rocket = new THREE.Mesh(rocketGeo, rocketMat);
+    rocket.position.y = 6;
+    rocket.castShadow = true;
+    mavGroup.add(rocket);
+
+    const coneGeo = new THREE.ConeGeometry(1.6, 3.4, 24);
+    const coneMat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.4 });
+    const cone = new THREE.Mesh(coneGeo, coneMat);
+    cone.position.y = 13.7;
+    cone.castShadow = true;
+    mavGroup.add(cone);
+
+    for (let f = 0; f < 3; f++) {
+      const finGeo = new THREE.BoxGeometry(0.18, 2.8, 1.6);
+      const finMat = new THREE.MeshStandardMaterial({ color: 0x334155 });
+      const fin = new THREE.Mesh(finGeo, finMat);
+      const finAngle = (f * Math.PI * 2) / 3;
+      fin.position.set(Math.cos(finAngle) * 2.2, 1.5, Math.sin(finAngle) * 2.2);
+      fin.rotation.y = -finAngle;
+      mavGroup.add(fin);
+    }
+
+    mavGroup.position.set(22, 0, 16);
+    this.scene.add(mavGroup);
+
+    // 6. Rover ROVI en 3D
+    const roverGroup = new THREE.Group();
+    const chassisGeo = new THREE.BoxGeometry(2.4, 1, 3.2);
+    const chassisMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.5 });
+    const chassis = new THREE.Mesh(chassisGeo, chassisMat);
+    chassis.position.y = 1.1;
+    chassis.castShadow = true;
+    roverGroup.add(chassis);
+
+    const wheelGeo = new THREE.CylinderGeometry(0.45, 0.45, 0.4, 12);
+    wheelGeo.rotateZ(Math.PI / 2);
+    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 });
+
+    const wheelOffsets = [
+      [-1.3, 0.45, -1.1], [1.3, 0.45, -1.1],
+      [-1.3, 0.45, 0],    [1.3, 0.45, 0],
+      [-1.3, 0.45, 1.1],  [1.3, 0.45, 1.1]
+    ];
+    wheelOffsets.forEach(pos => {
+      const w = new THREE.Mesh(wheelGeo, wheelMat);
+      w.position.set(pos[0], pos[1], pos[2]);
+      roverGroup.add(w);
+    });
+
+    const mastPole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.6), new THREE.MeshStandardMaterial({ color: 0x475569 }));
+    mastPole.position.set(0.6, 2.2, -1);
+    roverGroup.add(mastPole);
+    const cameraHead = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.3, 0.4), new THREE.MeshStandardMaterial({ color: 0x0284c7 }));
+    cameraHead.position.set(0.6, 3, -1);
+    roverGroup.add(cameraHead);
+
+    roverGroup.position.set(7, 0, 11);
+    this.scene.add(roverGroup);
+
+    // Registro de estaciones interactivas con halos luminosos
+    this.registerStation({
+      id: "drill",
+      name: "Perforación Glaciar",
+      actionText: "💧 [E] o Clic: Extraer Hielo Subterráneo",
+      position: new THREE.Vector3(-15, 0, -14),
+      radius: 7.0,
+      color: 0x38bdf8,
+      minigameKey: "MinigameDrill",
+      discoveryId: "water_mars"
+    });
+
+    this.registerStation({
+      id: "solar",
+      name: "Parque Solar",
+      actionText: "⚡ [E] o Clic: Mantenimiento y Conexión Solar",
+      position: new THREE.Vector3(16, 0, 0),
+      radius: 8.0,
+      color: 0xfacc15,
+      minigameKey: "MinigameCircuit",
+      discoveryId: "solar_power"
+    });
+
+    this.registerStation({
+      id: "biodome",
+      name: "Biodomo Hidropónico",
+      actionText: "🌱 [E] o Clic: Cosecha en el Biodomo",
+      position: new THREE.Vector3(-16, 0, 5),
+      radius: 7.5,
+      color: 0x4ade80,
+      minigameKey: "MinigameBiodome",
+      discoveryId: "biodome_osdr"
+    });
+
+    this.registerStation({
+      id: "hab",
+      name: "Laboratorio MOXIE",
+      actionText: "🫧 [E] o Clic: Reactor MOXIE de Oxígeno",
+      position: new THREE.Vector3(0, 0, 8),
+      radius: 6.0,
+      color: 0x38bdf8,
+      minigameKey: "MinigameMoxie",
+      discoveryId: "moxie_oxygen"
+    });
+
+    this.registerStation({
+      id: "rover",
+      name: "Rover ROVI",
+      actionText: "🚙 [E] o Clic: Conducir Rover en Marte",
+      position: new THREE.Vector3(7, 0, 11),
+      radius: 6.0,
+      color: 0xfacc15,
+      minigameKey: "MinigameRoverDrive",
+      discoveryId: "rovers_exploration"
+    });
+
+    this.registerStation({
+      id: "mav",
+      name: "Cohete MAV",
+      actionText: "🚀 [E] o Clic: Blindar y Revisar Cohete MAV",
+      position: new THREE.Vector3(22, 0, 16),
+      radius: 8.0,
+      color: 0xf43f5e,
+      minigameKey: "MinigameShield",
+      discoveryId: "radiation_donki"
+    });
+  },
+
+  registerStation(st) {
+    const ringGeo = new THREE.RingGeometry(st.radius * 0.65, st.radius * 0.72, 32);
+    ringGeo.rotateX(-Math.PI / 2);
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: st.color,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.7
+    });
+    const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+    ringMesh.position.copy(st.position);
+    ringMesh.position.y = 0.08;
+    this.scene.add(ringMesh);
+
+    st.beaconRing = ringMesh;
+    this.stations.push(st);
+  },
+
+  buildPlayer() {
+    this.player = new THREE.Group();
+
+    const suitMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.4 });
+    const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.45, 1.4, 12), suitMat);
+    torso.position.y = 1.4;
+    torso.castShadow = true;
+    this.player.add(torso);
+
+    const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.48, 16, 16), suitMat);
+    helmet.position.y = 2.4;
+    helmet.castShadow = true;
+    this.player.add(helmet);
+
+    const visorGeo = new THREE.SphereGeometry(0.38, 16, 16, 0, Math.PI, 0, Math.PI);
+    visorGeo.rotateY(Math.PI / 2);
+    const visorMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.9, roughness: 0.1 });
+    const visor = new THREE.Mesh(visorGeo, visorMat);
+    visor.position.set(0, 2.4, 0.15);
+    this.player.add(visor);
+
+    const packMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.5 });
+    const pack = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.0, 0.4), packMat);
+    pack.position.set(0, 1.5, -0.45);
+    pack.castShadow = true;
+    this.player.add(pack);
+
+    this.leftLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.22, 1.0), suitMat);
+    this.leftLeg.position.set(-0.28, 0.5, 0);
+    this.leftLeg.castShadow = true;
+    this.player.add(this.leftLeg);
+
+    this.rightLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.22, 1.0), suitMat);
+    this.rightLeg.position.set(0.28, 0.5, 0);
+    this.rightLeg.castShadow = true;
+    this.player.add(this.rightLeg);
+
+    // Posición inicial cerca del hábitat
+    this.player.position.set(0, 0, 14);
+    this.scene.add(this.player);
+  },
+
+  setupInputs() {
+    window.addEventListener("keydown", (e) => {
+      this.keys[e.code] = true;
+      if (e.code === "KeyE" && this.active && this.activePromptStation) {
+        this.interactWithStation(this.activePromptStation);
+      }
+    });
+
+    window.addEventListener("keyup", (e) => {
+      this.keys[e.code] = false;
+    });
+
+    const dom = this.renderer ? this.renderer.domElement : window;
+    dom.addEventListener("mousedown", (e) => {
+      this.isMouseDown = true;
+      this.prevMouseX = e.clientX;
+    });
+
+    window.addEventListener("mouseup", () => {
+      this.isMouseDown = false;
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (!this.isMouseDown || !this.active) return;
+      const deltaX = e.clientX - this.prevMouseX;
+      this.cameraAngle -= deltaX * 0.005;
+      this.prevMouseX = e.clientX;
+    });
+
+    const promptBtn = document.getElementById("btn-3d-interact");
+    if (promptBtn) {
+      promptBtn.onclick = () => {
+        if (this.activePromptStation) {
+          this.interactWithStation(this.activePromptStation);
+        }
+      };
+    }
+  },
+
+  interactWithStation(station) {
+    if (!station) return;
+
+    if (typeof SoundFx !== "undefined") SoundFx.playClick();
+
+    if (station.discoveryId && typeof DiscoverySystem !== "undefined") {
+      DiscoverySystem.unlock(station.discoveryId, true);
+    }
+
+    const mockChoice = {
+      label: station.name,
+      minigame: station.minigameKey,
+      minigameTitle: station.name,
+      cost: {},
+      successReward: {
+        water: station.id === "drill" ? 25 : 0,
+        energy: station.id === "solar" ? 25 : 0,
+        food: station.id === "biodome" ? 25 : 0,
+        oxygen: station.id === "hab" ? 25 : 0,
+        mav: station.id === "mav" ? 1 : 0
+      },
+      failReward: {
+        water: station.id === "drill" ? 12 : 0,
+        energy: station.id === "solar" ? 12 : 0,
+        food: station.id === "biodome" ? 12 : 0,
+        oxygen: station.id === "hab" ? 12 : 0
+      },
+      nasaFact: `Misión completada con éxito en la estación de ${station.name}. Recursos suministrados al Outpost Beta.`
+    };
+
+    if (typeof showMinigameBriefing === "function") {
+      pendingMinigameChoice = mockChoice;
+      showMinigameBriefing(mockChoice);
+    }
+  },
+
+  renderOnce() {
+    if (!this.renderer || !this.scene || !this.camera) return;
+    this.updateCameraImmediate();
+    this.renderer.render(this.scene, this.camera);
+  },
+
+  updateCameraImmediate() {
+    if (!this.player || !this.camera) return;
+    const targetX = this.player.position.x + Math.sin(this.cameraAngle) * this.cameraOffset.z;
+    const targetZ = this.player.position.z + Math.cos(this.cameraAngle) * this.cameraOffset.z;
+    const targetY = this.player.position.y + this.cameraOffset.y;
+
+    this.camera.position.set(targetX, targetY, targetZ);
+    this.camera.lookAt(this.player.position.x, this.player.position.y + 1.6, this.player.position.z);
+  },
+
+  start() {
+    this.active = true;
+    if (this.container) {
+      this.container.classList.remove("hidden");
+    }
+    const hud3d = document.getElementById("hud-3d-controls");
+    if (hud3d) hud3d.classList.remove("hidden");
+
+    // Reajustar dimensiones inmediatamente
+    this.onWindowResize();
+
+    // Posición inmediata de cámara
+    this.updateCameraImmediate();
+    this.renderOnce();
+
+    if (this.animId) cancelAnimationFrame(this.animId);
+    this.animate();
+  },
+
+  stop() {
+    this.active = false;
+    if (this.animId) {
+      cancelAnimationFrame(this.animId);
+      this.animId = null;
+    }
+    if (this.container) this.container.classList.add("hidden");
+    const hud3d = document.getElementById("hud-3d-controls");
+    if (hud3d) hud3d.classList.add("hidden");
+  },
+
+  onWindowResize() {
+    if (!this.renderer || !this.camera || !this.container) return;
+    const width = Math.max(900, this.container.clientWidth || 900);
+    const height = Math.max(500, this.container.clientHeight || 500);
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(width, height, false);
+  },
+
+  animate() {
+    if (!this.active) return;
+    this.animId = requestAnimationFrame(() => this.animate());
+
+    const delta = Math.min(this.clock.getDelta(), 0.1);
+    const elapsed = this.clock.getElapsedTime();
+
+    this.updatePlayerMovement(delta, elapsed);
+    this.updateCamera();
+    this.checkStationProximity(elapsed);
+
+    this.renderer.render(this.scene, this.camera);
+  },
+
+  updatePlayerMovement(delta, elapsed) {
+    if (!this.player) return;
+
+    let moveX = 0;
+    let moveZ = 0;
+
+    if (this.keys["KeyW"] || this.keys["ArrowUp"]) moveZ -= 1;
+    if (this.keys["KeyS"] || this.keys["ArrowDown"]) moveZ += 1;
+    if (this.keys["KeyA"] || this.keys["ArrowLeft"]) moveX -= 1;
+    if (this.keys["KeyD"] || this.keys["ArrowRight"]) moveX += 1;
+
+    const isMoving = moveX !== 0 || moveZ !== 0;
+
+    if (isMoving) {
+      const len = Math.sqrt(moveX * moveX + moveZ * moveZ);
+      moveX /= len;
+      moveZ /= len;
+
+      const sinA = Math.sin(this.cameraAngle);
+      const cosA = Math.cos(this.cameraAngle);
+
+      const worldX = moveX * cosA - moveZ * sinA;
+      const worldZ = moveX * sinA + moveZ * cosA;
+
+      this.player.position.x += worldX * this.playerSpeed * delta;
+      this.player.position.z += worldZ * this.playerSpeed * delta;
+
+      const distFromCenter = Math.sqrt(this.player.position.x ** 2 + this.player.position.z ** 2);
+      if (distFromCenter > 95) {
+        this.player.position.x = (this.player.position.x / distFromCenter) * 95;
+        this.player.position.z = (this.player.position.z / distFromCenter) * 95;
+      }
+
+      const targetAngle = Math.atan2(worldX, worldZ);
+      this.player.rotation.y = targetAngle;
+
+      if (this.leftLeg && this.rightLeg) {
+        this.leftLeg.rotation.x = Math.sin(elapsed * 10) * 0.45;
+        this.rightLeg.rotation.x = -Math.sin(elapsed * 10) * 0.45;
+      }
+    } else {
+      if (this.leftLeg && this.rightLeg) {
+        this.leftLeg.rotation.x = 0;
+        this.rightLeg.rotation.x = 0;
+      }
+    }
+  },
+
+  updateCamera() {
+    if (!this.player || !this.camera) return;
+
+    const targetX = this.player.position.x + Math.sin(this.cameraAngle) * this.cameraOffset.z;
+    const targetZ = this.player.position.z + Math.cos(this.cameraAngle) * this.cameraOffset.z;
+    const targetY = this.player.position.y + this.cameraOffset.y;
+
+    this.camera.position.x = THREE.MathUtils.lerp(this.camera.position.x, targetX, 0.12);
+    this.camera.position.y = THREE.MathUtils.lerp(this.camera.position.y, targetY, 0.12);
+    this.camera.position.z = THREE.MathUtils.lerp(this.camera.position.z, targetZ, 0.12);
+
+    this.camera.lookAt(this.player.position.x, this.player.position.y + 1.6, this.player.position.z);
+  },
+
+  checkStationProximity(elapsed) {
+    if (!this.player) return;
+
+    let nearest = null;
+    let minDist = Infinity;
+
+    this.stations.forEach(st => {
+      const dist = this.player.position.distanceTo(st.position);
+
+      if (st.beaconRing) {
+        const scalePulse = 1 + Math.sin(elapsed * 3) * 0.06;
+        st.beaconRing.scale.set(scalePulse, scalePulse, scalePulse);
+      }
+
+      if (dist < st.radius && dist < minDist) {
+        minDist = dist;
+        nearest = st;
+      }
+    });
+
+    const promptCard = document.getElementById("station-prompt-card");
+    const promptText = document.getElementById("station-prompt-text");
+
+    if (nearest) {
+      this.activePromptStation = nearest;
+      if (promptCard) promptCard.classList.remove("hidden");
+      if (promptText) promptText.textContent = nearest.actionText;
+    } else {
+      this.activePromptStation = null;
+      if (promptCard) promptCard.classList.add("hidden");
+    }
+  }
+};
+
+if (typeof window !== "undefined") {
+  window.Scene3D = Scene3D;
+}
