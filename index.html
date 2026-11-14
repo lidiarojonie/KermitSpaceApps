@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MARS — LAST CHANCE | NASA Space Apps</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <!-- Cargamos Phaser 3 desde su servidor oficial (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+</head>
+<body>
+
+  <!-- PANTALLA DE INICIO -->
+  <div id="start-screen" class="overlay-screen">
+    <div class="modal-card start-card">
+      <span class="badge-nasa">MISIÓN ARES-VII • ARCADIA PLANITIA</span>
+      <h1>MARS — LAST CHANCE</h1>
+      <p>
+        Tu cápsula ha sufrido un aterrizaje forzoso a 1 km del Vehículo de Ascenso a Marte (MAV).
+        Tienes <strong>15 Soles</strong> para sobrevivir en el refugio Outpost Beta, gestionar el soporte vital
+        y cargar el cohete antes de que llegue la megatormenta de polvo.
+      </p>
+      <div class="start-buttons">
+        <button id="btn-new-game" class="btn-primary">🚀 INICIAR MISIÓN (SOL 1)</button>
+        <button id="btn-Reset-save" class="btn-secondary">🔄 Borrar partida guardada</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD PRINCIPAL DEL JUEGO -->
+  <div id="game-wrapper">
+    <!-- BARRA SUPERIOR DE RECURSOS (HUD) -->
+    <header id="hud-bar">
+      <div class="sol-badge">
+        <span class="sol-label">DÍA MARCIANO</span>
+        <strong id="sol-counter">SOL 1 / 15</strong>
+      </div>
+
+      <div class="resources-container">
+        <div class="res-box" title="Agua potable disponible">
+          <div class="res-header"><span>💧 AGUA</span><span id="val-water">50%</span></div>
+          <div class="progress-bg"><div id="bar-water" class="progress-fill water-fill"></div></div>
+        </div>
+
+        <div class="res-box" title="Oxígeno respirable en el hábitat">
+          <div class="res-header"><span>🫧 OXÍGENO</span><span id="val-oxygen">60%</span></div>
+          <div class="progress-bg"><div id="bar-oxygen" class="progress-fill oxygen-fill"></div></div>
+        </div>
+
+        <div class="res-box" title="Baterías solares y calefacción">
+          <div class="res-header"><span>⚡ ENERGÍA</span><span id="val-energy">50%</span></div>
+          <div class="progress-bg"><div id="bar-energy" class="progress-fill energy-fill"></div></div>
+        </div>
+
+        <div class="res-box" title="Raciones y microgreens hidropónicos">
+          <div class="res-header"><span>🌱 COMIDA</span><span id="val-food">55%</span></div>
+          <div class="progress-bg"><div id="bar-food" class="progress-fill food-fill"></div></div>
+        </div>
+      </div>
+
+      <div class="status-badges">
+        <div class="mini-status">🛡️ Escudo: <strong id="val-shield">80%</strong></div>
+        <div class="mini-status">🚀 Cohete MAV: <strong id="val-mav">0 / 3</strong></div>
+      </div>
+    </header>
+
+    <!-- ZONA CENTRAL: CANVAS DE PHASER 3 + PANELES SUPERPUESTOS -->
+    <main id="stage-area">
+      <!-- Aquí inyecta Phaser 3 el escenario 2D y los minijuegos -->
+      <div id="phaser-container"></div>
+
+      <!-- PANEL DE COMUNICACIÓN CON LA TIERRA -->
+      <aside id="earth-comm" class="comm-panel">
+        <div class="comm-header">
+          <span>📡 HOUSTON CAPCOM</span>
+          <span class="delay-tag">⏱️ RETRASO SEÑAL: 14 MIN</span>
+        </div>
+        <p id="comm-text">Conectando con antena de Espacio Profundo...</p>
+      </aside>
+
+      <!-- TARJETA DE DECISIÓN DEL DÍA -->
+      <section id="decision-panel" class="decision-card hidden">
+        <span id="event-phase" class="phase-tag">FASE 1: EMERGENCY</span>
+        <h2 id="event-title">Cargando evento...</h2>
+        <p id="event-desc">...</p>
+        <div id="choices-container" class="choices-list"></div>
+      </section>
+
+      <!-- TARJETA DE RESULTADO Y CÁPSULA CIENTÍFICA NASA -->
+      <section id="result-panel" class="decision-card hidden">
+        <span class="phase-tag">INFORME DE INGENIERÍA</span>
+        <h2 id="result-title">Resultado de la operación</h2>
+        <p id="result-desc"></p>
+        <div class="nasa-box">
+          <strong>🔬 CIENCIA REAL DE LA NASA:</strong>
+          <p id="nasa-fact"></p>
+        </div>
+        <button id="btn-next-sol" class="btn-primary">🌙 DORMIR Y AVANZAR AL SIGUIENTE SOL (-10 Recursos Vitales)</button>
+      </section>
+    </main>
+  </div>
+
+  <!-- Cargamos nuestros scripts en orden lógico -->
+  <script src="./"></script>
+  <script src="./js/state.js"></script>
+  <script src="./js/mainScene.js"></script>
+  <script src="./js/minigameMoxie.js"></script>
+  <script src="./js/game.js"></script>
+</body>
+</html>
