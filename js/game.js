@@ -1,26 +1,49 @@
-// js/game.js — Controlador principal del ciclo diario y configuración de Phaser 3
+// js/game.js — Controlador principal completo y blindado
 
-const config = {
-  type: Phaser.AUTO,
-  width: 900,
-  height: 500,
-  parent: "phaser-container",
-  scene: [MainScene, MinigameMoxie]
-};
+// 1. Construimos la lista de escenas verificando que existan para evitar bloqueos
+const scenesList = [];
 
-const phaserGame = new Phaser.Game(config);
+if (typeof MainScene !== "undefined") scenesList.push(MainScene);
+if (typeof MinigameMoxie !== "undefined") scenesList.push(MinigameMoxie);
+if (typeof MinigameDrill !== "undefined") scenesList.push(MinigameDrill);
+if (typeof MinigameSolar !== "undefined") scenesList.push(MinigameSolar);
+if (typeof MinigameBiodome !== "undefined") scenesList.push(MinigameBiodome);
+if (typeof MinigameShield !== "undefined") scenesList.push(MinigameShield);
 
-// Referencias a elementos del DOM
+// 2. Inicializamos Phaser 3
+let phaserGame = null;
+if (typeof Phaser !== "undefined") {
+  const config = {
+    type: Phaser.AUTO,
+    width: 900,
+    height: 500,
+    parent: "phaser-container",
+    scene: scenesList
+  };
+  phaserGame = new Phaser.Game(config);
+} else {
+  console.error("Error: Phaser 3 no se ha podido cargar desde el CDN.");
+}
+
+// 3. Referencias a elementos del DOM
 const startScreen = document.getElementById("start-screen");
 const decisionPanel = document.getElementById("decision-panel");
 const resultPanel = document.getElementById("result-panel");
+const btnNewGame = document.getElementById("btn-new-game");
+const btnResetSave = document.getElementById("btn-Reset-save");
+const btnNextSol = document.getElementById("btn-next-sol");
 
-// Carga un Sol en la interfaz
+// 4. Carga un Sol en la interfaz
 function loadCurrentSol() {
+  if (typeof GameState === "undefined" || typeof MISSION_DAYS === "undefined") {
+    alert("Error de carga: Revisa que js/data.js y js/state.js estén guardados y enlazados en index.html.");
+    return;
+  }
+
   GameState.updateHUD();
 
-  // Buscamos los datos del Sol actual (o repetimos plantilla si pasa del Sol 2 en este prototipo)
-  const dayData = MISSION_DAYS.find(d => d.sol === GameState.sol) || MISSION_DAYS[0];
+  // Buscamos los datos del Sol actual (o usamos el último disponible si supera la lista)
+  const dayData = MISSION_DAYS.find(d => d.sol === GameState.sol) || MISSION_DAYS[MISSION_DAYS.length - 1];
 
   document.getElementById("comm-text").textContent = dayData.comm;
   document.getElementById("event-phase").textContent = dayData.phase;
@@ -45,25 +68,31 @@ function loadCurrentSol() {
   decisionPanel.classList.remove("hidden");
 }
 
-// Al pulsar una decisión
+// 5. Al pulsar una opción de decisión
 function handleChoiceSelection(choice) {
-  // 1. Descontamos el coste inmediato de la acción
-  GameState.modifyResources(choice.cost);
+  // Descontamos el coste inmediato de la acción
+  GameState.modifyResources(choice.cost || {});
   decisionPanel.classList.add("hidden");
 
-  // 2. Si tiene minijuego asociado, lo lanzamos en Phaser 3
-  if (choice.minigame) {
+  // Comprobamos si la opción tiene minijuego y si la escena está registrada en Phaser
+  const hasMinigameScene =
+    choice.minigame &&
+    phaserGame &&
+    phaserGame.scene &&
+    phaserGame.scene.getScene(choice.minigame);
+
+  if (hasMinigameScene) {
     phaserGame.scene.pause("MainScene");
     phaserGame.scene.start(choice.minigame, { choice });
   } else {
-    // Si es una decisión directa sin minijuego, mostramos resultado
+    // Si no tiene minijuego (o aún no está cargado minigamesPack.js), resolvemos directamente
     window.onMinigameComplete(true, choice);
   }
 }
 
-// Callback global que se ejecuta al terminar el minijuego
+// 6. Callback global que se ejecuta al terminar cualquier minijuego
 window.onMinigameComplete = function (success, choice) {
-  const reward = success ? choice.successReward : choice.failReward;
+  const reward = success ? (choice.successReward || {}) : (choice.failReward || {});
   GameState.modifyResources(reward);
 
   document.getElementById("result-title").textContent = success
@@ -71,43 +100,57 @@ window.onMinigameComplete = function (success, choice) {
     : "⚠️ OPERACIÓN PARCIAL (SISTEMA DE RESERVA)";
 
   document.getElementById("result-desc").textContent = success
-    ? "Has estabilizado el sistema a la perfección y los tanques del refugio han recibido el máximo suministro."
+    ? "Has estabilizado el sistema y los tanques del refugio han recibido el suministro completo."
     : "No alcanzaste el rendimiento óptimo a tiempo, pero ROVI logró rescatar una parte de los recursos.";
 
-  document.getElementById("nasa-fact").textContent = choice.nasaFact;
+  document.getElementById("nasa-fact").textContent = choice.nasaFact || "";
   resultPanel.classList.remove("hidden");
 };
 
-// Botón para dormir y pasar al siguiente Sol
-document.getElementById("btn-next-sol").onclick = () => {
-  GameState.advanceSol();
+// 7. Botón para dormir y pasar al siguiente Sol
+if (btnNextSol) {
+  btnNextSol.onclick = () => {
+    GameState.advanceSol();
 
-  const failureReason = GameState.checkFailure();
-  if (failureReason) {
-    alert(`🛑 MODO HIBERNACIÓN ACTIVADO\n\n${failureReason}\n\nSe reiniciará la simulación en el Sol 1.`);
-    GameState.reset();
+    const failureReason = GameState.checkFailure();
+    if (failureReason) {
+      alert(`🛑 MODO HIBERNACIÓN ACTIVADO\n\n${failureReason}\n\nSe reiniciará la simulación en el Sol 1.`);
+      GameState.reset();
+      loadCurrentSol();
+      return;
+    }
+
+    if (GameState.sol > 15) {
+      if (GameState.mav >= 3) {
+        alert("🏆 ¡MISIÓN CUMPLIDA! Has sobrevivido los 15 Soles y despegado hacia la órbita marciana en el MAV.");
+      } else {
+        alert("⚠️ FIN DEL SOL 15: Has sobrevivido en el hábitat, pero el cohete MAV no completó sus 3 fases de carga antes de la tormenta.");
+      }
+      GameState.reset();
+    }
+
     loadCurrentSol();
-    return;
-  }
+  };
+}
 
-  if (GameState.sol > 15) {
-    alert("🏆 ¡MISIÓN CUMPLIDA! Has sobrevivido los 15 Soles y despegado en el MAV.");
-    GameState.reset();
-  }
+// 8. Botones de la pantalla inicial
+if (btnNewGame) {
+  btnNewGame.onclick = () => {
+    if (typeof GameState !== "undefined") {
+      if (!GameState.load()) {
+        GameState.reset();
+      }
+    }
+    startScreen.classList.add("hidden");
+    loadCurrentSol();
+  };
+}
 
-  loadCurrentSol();
-};
-
-// Botones de la pantalla inicial
-document.getElementById("btn-new-game").onclick = () => {
-  if (!GameState.load()) {
-    GameState.reset();
-  }
-  startScreen.classList.add("hidden");
-  loadCurrentSol();
-};
-
-document.getElementById("btn-Reset-save").onclick = () => {
-  GameState.reset();
-  alert("Partida reiniciada al Sol 1.");
-};
+if (btnResetSave) {
+  btnResetSave.onclick = () => {
+    if (typeof GameState !== "undefined") {
+      GameState.reset();
+      alert("Partida reiniciada al Sol 1.");
+    }
+  };
+}
