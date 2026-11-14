@@ -1047,6 +1047,11 @@ class MinigameRoverDrive extends Phaser.Scene {
     if (this.cursors.down.isDown || this.wasd.down.isDown) moveY += 1;
 
     if (moveX !== 0 || moveY !== 0) {
+      // Normalizar vector de movimiento diagonal para velocidad constante
+      const len = Math.hypot(moveX, moveY);
+      moveX /= len;
+      moveY /= len;
+
       const speed = 0.22 * delta;
       this.rover.x += moveX * speed;
       this.rover.y += moveY * speed;

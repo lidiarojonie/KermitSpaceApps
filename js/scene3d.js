@@ -612,14 +612,24 @@ const Scene3D = {
       this.keys[e.code] = false;
     });
 
-    const dom = this.renderer ? this.renderer.domElement : window;
+    const dom = this.container || (this.renderer ? this.renderer.domElement : window);
     dom.addEventListener("mousedown", (e) => {
       this.isMouseDown = true;
       this.prevMouseX = e.clientX;
+      e.preventDefault();
     });
 
     window.addEventListener("mouseup", () => {
       this.isMouseDown = false;
+    });
+
+    window.addEventListener("dragend", () => {
+      this.isMouseDown = false;
+    });
+
+    window.addEventListener("blur", () => {
+      this.isMouseDown = false;
+      this.keys = {};
     });
 
     window.addEventListener("mousemove", (e) => {
@@ -628,6 +638,25 @@ const Scene3D = {
       this.cameraAngle -= deltaX * 0.005;
       this.prevMouseX = e.clientX;
     });
+
+    // Soporte para pantalla táctil en dispositivos móviles / tabletas
+    dom.addEventListener("touchstart", (e) => {
+      if (e.touches.length > 0) {
+        this.isMouseDown = true;
+        this.prevMouseX = e.touches[0].clientX;
+      }
+    }, { passive: true });
+
+    window.addEventListener("touchend", () => {
+      this.isMouseDown = false;
+    }, { passive: true });
+
+    window.addEventListener("touchmove", (e) => {
+      if (!this.isMouseDown || !this.active || e.touches.length === 0) return;
+      const deltaX = e.touches[0].clientX - this.prevMouseX;
+      this.cameraAngle -= deltaX * 0.005;
+      this.prevMouseX = e.touches[0].clientX;
+    }, { passive: true });
 
     const promptBtn = document.getElementById("btn-3d-interact");
     if (promptBtn) {
@@ -710,6 +739,8 @@ const Scene3D = {
 
   stop() {
     this.active = false;
+    this.isMouseDown = false;
+    this.keys = {};
     if (this.animId) {
       cancelAnimationFrame(this.animId);
       this.animId = null;
@@ -764,8 +795,9 @@ const Scene3D = {
       const sinA = Math.sin(this.cameraAngle);
       const cosA = Math.cos(this.cameraAngle);
 
-      const worldX = moveX * cosA - moveZ * sinA;
-      const worldZ = moveX * sinA + moveZ * cosA;
+      // Vector de movimiento orientado según la perspectiva de la cámara en 3D
+      const worldX = moveX * cosA + moveZ * sinA;
+      const worldZ = -moveX * sinA + moveZ * cosA;
 
       this.player.position.x += worldX * this.playerSpeed * delta;
       this.player.position.z += worldZ * this.playerSpeed * delta;
@@ -848,9 +880,14 @@ const Scene3D = {
     const targetZ = this.player.position.z + Math.cos(this.cameraAngle) * this.cameraOffset.z;
     const targetY = this.player.position.y + this.cameraOffset.y;
 
-    this.camera.position.x = THREE.MathUtils.lerp(this.camera.position.x, targetX, 0.12);
-    this.camera.position.y = THREE.MathUtils.lerp(this.camera.position.y, targetY, 0.12);
-    this.camera.position.z = THREE.MathUtils.lerp(this.camera.position.z, targetZ, 0.12);
+    if (this.isMouseDown) {
+      // Respuesta orbital inmediata al arrastrar el ratón para evitar desfases o atravesar al personaje
+      this.camera.position.set(targetX, targetY, targetZ);
+    } else {
+      this.camera.position.x = THREE.MathUtils.lerp(this.camera.position.x, targetX, 0.15);
+      this.camera.position.y = THREE.MathUtils.lerp(this.camera.position.y, targetY, 0.15);
+      this.camera.position.z = THREE.MathUtils.lerp(this.camera.position.z, targetZ, 0.15);
+    }
 
     this.camera.lookAt(this.player.position.x, this.player.position.y + 1.6, this.player.position.z);
   },
