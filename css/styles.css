@@ -1044,3 +1044,519 @@ body {
 .locked-tag {
   color: #94a3b8 !important;
 }
+
+/* Menús de la misión: una interfaz cálida, clara y fácil de recorrer. */
+.overlay-screen {
+  padding: 18px;
+  background:
+    radial-gradient(ellipse at 12% 18%, rgba(247, 227, 150, 0.12), transparent 28%),
+    radial-gradient(ellipse at 88% 82%, rgba(56, 189, 248, 0.12), transparent 32%),
+    rgba(13, 20, 33, 0.86);
+  backdrop-filter: blur(3px);
+}
+
+.modal-card {
+  position: relative;
+  max-height: 92vh;
+  overflow-y: auto;
+  background: #fff8e9;
+  color: #263247;
+  border: 3px solid #e8a65d;
+  border-radius: 24px;
+  padding: 28px 32px;
+  box-shadow: 0 12px 0 rgba(119, 65, 46, 0.25), 0 22px 48px rgba(0, 0, 0, 0.4);
+}
+
+.modal-card h1,
+.modal-card h2,
+.modal-card h3,
+.modal-card h4 {
+  color: #27354a;
+}
+
+.start-card {
+  max-width: 700px;
+  border-color: #e58b55;
+  background:
+    radial-gradient(circle at 92% 10%, rgba(255, 215, 120, 0.36), transparent 25%),
+    #fff8e9;
+}
+
+.badge-nasa {
+  color: #69452f;
+  background: #ffe4a8;
+  border: 2px solid #efbd67;
+  letter-spacing: 0.3px;
+  font-size: 0.82rem;
+}
+
+.launch-illustration {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  margin: 4px auto 2px;
+}
+
+.launch-illustration span {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  background: #fff;
+  border: 2px solid #f1d3a0;
+  border-radius: 18px;
+  font-size: 1.8rem;
+  transform: rotate(-4deg);
+}
+
+.launch-illustration span:nth-child(even) {
+  transform: rotate(4deg) translateY(-4px);
+}
+
+.start-card h1 {
+  color: #a94835;
+  font-size: clamp(1.8rem, 5vw, 2.45rem);
+  text-shadow: none;
+}
+
+.subtitle-text {
+  color: #397c91;
+  letter-spacing: 0.2px;
+  text-transform: none;
+  font-size: 1.02rem;
+}
+
+.start-card p,
+.brief-objective,
+.decision-card p {
+  color: #46536a;
+}
+
+.start-features {
+  gap: 9px;
+}
+
+.feat-badge {
+  color: #39475b;
+  background: #fff;
+  border: 2px solid #f0d7b1;
+  border-radius: 14px;
+  padding: 8px 12px;
+}
+
+.start-buttons {
+  flex-wrap: wrap;
+}
+
+.btn-primary,
+.btn-secondary,
+.choice-btn,
+.btn-pedia,
+.btn-diary,
+.btn-mode-toggle {
+  border-radius: 15px;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
+}
+
+.btn-primary {
+  background: #f2b84b;
+  color: #352b23;
+  padding: 13px 22px;
+  box-shadow: 0 4px 0 #c9872d;
+}
+
+.btn-primary:hover {
+  background: #ffd16b;
+  box-shadow: 0 6px 0 #c9872d;
+  transform: translateY(-2px);
+}
+
+.btn-primary:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #c9872d;
+}
+
+.btn-secondary {
+  color: #39475b;
+  background: #fff;
+  border: 2px solid #d6dce4;
+  padding: 11px 18px;
+}
+
+.btn-secondary:hover {
+  color: #27354a;
+  background: #f2f5f8;
+  border-color: #aeb9c7;
+}
+
+.btn-3d-glow {
+  background: #4a9eb2 !important;
+  color: #fff !important;
+  box-shadow: 0 4px 0 #347688 !important;
+}
+
+.btn-3d-glow:hover {
+  background: #58b3c5 !important;
+  box-shadow: 0 6px 0 #347688 !important;
+}
+
+.decision-card {
+  background: #fff8e9;
+  color: #263247;
+  border: 3px solid #e8a65d;
+  border-radius: 22px;
+  box-shadow: 0 10px 0 rgba(119, 65, 46, 0.24), 0 18px 36px rgba(0, 0, 0, 0.32);
+}
+
+.phase-tag {
+  color: #397c91;
+  letter-spacing: 0.4px;
+}
+
+.decision-card h2 {
+  color: #27354a;
+}
+
+.choice-btn {
+  background: #fff;
+  color: #27354a;
+  border: 2px solid #e6d8c3;
+  border-radius: 15px;
+  padding: 13px 15px;
+  font-size: 0.95rem;
+}
+
+.choice-btn:hover,
+.choice-btn:focus-visible {
+  background: #fff1d2;
+  border-color: #e5a84f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 0 rgba(229, 168, 79, 0.35);
+}
+
+.choice-cost {
+  color: #8d5b29;
+}
+
+.brief-card h2,
+.pedia-header h2 {
+  color: #a94835;
+}
+
+.brief-controls-box,
+.pedia-item,
+.diary-card {
+  background: #fff;
+  border: 2px solid #eadcc7;
+  border-radius: 16px;
+}
+
+.brief-controls-box h3,
+.pedia-item h3 {
+  color: #397c91;
+}
+
+.brief-controls-box p,
+.reward-pill,
+.pedia-item p,
+.diary-card p {
+  color: #46536a;
+}
+
+.reward-pill {
+  padding: 3px 4px;
+}
+
+.reward-pill .stars {
+  color: #b8791d;
+}
+
+.pedia-header {
+  border-bottom-color: #eadcc7;
+}
+
+.pedia-grid {
+  gap: 12px;
+}
+
+.diary-subtitle {
+  color: #397c91;
+}
+
+.diary-card.unlocked {
+  background: #f0fbf5;
+  border-color: #75c69a;
+}
+
+.diary-card.locked {
+  background: #f3f0e9;
+}
+
+.nasa-box {
+  background: #eaf7fb;
+  border: 2px solid #a9dce8;
+  color: #344a59;
+}
+
+.nasa-box strong {
+  color: #28768b;
+}
+
+.disc-header h3 {
+  color: #27354a;
+}
+
+.disc-body-text {
+  color: #46536a;
+  background: #fff;
+  border-left-color: #e5a84f;
+}
+
+button:focus-visible {
+  outline: 3px solid #28768b;
+  outline-offset: 3px;
+}
+
+@media (max-width: 700px) {
+  .modal-card {
+    width: 100%;
+    padding: 22px 18px;
+  }
+
+  .start-buttons,
+  .brief-actions {
+    flex-direction: column;
+  }
+
+  .start-buttons button,
+  .brief-actions button {
+    width: 100%;
+  }
+
+  .pedia-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .launch-illustration {
+    gap: 7px;
+  }
+
+  .launch-illustration span {
+    width: 44px;
+    height: 44px;
+    font-size: 1.5rem;
+  }
+
+  .decision-card {
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-height: 90%;
+    overflow-y: auto;
+    transform: translateY(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==========================================================================
+   PANTALLA DE INICIO — MENÚ GRANDE CON FONDO UNIVERSO CARTOON
+   ========================================================================== */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border-width: 0 !important;
+}
+
+#start-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  /* Fondo: imagen cartoon del universo + degradado oscuro encima */
+  background:
+    linear-gradient(to bottom, rgba(5, 5, 20, 0.45) 0%, rgba(10, 5, 30, 0.35) 100%),
+    url('../images/space-bg.jpg') center / cover no-repeat;
+  background-color: #05051a; /* fallback si la imagen no carga */
+}
+
+/* Estrellas animadas generadas con CSS mientras carga la imagen */
+#start-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 10%  8%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 25% 18%, #fff 100%, transparent),
+    radial-gradient(2px 2px at 40%  5%, rgba(255,220,180,0.9) 100%, transparent),
+    radial-gradient(1px 1px at 55% 12%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 70%  3%, #fff 100%, transparent),
+    radial-gradient(2px 2px at 82% 15%, rgba(200,200,255,0.9) 100%, transparent),
+    radial-gradient(1px 1px at 92%  7%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 15% 30%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 48% 28%, #fff 100%, transparent),
+    radial-gradient(2px 2px at 63% 35%, rgba(255,255,200,0.9) 100%, transparent),
+    radial-gradient(1px 1px at 78% 22%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 88% 40%, #fff 100%, transparent),
+    radial-gradient(1px 1px at  5% 55%, #fff 100%, transparent),
+    radial-gradient(2px 2px at 20% 48%, rgba(220,200,255,0.9) 100%, transparent),
+    radial-gradient(1px 1px at 35% 62%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 50% 70%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 65% 58%, #fff 100%, transparent),
+    radial-gradient(2px 2px at 75% 75%, rgba(255,220,180,0.9) 100%, transparent),
+    radial-gradient(1px 1px at 90% 65%, #fff 100%, transparent),
+    radial-gradient(1px 1px at  8% 80%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 42% 85%, #fff 100%, transparent),
+    radial-gradient(2px 2px at 60% 90%, rgba(200,220,255,0.9) 100%, transparent),
+    radial-gradient(1px 1px at 85% 88%, #fff 100%, transparent),
+    radial-gradient(1px 1px at 95% 95%, #fff 100%, transparent);
+  animation: twinkle 4s ease-in-out infinite alternate;
+  z-index: 0;
+}
+
+@keyframes twinkle {
+  0%   { opacity: 0.6; }
+  50%  { opacity: 1.0; }
+  100% { opacity: 0.5; }
+}
+
+#start-screen .start-card {
+  position: relative;
+  z-index: 1;
+  /* Tamaño aumentado respecto a la referencia */
+  width: min(500px, calc(100vw - 32px));
+  max-width: 500px;
+  max-height: none;
+  /* Vidrio oscuro semi-transparente con brillo */
+  background: rgba(18, 15, 48, 0.82);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border: 2px solid rgba(140, 110, 255, 0.35);
+  border-radius: 28px;
+  padding: 42px 40px 36px 40px;
+  box-shadow:
+    0 0 0 1px rgba(100, 60, 220, 0.2),
+    0 20px 60px rgba(0, 0, 0, 0.75),
+    0 0 80px rgba(80, 40, 180, 0.3) inset;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+#start-screen .start-title-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 36px;
+}
+
+#start-screen .start-title-img {
+  width: 100%;
+  max-width: 380px;
+  height: auto;
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  /* Ligero brillo blanco sobre la imagen pixel art */
+  filter: drop-shadow(0 0 12px rgba(255,255,255,0.35));
+}
+
+#start-screen .start-buttons {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+#start-screen .start-buttons button {
+  width: 100%;
+  height: 54px;
+  min-height: 54px;
+  padding: 0 20px;
+  border: none;
+  border-radius: 9999px;
+  font-family: "Comic Sans MS", "Comic Neue", "Chalkboard SE", "Arial Rounded MT Bold", cursive, sans-serif;
+  font-size: 17px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #000000 !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  outline: none;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.4) !important;
+  transition: filter 0.15s ease, transform 0.12s ease, box-shadow 0.12s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#start-screen .start-buttons button:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+  box-shadow: 0 7px 20px rgba(0,0,0,0.5) !important;
+}
+
+#start-screen .start-buttons button:active {
+  filter: brightness(0.9);
+  transform: translateY(2px);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3) !important;
+}
+
+/* Botón 1: Naranja vibrante */
+#start-screen .start-buttons #btn-new-game,
+#start-screen .start-buttons .btn-primary:not(.btn-3d-glow) {
+  background: #ff9b31 !important;
+  color: #000000 !important;
+}
+
+/* Botón 2: Azul pizarra */
+#start-screen .start-buttons #btn-demo-3d,
+#start-screen .start-buttons .btn-3d-glow {
+  background: #617c97 !important;
+  color: #000000 !important;
+}
+
+/* Botón 3: Gris perla */
+#start-screen .start-buttons #btn-Reset-save,
+#start-screen .start-buttons .btn-secondary {
+  background: #c8d1d9 !important;
+  color: #000000 !important;
+}
+
+/* Responsive: en móvil reducir un poco */
+@media (max-width: 540px) {
+  #start-screen .start-card {
+    padding: 32px 24px 28px 24px;
+  }
+  #start-screen .start-buttons button {
+    height: 48px;
+    min-height: 48px;
+    font-size: 15px;
+  }
+}

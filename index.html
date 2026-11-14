@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MARS — LAST CHANCE | NASA Space Apps Challenge</title>
   <link rel="stylesheet" href="css/styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Press+Start+2P&display=swap" rel="stylesheet" />
   <!-- Phaser 3 (Motor 2D) -->
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
   <!-- Three.js (Motor 3D Prototipo de Exploración) -->
@@ -18,24 +21,15 @@
   <!-- PANTALLA DE INICIO -->
   <div id="start-screen" class="overlay-screen">
     <div class="modal-card start-card">
-      <span class="badge-nasa">MISIÓN ARES-VII • ARCADIA PLANITIA</span>
-      <h1>MARS — LAST CHANCE</h1>
-      <p class="subtitle-text">Build a Junior Astronaut Mission Trainer | NASA Space Apps 2026</p>
-      <p>
-        Tu cápsula de aterrizaje ha sufrido un impacto a 1 km del Vehículo de Ascenso a Marte (MAV).
-        Tienes <strong>15 Soles</strong> para sobrevivir en el refugio Outpost Beta junto al rover <strong>ROVI</strong>,
-        gestionar los recursos vitales (Agua, Oxígeno, Energía y Comida), explorar la superficie y preparar el cohete antes de la megatormenta de polvo marciana.
-      </p>
-      <div class="start-features">
-        <div class="feat-badge">EXPLORACION 3D Y VISTA 2D</div>
-        <div class="feat-badge">10 MINIJUEGOS EDUCATIVOS</div>
-        <div class="feat-badge">CIENCIA OFICIAL NASA</div>
-        <div class="feat-badge">DIARIO DE DESCUBRIMIENTOS</div>
+      <div class="start-title-wrap">
+        <img src="images/akaria-title.svg" onerror="this.onerror=null; this.src='images/akaria-title.png';" alt="AKARIA - A SPACE ADVENTURE" class="start-title-img" />
+        <h1 class="sr-only">AKARIA</h1>
+        <p class="subtitle-text sr-only">A SPACE ADVENTURE</p>
       </div>
       <div class="start-buttons">
-        <button id="btn-new-game" class="btn-primary">INICIAR CAMPAÑA 2D (SOL 1)</button>
-        <button id="btn-demo-3d" class="btn-primary btn-3d-glow">MODO EXPLORACION 3D</button>
-        <button id="btn-Reset-save" class="btn-secondary">Reiniciar Partida</button>
+        <button id="btn-new-game" class="btn-primary">COMIENZA LA AVENTURA</button>
+        <button id="btn-demo-3d" class="btn-primary btn-3d-glow">EXPLORA MARTE EN 3D</button>
+        <button id="btn-Reset-save" class="btn-secondary">REINICIAR PROGRESO</button>
       </div>
     </div>
   </div>
@@ -62,10 +56,10 @@
     <div class="modal-card diary-modal-card">
       <div class="pedia-header">
         <div>
-          <h2>DIARIO DE EXPLORACION ESPACIAL</h2>
+          <h2>Mi diario espacial</h2>
           <p id="diary-stats-text" class="diary-subtitle">Has descubierto 0 de 10 secretos marcianos</p>
         </div>
-        <button id="btn-close-diary" class="btn-secondary">[X] Cerrar</button>
+        <button id="btn-close-diary" class="btn-secondary">Cerrar</button>
       </div>
       <div id="diary-cards-grid" class="diary-grid"></div>
     </div>
@@ -79,18 +73,18 @@
       <p id="brief-desc" class="brief-objective">Instrucciones de la tarea...</p>
       
       <div class="brief-controls-box">
-        <h3>OBJETIVO TECNICO:</h3>
+        <h3>¿Qué tienes que hacer?</h3>
         <p id="brief-controls">Usa el ratón o las teclas para interactuar.</p>
       </div>
 
       <div class="brief-rewards-preview">
-        <div class="reward-pill"><span class="stars">[3/3]</span> Rendimiento Optimo: 100% recursos + Bonus</div>
-        <div class="reward-pill"><span class="stars">[2/3]</span> Operacion Estandar: 100% recursos estándar</div>
-        <div class="reward-pill"><span class="stars">[1/3]</span> Operacion Parcial: Suministro de contingencia</div>
+        <div class="reward-pill"><span class="stars">⭐⭐⭐</span> ¡Genial! Consigues una recompensa extra</div>
+        <div class="reward-pill"><span class="stars">⭐⭐</span> ¡Buen trabajo! Consigues recursos</div>
+        <div class="reward-pill"><span class="stars">⭐</span> ROVI te echa una mano</div>
       </div>
 
       <div class="brief-actions">
-        <button id="btn-start-minigame" class="btn-primary">COMENZAR OPERACION</button>
+        <button id="btn-start-minigame" class="btn-primary">¡A la misión!</button>
         <button id="btn-cancel-briefing" class="btn-secondary">Volver</button>
       </div>
     </div>
@@ -100,8 +94,8 @@
   <div id="nasapedia-modal" class="overlay-screen hidden">
     <div class="modal-card pedia-card">
       <div class="pedia-header">
-        <h2>NASA PEDIA: CIENCIA REAL APLICADA</h2>
-        <button id="btn-close-pedia" class="btn-secondary">[X] Cerrar</button>
+        <h2>La ciencia detrás de la aventura</h2>
+        <button id="btn-close-pedia" class="btn-secondary">Cerrar</button>
       </div>
       <div class="pedia-grid">
         <div class="pedia-item">
@@ -145,7 +139,7 @@
       <h1 id="end-title">MISIÓN FINALIZADA</h1>
       <p id="end-desc"></p>
       <div id="end-medal-box" class="nasa-box end-medal"></div>
-      <button id="btn-restart-end" class="btn-primary">NUEVA SIMULACION (SOL 1)</button>
+      <button id="btn-restart-end" class="btn-primary">¡Jugar otra vez!</button>
     </div>
   </div>
 
@@ -187,9 +181,9 @@
           <span id="mav-step-icons" class="mav-steps">[0 / 3]</span>
         </div>
         <button id="btn-toggle-view" class="btn-mode-toggle" title="Alternar entre Vista 2D Clásica y Exploración 3D">MODO 3D</button>
-        <button id="btn-open-diary" class="btn-diary" title="Ver Diario de Exploración">DIARIO (<span id="diary-counter-badge">0 / 10</span>)</button>
+        <button id="btn-open-diary" class="btn-diary" title="Ver Diario de Exploración">📔 Diario (<span id="diary-counter-badge">0 / 10</span>)</button>
         <button id="btn-toggle-sound" class="btn-sound" title="Activar/Silenciar sonido">SONIDO</button>
-        <button id="btn-open-pedia" class="btn-pedia">NASA PEDIA</button>
+        <button id="btn-open-pedia" class="btn-pedia">🔭 Curiosidades</button>
       </div>
     </header>
 
@@ -260,7 +254,7 @@
           <strong>CIENCIA REAL DE LA NASA:</strong>
           <p id="nasa-fact"></p>
         </div>
-        <button id="btn-next-sol" class="btn-primary">AVANZAR AL SIGUIENTE SOL (Consumo Nocturno)</button>
+        <button id="btn-next-sol" class="btn-primary">Seguir con el próximo día 🌙</button>
       </section>
     </main>
   </div>
