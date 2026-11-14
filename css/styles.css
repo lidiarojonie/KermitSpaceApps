@@ -1,0 +1,317 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #0e121b;
+  color: #f8fafc;
+  overflow: hidden;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* PANTALLA DE INICIO */
+.overlay-screen {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(22, 27, 40, 0.92), #090c12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal-card {
+  background: #161B28;
+  border: 2px solid #F7E396;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 580px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+}
+
+.badge-nasa {
+  background: rgba(247, 227, 150, 0.15);
+  color: #F7E396;
+  padding: 6px 14px;
+  border-radius: 99px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.start-card h1 {
+  font-size: 2.3rem;
+  margin: 16px 0 12px;
+  color: #F7E396;
+}
+
+.start-card p {
+  line-height: 1.6;
+  color: #cbd5e1;
+  margin-bottom: 24px;
+}
+
+.start-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* BOTONES */
+.btn-primary {
+  background: #F7E396;
+  color: #161B28;
+  border: none;
+  padding: 12px 22px;
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.2s;
+}
+
+.btn-primary:hover {
+  background: #fde047;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #94a3b8;
+  border: 1px solid #475569;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* BARRA SUPERIOR HUD */
+#game-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+#hud-bar {
+  background: #161B28;
+  border-bottom: 2px solid #263044;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.sol-badge {
+  background: #20283a;
+  border: 1px solid #F7E396;
+  padding: 8px 16px;
+  border-radius: 10px;
+  text-align: center;
+  min-width: 130px;
+}
+
+.sol-label {
+  display: block;
+  font-size: 0.68rem;
+  color: #F7E396;
+  letter-spacing: 1px;
+}
+
+#sol-counter {
+  font-size: 1.15rem;
+  color: #ffffff;
+}
+
+.resources-container {
+  display: flex;
+  flex: 1;
+  gap: 16px;
+  max-width: 760px;
+}
+
+.res-box {
+  flex: 1;
+  background: #1e2536;
+  padding: 8px 12px;
+  border-radius: 10px;
+}
+
+.res-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.progress-bg {
+  width: 100%;
+  height: 10px;
+  background: #0f141f;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 50%;
+  transition: width 0.35s ease;
+}
+
+.water-fill { background: #38bdf8; }
+.oxygen-fill { background: #4ade80; }
+.energy-fill { background: #facc15; }
+.food-fill { background: #fb7185; }
+
+.status-badges {
+  display: flex;
+  gap: 12px;
+  font-size: 0.88rem;
+}
+
+.mini-status {
+  background: #1e2536;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #334155;
+}
+
+/* ZONA DEL ESCENARIO Y TARJETAS */
+#stage-area {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #111520;
+}
+
+#phaser-container canvas {
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+/* COMUNICACIÓN CON TIERRA */
+.comm-panel {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  width: 340px;
+  background: rgba(22, 27, 40, 0.94);
+  border-left: 4px solid #38bdf8;
+  padding: 12px 16px;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+.comm-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #38bdf8;
+  margin-bottom: 6px;
+}
+
+.delay-tag {
+  background: rgba(56, 189, 248, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+#comm-text {
+  font-size: 0.88rem;
+  color: #e2e8f0;
+  line-height: 1.4;
+}
+
+/* TARJETA DE DECISIÓN Y RESULTADOS */
+.decision-card {
+  position: absolute;
+  right: 28px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 420px;
+  background: rgba(22, 27, 40, 0.96);
+  border: 2px solid #F7E396;
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75);
+}
+
+.phase-tag {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #F7E396;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.decision-card h2 {
+  margin: 6px 0 10px;
+  font-size: 1.35rem;
+  color: #ffffff;
+}
+
+.decision-card p {
+  font-size: 0.92rem;
+  color: #cbd5e1;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.choices-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.choice-btn {
+  background: #232b3e;
+  color: #f8fafc;
+  border: 1px solid #475569;
+  padding: 12px 14px;
+  border-radius: 10px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.choice-btn:hover {
+  background: #2d3850;
+  border-color: #F7E396;
+}
+
+.choice-cost {
+  display: block;
+  font-size: 0.78rem;
+  color: #F7E396;
+  margin-top: 4px;
+  font-weight: 700;
+}
+
+.nasa-box {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid #38bdf8;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
+}
+
+.nasa-box strong {
+  color: #38bdf8;
+  display: block;
+  margin-bottom: 4px;
+}
