@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MARS — LAST CHANCE | NASA Space Apps</title>
   <link rel="stylesheet" href="css/styles.css" />
-  <!-- Cargamos Phaser 3 desde su servidor oficial (CDN) -->
+  <!-- Cargamos Phaser 3 desde CDN oficial -->
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
 </head>
 <body>
@@ -27,9 +27,51 @@
     </div>
   </div>
 
+  <!-- MODAL DE NASA PEDIA (REFERENCIAS CIENTÍFICAS) -->
+  <div id="nasapedia-modal" class="overlay-screen hidden">
+    <div class="modal-card pedia-card">
+      <div class="pedia-header">
+        <h2>📘 NASA PEDIA: CIENCIA REAL VS. VIDEOJUEGO</h2>
+        <button id="btn-close-pedia" class="btn-secondary">✖ Cerrar</button>
+      </div>
+      <div class="pedia-grid">
+        <div class="pedia-item">
+          <h3>⚙️ MOXIE (Oxígeno en Marte)</h3>
+          <p><strong>Dato Real NASA:</strong> Experimento a bordo del rover Perseverance que produjo oxígeno respirable a partir del CO₂ atmosférico marciano (95%) a 800 °C.</p>
+          <p><strong>En el juego:</strong> Convertimos puntos de Energía directamente en Oxígeno mediante el minijuego de control térmico.</p>
+        </div>
+        <div class="pedia-item">
+          <h3>☀️ DONKI (Clima Espacial)</h3>
+          <p><strong>Dato Real NASA:</strong> Base de datos que monitoriza llamaradas solares y eyecciones de masa coronal (CME). Marte carece de campo magnético global protector.</p>
+          <p><strong>En el juego:</strong> Si el escudo baja durante una tormenta DONKI, las partículas dañan las baterías y los cultivos.</p>
+        </div>
+        <div class="pedia-item">
+          <h3>🌱 OSDR (Biología Espacial)</h3>
+          <p><strong>Dato Real NASA:</strong> El Open Science Data Repository estudia cómo crecen plantas y microalgas en microgravedad y radiación.</p>
+          <p><strong>En el juego:</strong> Usamos microgreens y espirulina hidropónica de ciclo rápido (7-10 días) en vez de patatas que tardarían 3 meses.</p>
+        </div>
+        <div class="pedia-item">
+          <h3>🧊 Arcadia Planitia y MAV</h3>
+          <p><strong>Dato Real NASA:</strong> El radar SHARAD del orbitador MRO detectó grandes glaciares de hielo de agua bajo el polvo de Arcadia Planitia.</p>
+          <p><strong>En el juego:</strong> Extraemos hielo subterráneo para beber y para refrigerar el Vehículo de Ascenso a Marte (MAV).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL FINAL DE VICTORIA / HIBERNACIÓN -->
+  <div id="end-modal" class="overlay-screen hidden">
+    <div class="modal-card">
+      <span id="end-badge" class="badge-nasa">INFORME FINAL DE MISIÓN</span>
+      <h1 id="end-title">MISIÓN FINALIZADA</h1>
+      <p id="end-desc"></p>
+      <div id="end-medal-box" class="nasa-box"></div>
+      <button id="btn-restart-end" class="btn-primary">🔄 JUGAR NUEVA SIMULACIÓN (SOL 1)</button>
+    </div>
+  </div>
+
   <!-- DASHBOARD PRINCIPAL DEL JUEGO -->
   <div id="game-wrapper">
-    <!-- BARRA SUPERIOR DE RECURSOS (HUD) -->
     <header id="hud-bar">
       <div class="sol-badge">
         <span class="sol-label">DÍA MARCIANO</span>
@@ -37,22 +79,22 @@
       </div>
 
       <div class="resources-container">
-        <div class="res-box" title="Agua potable disponible">
+        <div id="box-water" class="res-box" title="Agua potable disponible">
           <div class="res-header"><span>💧 AGUA</span><span id="val-water">50%</span></div>
           <div class="progress-bg"><div id="bar-water" class="progress-fill water-fill"></div></div>
         </div>
 
-        <div class="res-box" title="Oxígeno respirable en el hábitat">
+        <div id="box-oxygen" class="res-box" title="Oxígeno respirable en el hábitat">
           <div class="res-header"><span>🫧 OXÍGENO</span><span id="val-oxygen">60%</span></div>
           <div class="progress-bg"><div id="bar-oxygen" class="progress-fill oxygen-fill"></div></div>
         </div>
 
-        <div class="res-box" title="Baterías solares y calefacción">
+        <div id="box-energy" class="res-box" title="Baterías solares y calefacción">
           <div class="res-header"><span>⚡ ENERGÍA</span><span id="val-energy">50%</span></div>
           <div class="progress-bg"><div id="bar-energy" class="progress-fill energy-fill"></div></div>
         </div>
 
-        <div class="res-box" title="Raciones y microgreens hidropónicos">
+        <div id="box-food" class="res-box" title="Raciones y microgreens hidropónicos">
           <div class="res-header"><span>🌱 COMIDA</span><span id="val-food">55%</span></div>
           <div class="progress-bg"><div id="bar-food" class="progress-fill food-fill"></div></div>
         </div>
@@ -61,13 +103,16 @@
       <div class="status-badges">
         <div class="mini-status">🛡️ Escudo: <strong id="val-shield">80%</strong></div>
         <div class="mini-status">🚀 Cohete MAV: <strong id="val-mav">0 / 3</strong></div>
+        <button id="btn-open-pedia" class="btn-pedia">📘 NASA Pedia</button>
       </div>
     </header>
 
     <!-- ZONA CENTRAL: CANVAS DE PHASER 3 + PANELES SUPERPUESTOS -->
     <main id="stage-area">
-      <!-- Aquí inyecta Phaser 3 el escenario 2D y los minijuegos -->
       <div id="phaser-container"></div>
+
+      <!-- BANNER DE EVENTO ALEATORIO AL AMANECER -->
+      <div id="random-event-banner" class="event-toast hidden"></div>
 
       <!-- PANEL DE COMUNICACIÓN CON LA TIERRA -->
       <aside id="earth-comm" class="comm-panel">
@@ -100,7 +145,7 @@
     </main>
   </div>
 
- <!-- Cargamos nuestros scripts en orden lógico -->
+  <!-- Scripts en orden -->
   <script src="js/data.js"></script>
   <script src="js/state.js"></script>
   <script src="js/mainScene.js"></script>

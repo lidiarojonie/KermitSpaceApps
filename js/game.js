@@ -1,8 +1,6 @@
-// js/game.js — Controlador principal completo y blindado
+// js/game.js — Controlador final con NASA Pedia, Eventos Aleatorios y Medallas
 
-// 1. Construimos la lista de escenas verificando que existan para evitar bloqueos
 const scenesList = [];
-
 if (typeof MainScene !== "undefined") scenesList.push(MainScene);
 if (typeof MinigameMoxie !== "undefined") scenesList.push(MinigameMoxie);
 if (typeof MinigameDrill !== "undefined") scenesList.push(MinigameDrill);
@@ -10,39 +8,76 @@ if (typeof MinigameSolar !== "undefined") scenesList.push(MinigameSolar);
 if (typeof MinigameBiodome !== "undefined") scenesList.push(MinigameBiodome);
 if (typeof MinigameShield !== "undefined") scenesList.push(MinigameShield);
 
-// 2. Inicializamos Phaser 3
 let phaserGame = null;
 if (typeof Phaser !== "undefined") {
-  const config = {
+  phaserGame = new Phaser.Game({
     type: Phaser.AUTO,
     width: 900,
     height: 500,
     parent: "phaser-container",
     scene: scenesList
-  };
-  phaserGame = new Phaser.Game(config);
-} else {
-  console.error("Error: Phaser 3 no se ha podido cargar desde el CDN.");
+  });
 }
 
-// 3. Referencias a elementos del DOM
+// Eventos aleatorios basados en fenómenos reales de Marte y NASA
+const RANDOM_EVENTS = [
+  {
+    text: "🌪️ EVENTO NASA: ¡Un remolino 'Dust Devil' ha barrido el polvo de tus placas solares! (+15 ⚡ Energía)",
+    changes: { energy: 15 }
+  },
+  {
+    text: "🧊 HALLAZGO MRO: La broca encontró una lente de hielo subsuperficial purísimo (+15 💧 Agua)",
+    changes: { water: 15 }
+  },
+  {
+    text: "🌱 BIODOMO OSDR: ¡Brote acelerado de espirulina bajo luz LED roja! (+15 🌱 Comida y +5 🫧 Oxígeno)",
+    changes: { food: 15, oxygen: 5 }
+  },
+  {
+    text: "☀️ VIENTO SOLAR DONKI: Pequeña ráfaga de protones solares absorbida por el escudo (-5% 🛡️ Escudo, +10 ⚡ Energía)",
+    changes: { shield: -5, energy: 10 }
+  }
+];
+
+// Referencias DOM
 const startScreen = document.getElementById("start-screen");
 const decisionPanel = document.getElementById("decision-panel");
 const resultPanel = document.getElementById("result-panel");
-const btnNewGame = document.getElementById("btn-new-game");
-const btnResetSave = document.getElementById("btn-Reset-save");
-const btnNextSol = document.getElementById("btn-next-sol");
+const pediaModal = document.getElementById("nasapedia-modal");
+const endModal = document.getElementById("end-modal");
+const randomBanner = document.getElementById("random-event-banner");
 
-// 4. Carga un Sol en la interfaz
+// Ilumina las barras de recursos afectadas al pasar el ratón por una opción
+function highlightResources(cost = {}, reward = {}, active = true) {
+  const keys = ["water", "oxygen", "energy", "food"];
+  keys.forEach(k => {
+    const box = document.getElementById(`box-${k}`);
+    if (!box) return;
+    box.classList.remove("res-highlight-cost", "res-highlight-gain");
+    if (!active) return;
+
+    if (cost[k] && cost[k] < 0) {
+      box.classList.add("res-highlight-cost");
+    } else if (reward[k] && reward[k] > 0) {
+      box.classList.add("res-highlight-gain");
+    }
+  });
+}
+
+// Carga un Sol en la interfaz
 function loadCurrentSol() {
-  if (typeof GameState === "undefined" || typeof MISSION_DAYS === "undefined") {
-    alert("Error de carga: Revisa que js/data.js y js/state.js estén guardados y enlazados en index.html.");
-    return;
-  }
-
   GameState.updateHUD();
 
-  // Buscamos los datos del Sol actual (o usamos el último disponible si supera la lista)
+  // Eventos aleatorios en los Soles 3, 6, 9 y 13
+  if ([3, 6, 9, 13].includes(GameState.sol)) {
+    const ev = RANDOM_EVENTS[Math.floor(Math.random() * RANDOM_EVENTS.length)];
+    GameState.modifyResources(ev.changes);
+    randomBanner.textContent = ev.text;
+    randomBanner.classList.remove("hidden");
+  } else {
+    randomBanner.classList.add("hidden");
+  }
+
   const dayData = MISSION_DAYS.find(d => d.sol === GameState.sol) || MISSION_DAYS[MISSION_DAYS.length - 1];
 
   document.getElementById("comm-text").textContent = dayData.comm;
@@ -60,7 +95,12 @@ function loadCurrentSol() {
       <strong>${choice.label}</strong>
       <span class="choice-cost">${choice.costText}</span>
     `;
-    btn.onclick = () => handleChoiceSelection(choice);
+    btn.onmouseenter = () => highlightResources(choice.cost, choice.successReward, true);
+    btn.onmouseleave = () => highlightResources({}, {}, false);
+    btn.onclick = () => {
+      highlightResources({}, {}, false);
+      handleChoiceSelection(choice);
+    };
     choicesContainer.appendChild(btn);
   });
 
@@ -68,13 +108,10 @@ function loadCurrentSol() {
   decisionPanel.classList.remove("hidden");
 }
 
-// 5. Al pulsar una opción de decisión
 function handleChoiceSelection(choice) {
-  // Descontamos el coste inmediato de la acción
   GameState.modifyResources(choice.cost || {});
   decisionPanel.classList.add("hidden");
 
-  // Comprobamos si la opción tiene minijuego y si la escena está registrada en Phaser
   const hasMinigameScene =
     choice.minigame &&
     phaserGame &&
@@ -85,12 +122,10 @@ function handleChoiceSelection(choice) {
     phaserGame.scene.pause("MainScene");
     phaserGame.scene.start(choice.minigame, { choice });
   } else {
-    // Si no tiene minijuego (o aún no está cargado minigamesPack.js), resolvemos directamente
     window.onMinigameComplete(true, choice);
   }
 }
 
-// 6. Callback global que se ejecuta al terminar cualquier minijuego
 window.onMinigameComplete = function (success, choice) {
   const reward = success ? (choice.successReward || {}) : (choice.failReward || {});
   GameState.modifyResources(reward);
@@ -107,50 +142,78 @@ window.onMinigameComplete = function (success, choice) {
   resultPanel.classList.remove("hidden");
 };
 
-// 7. Botón para dormir y pasar al siguiente Sol
-if (btnNextSol) {
-  btnNextSol.onclick = () => {
-    GameState.advanceSol();
+// Mostrar modal de Fin de Partida (Victoria o Hibernación)
+function showEndScreen(isVictory, reasonText) {
+  document.getElementById("end-badge").textContent = isVictory
+    ? "MISIÓN ARES-VII COMPLETADA"
+    : "PROTOCOLO DE PROTECCIÓN DE TRIPULACIÓN";
 
-    const failureReason = GameState.checkFailure();
-    if (failureReason) {
-      alert(`🛑 MODO HIBERNACIÓN ACTIVADO\n\n${failureReason}\n\nSe reiniciará la simulación en el Sol 1.`);
-      GameState.reset();
-      loadCurrentSol();
-      return;
+  document.getElementById("end-title").textContent = isVictory
+    ? "🚀 ¡DESPEGUE EXITOSO EN EL MAV!"
+    : "🛑 MODO HIBERNACIÓN ACTIVADO";
+
+  document.getElementById("end-desc").textContent = reasonText;
+
+  const medalBox = document.getElementById("end-medal-box");
+  if (isVictory) {
+    const avg = Math.round((GameState.water + GameState.oxygen + GameState.energy + GameState.food) / 4);
+    let medal = "🥉 INSIGNIA SUPERVIVIENTE AL LÍMITE (Bronce)";
+    if (avg >= 45 && GameState.shield >= 70) {
+      medal = "🥇 INSIGNIA COMANDANTE DE MARTE (Oro)";
+    } else if (avg >= 25) {
+      medal = "🥈 INSIGNIA INGENIERO/A ESPACIAL (Plata)";
     }
+    medalBox.innerHTML = `<strong>${medal}</strong><p>Media final de recursos vitales: ${avg}% | Escudo del hábitat: ${GameState.shield}%</p>`;
+  } else {
+    medalBox.innerHTML = `<strong>💡 CONSEJO DE INGENIERÍA NASA:</strong><p>Recuerda que la Energía alimenta al reactor MOXIE (Oxígeno) y la perforadora (Agua). No dejes que ninguna barra baje del 15% antes de dormir.</p>`;
+  }
 
-    if (GameState.sol > 15) {
-      if (GameState.mav >= 3) {
-        alert("🏆 ¡MISIÓN CUMPLIDA! Has sobrevivido los 15 Soles y despegado hacia la órbita marciana en el MAV.");
-      } else {
-        alert("⚠️ FIN DEL SOL 15: Has sobrevivido en el hábitat, pero el cohete MAV no completó sus 3 fases de carga antes de la tormenta.");
-      }
-      GameState.reset();
-    }
-
-    loadCurrentSol();
-  };
+  endModal.classList.remove("hidden");
 }
 
-// 8. Botones de la pantalla inicial
-if (btnNewGame) {
-  btnNewGame.onclick = () => {
-    if (typeof GameState !== "undefined") {
-      if (!GameState.load()) {
-        GameState.reset();
-      }
-    }
-    startScreen.classList.add("hidden");
-    loadCurrentSol();
-  };
-}
+// Pasar al siguiente Sol
+document.getElementById("btn-next-sol").onclick = () => {
+  GameState.advanceSol();
 
-if (btnResetSave) {
-  btnResetSave.onclick = () => {
-    if (typeof GameState !== "undefined") {
-      GameState.reset();
-      alert("Partida reiniciada al Sol 1.");
+  const failureReason = GameState.checkFailure();
+  if (failureReason) {
+    showEndScreen(false, `${failureReason} ROVI ha tomado el control autónomo del Outpost Beta en el Sol ${GameState.sol}.`);
+    return;
+  }
+
+  if (GameState.sol > 15) {
+    if (GameState.mav >= 3) {
+      showEndScreen(true, "¡Has sobrevivido los 15 Soles en Arcadia Planitia, cargado las 3 etapas del cohete MAV y despegado junto a ROVI justo antes de la megatormenta de polvo!");
+    } else {
+      showEndScreen(false, "Has sobrevivido hasta el Sol 15, pero el cohete MAV no alcanzó las 3 fases de carga necesarias para despegar antes de la tormenta.");
     }
-  };
-}
+    return;
+  }
+
+  loadCurrentSol();
+};
+
+// Botones de control y NASA Pedia
+document.getElementById("btn-new-game").onclick = () => {
+  if (!GameState.load()) GameState.reset();
+  startScreen.classList.add("hidden");
+  loadCurrentSol();
+};
+
+document.getElementById("btn-Reset-save").onclick = () => {
+  GameState.reset();
+};
+
+document.getElementById("btn-restart-end").onclick = () => {
+  GameState.reset();
+  endModal.classList.add("hidden");
+  loadCurrentSol();
+};
+
+document.getElementById("btn-open-pedia").onclick = () => {
+  pediaModal.classList.remove("hidden");
+};
+
+document.getElementById("btn-close-pedia").onclick = () => {
+  pediaModal.classList.add("hidden");
+};
