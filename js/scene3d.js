@@ -724,7 +724,8 @@ const Scene3D = {
   start() {
     this.active = true;
     if (this.container) {
-      this.container.classList.remove("hidden");
+      this.container.classList.remove("view-layer-inactive");
+      this.container.classList.add("view-layer-active");
     }
     const hud3d = document.getElementById("hud-3d-controls");
     if (hud3d) hud3d.classList.remove("hidden");
@@ -745,15 +746,18 @@ const Scene3D = {
       cancelAnimationFrame(this.animId);
       this.animId = null;
     }
-    if (this.container) this.container.classList.add("hidden");
+    if (this.container) {
+      this.container.classList.remove("view-layer-active");
+      this.container.classList.add("view-layer-inactive");
+    }
     const hud3d = document.getElementById("hud-3d-controls");
     if (hud3d) hud3d.classList.add("hidden");
   },
 
   onWindowResize() {
     if (!this.renderer || !this.camera || !this.container) return;
-    const width = Math.max(900, this.container.clientWidth || 900);
-    const height = Math.max(500, this.container.clientHeight || 500);
+    const width = window.innerWidth || this.container.clientWidth || 900;
+    const height = window.innerHeight || this.container.clientHeight || 500;
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height, false);

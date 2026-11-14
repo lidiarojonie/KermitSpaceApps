@@ -38,7 +38,7 @@ const MISSION_DAYS = [
     description: "Debes actuar de inmediato para recuperar el oxígeno del refugio antes de que la atmósfera interna baje de los niveles seguros.",
     choices: [
       {
-        label: "🫧 Sellar las fugas del casco con espuma selladora",
+        label: "Sellar las fugas del casco con espuma selladora",
         costText: "Coste: -4 Energia [PWR] | Juegas: Sellado de Fugas (+28 Oxigeno [O2] si ganas)",
         cost: { energy: -4 },
         minigame: "MinigameLeakRepair",
@@ -161,7 +161,7 @@ const MISSION_DAYS = [
     description: "Podemos aprovechar la succión del remolino para potenciar el flujo de aire al reactor MOXIE o recargar acumuladores.",
     choices: [
       {
-        label: "🫧 Inyectar flujo de CO2 marciano al reactor MOXIE",
+        label: "Inyectar flujo de CO2 marciano al reactor MOXIE",
         costText: "Coste: -4 Energia [PWR] | Juegas: Reactor MOXIE (+30 Oxigeno [O2])",
         cost: { energy: -4 },
         minigame: "MinigameMoxie",
@@ -267,7 +267,7 @@ const MISSION_DAYS = [
         nasaFact: "El oxidante líquido (oxígeno) representa cerca del 75% del peso de propelente que un cohete necesita para escapar de la gravedad marciana."
       },
       {
-        label: "🫧 Sellado preventivo de conductos y juntas del hábitat",
+        label: "Sellado preventivo de conductos y juntas del hábitat",
         costText: "Coste: -4 Energia [PWR] | Juegas: Sellado de Fugas (+26 Oxigeno [O2] y +12 Energia [PWR])",
         cost: { energy: -4 },
         minigame: "MinigameLeakRepair",

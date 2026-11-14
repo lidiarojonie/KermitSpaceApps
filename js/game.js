@@ -19,8 +19,12 @@ let phaserGame = null;
 if (typeof Phaser !== "undefined") {
   phaserGame = new Phaser.Game({
     type: Phaser.AUTO,
-    width: 900,
-    height: 500,
+    scale: {
+      mode: Phaser.Scale.RESIZE,
+      autoCenter: Phaser.Scale.CENTER_BOTH,
+      width: "100%",
+      height: "100%"
+    },
     parent: "phaser-container",
     scene: scenesList
   });
@@ -67,6 +71,7 @@ const closeDiscoveryBtn = document.getElementById("btn-close-discovery");
 
 let pendingMinigameChoice = null;
 let currentViewMode = "2d"; // '2d' o '3d'
+let isMinigameRunning = false;
 
 // 4. Sistema de efectos visuales flotantes de recursos (+25, -4, etc.)
 window.showFloatingDeltas = function (diffs) {
@@ -235,6 +240,11 @@ function loadCurrentSol() {
   resultPanel.classList.add("hidden");
   if (currentViewMode === "2d") {
     decisionPanel.classList.remove("hidden");
+  } else {
+    decisionPanel.classList.add("hidden");
+    if (roviMsg) {
+      roviMsg.textContent = `Sol ${GameState.sol}: ¡Nuevo día en Marte! Explora la base en 3D o pulsa "Vista 2D" para ver las misiones de hoy.`;
+    }
   }
 }
 
@@ -302,15 +312,30 @@ document.getElementById("btn-start-minigame").onclick = () => {
   briefingModal.classList.add("hidden");
   decisionPanel.classList.add("hidden");
 
+  isMinigameRunning = true;
+  toggleViewBtn.disabled = true;
+  toggleViewBtn.style.opacity = "0.5";
+
   if (typeof SoundFx !== "undefined") SoundFx.playClick();
 
-  // Si estábamos en 3D, ocultamos temporalmente el canvas 3D y mostramos Phaser para el minijuego
-  if (currentViewMode === "3d") {
-    if (typeof Scene3D !== "undefined") Scene3D.stop();
-    document.getElementById("threejs-container").classList.add("hidden");
-    const hud3d = document.getElementById("hud-3d-controls");
-    if (hud3d) hud3d.classList.add("hidden");
-    document.getElementById("phaser-container").classList.remove("hidden");
+  const phaserCont = document.getElementById("phaser-container");
+  const threeCont = document.getElementById("threejs-container");
+  const hud3d = document.getElementById("hud-3d-controls");
+
+  if (typeof Scene3D !== "undefined") Scene3D.stop();
+  if (threeCont) {
+    threeCont.classList.remove("view-layer-active");
+    threeCont.classList.add("view-layer-inactive");
+  }
+  if (hud3d) hud3d.classList.add("hidden");
+
+  if (phaserCont) {
+    phaserCont.classList.remove("view-layer-inactive");
+    phaserCont.classList.add("view-layer-active");
+  }
+
+  if (phaserGame && phaserGame.scale) {
+    phaserGame.scale.refresh();
   }
 
   // Descontar coste de la acción
@@ -323,11 +348,25 @@ document.getElementById("btn-start-minigame").onclick = () => {
 document.getElementById("btn-cancel-briefing").onclick = () => {
   briefingModal.classList.add("hidden");
   pendingMinigameChoice = null;
+  isMinigameRunning = false;
+  toggleViewBtn.disabled = false;
+  toggleViewBtn.style.opacity = "1";
+
+  if (currentViewMode === "3d") {
+    if (typeof Scene3D !== "undefined") Scene3D.start();
+  } else {
+    decisionPanel.classList.remove("hidden");
+  }
+
   if (typeof SoundFx !== "undefined") SoundFx.playClick();
 };
 
 // 12. Finalización y evaluación escalonada del minijuego (Excelente, Bien, Regular, Fallo)
 window.onMinigameComplete = function (result, choice) {
+  isMinigameRunning = false;
+  toggleViewBtn.disabled = false;
+  toggleViewBtn.style.opacity = "1";
+
   let tier = "good";
   let score = 100;
   let minigameName = "Operación Técnica";
@@ -340,13 +379,36 @@ window.onMinigameComplete = function (result, choice) {
     tier = result ? "good" : "fail";
   }
 
+  const phaserCont = document.getElementById("phaser-container");
+  const threeCont = document.getElementById("threejs-container");
+  const hud3d = document.getElementById("hud-3d-controls");
+
   // Si estábamos en modo 3D, restauramos la vista 3D tras el minijuego
   if (currentViewMode === "3d") {
-    document.getElementById("phaser-container").classList.add("hidden");
-    document.getElementById("threejs-container").classList.remove("hidden");
-    const hud3d = document.getElementById("hud-3d-controls");
+    if (phaserCont) {
+      phaserCont.classList.remove("view-layer-active");
+      phaserCont.classList.add("view-layer-inactive");
+    }
+    if (threeCont) {
+      threeCont.classList.remove("view-layer-inactive");
+      threeCont.classList.add("view-layer-active");
+    }
     if (hud3d) hud3d.classList.remove("hidden");
-    if (typeof Scene3D !== "undefined") Scene3D.start();
+    if (typeof Scene3D !== "undefined") {
+      Scene3D.start();
+    }
+  } else {
+    if (threeCont) {
+      threeCont.classList.remove("view-layer-active");
+      threeCont.classList.add("view-layer-inactive");
+    }
+    if (phaserCont) {
+      phaserCont.classList.remove("view-layer-inactive");
+      phaserCont.classList.add("view-layer-active");
+    }
+    if (phaserGame && phaserGame.scale) {
+      phaserGame.scale.refresh();
+    }
   }
 
   // Cálculo de recompensas escalonadas según rendimiento
@@ -390,7 +452,7 @@ window.onMinigameComplete = function (result, choice) {
   // Generar resumen visual de recursos ganados
   const breakdownEl = document.getElementById("result-breakdown");
   breakdownEl.innerHTML = "";
-  const icons = { water: "Agua [H2O]", oxygen: "Oxigeno [O2]", energy: "Energia [PWR]", food: "Comida [BIO]", shield: "Blindaje", mav: "Cohete MAV" };
+  const icons = { water: "Agua", oxygen: "Oxígeno", energy: "Energía", food: "Comida", shield: "Escudo", mav: "Fase Cohete MAV" };
 
   Object.keys(finalReward).forEach(k => {
     const val = finalReward[k];
@@ -407,21 +469,21 @@ window.onMinigameComplete = function (result, choice) {
   const descEl = document.getElementById("result-desc");
 
   if (tier === "excellent") {
-    starsEl.textContent = "CALIFICACION: EXCELENTE (3/3)";
-    titleEl.textContent = "¡RENDIMIENTO CIENTÍFICO ÓPTIMO!";
-    descEl.textContent = `¡Has completado la operación con maestría! Los tanques del Outpost Beta han recibido la máxima dotación de recursos con bonus de eficiencia.`;
+    starsEl.textContent = "3 Estrellas: ¡Excelente!";
+    titleEl.textContent = "¡TRABAJO EXTRAORDINARIO!";
+    descEl.textContent = `¡Lo has hecho genial! Los sistemas del Outpost Beta están al máximo y has ganado recursos extra para la misión.`;
   } else if (tier === "good") {
-    starsEl.textContent = "CALIFICACION: MUY BIEN (2/3)";
-    titleEl.textContent = "OPERACIÓN COMPLETADA CON ÉXITO";
-    descEl.textContent = `Has estabilizado el sistema correctamente y los recursos previstos se han transferido a la base.`;
+    starsEl.textContent = "2 Estrellas: ¡Muy bien!";
+    titleEl.textContent = "¡MISIÓN CUMPLIDA!";
+    descEl.textContent = `¡Buen trabajo! Has completado la tarea con éxito y los recursos ya están en los depósitos de la base.`;
   } else if (tier === "fair") {
-    starsEl.textContent = "CALIFICACION: BASICA (1/3)";
-    titleEl.textContent = "OPERACIÓN PARCIAL";
-    descEl.textContent = `Completaste parte de la tarea. Se ha recuperado un suministro parcial para asegurar la misión.`;
+    starsEl.textContent = "1 Estrella: ¡Buen intento!";
+    titleEl.textContent = "TAREA COMPLETADA";
+    descEl.textContent = `Conseguiste completar parte de la misión. Con un poco más de práctica lo harás todavía mejor.`;
   } else {
-    starsEl.textContent = "PROTOCOLO DE CONTINGENCIA ROVI";
-    titleEl.textContent = "SISTEMA DE ASISTENCIA ACTIVADO";
-    descEl.textContent = `No se alcanzó el objetivo a tiempo, pero el rover ROVI desplegó el protocolo de reserva y rescató suministros de emergencia.`;
+    starsEl.textContent = "¡Ánimo astronauta!";
+    titleEl.textContent = "ROVI TE AYUDA";
+    descEl.textContent = `Esta vez no dio tiempo a terminar, pero tu robot amigo ROVI activó las reservas para proteger a la tripulación.`;
   }
 
   document.getElementById("nasa-fact").textContent = choice.nasaFact || "";
@@ -509,18 +571,26 @@ document.getElementById("btn-next-sol").onclick = () => {
 
 // 15. Alternar entre Vista 2D Clásica y Prototipo 3D
 function switchViewMode(mode) {
+  if (isMinigameRunning) return;
+
   currentViewMode = mode;
   const phaserCont = document.getElementById("phaser-container");
   const threeCont = document.getElementById("threejs-container");
   const hud3d = document.getElementById("hud-3d-controls");
 
   if (mode === "3d") {
-    phaserCont.classList.add("hidden");
+    if (phaserCont) {
+      phaserCont.classList.remove("view-layer-active");
+      phaserCont.classList.add("view-layer-inactive");
+    }
+    if (threeCont) {
+      threeCont.classList.remove("view-layer-inactive");
+      threeCont.classList.add("view-layer-active");
+    }
     decisionPanel.classList.add("hidden");
-    toggleViewBtn.textContent = "VISTA 2D";
+    toggleViewBtn.textContent = "Vista 2D";
     toggleViewBtn.classList.add("active-3d");
 
-    threeCont.classList.remove("hidden");
     if (hud3d) hud3d.classList.remove("hidden");
 
     if (typeof Scene3D !== "undefined") {
@@ -533,12 +603,26 @@ function switchViewMode(mode) {
     if (typeof Scene3D !== "undefined") {
       Scene3D.stop();
     }
-    threeCont.classList.add("hidden");
+    if (threeCont) {
+      threeCont.classList.remove("view-layer-active");
+      threeCont.classList.add("view-layer-inactive");
+    }
     if (hud3d) hud3d.classList.add("hidden");
-    phaserCont.classList.remove("hidden");
-    toggleViewBtn.textContent = "MODO 3D";
+
+    if (phaserCont) {
+      phaserCont.classList.remove("view-layer-inactive");
+      phaserCont.classList.add("view-layer-active");
+    }
+    toggleViewBtn.textContent = "Modo 3D";
     toggleViewBtn.classList.remove("active-3d");
-    decisionPanel.classList.remove("hidden");
+
+    if (briefingModal.classList.contains("hidden") && resultPanel.classList.contains("hidden")) {
+      decisionPanel.classList.remove("hidden");
+    }
+
+    if (phaserGame && phaserGame.scale) {
+      phaserGame.scale.refresh();
+    }
   }
 
   updateRoviAdvice();
@@ -615,11 +699,33 @@ if (typeof DiscoverySystem !== "undefined") {
   DiscoverySystem.init();
 }
 
+// Control de Pantalla Completa (Fullscreen)
+const fullscreenBtn = document.getElementById("btn-toggle-fullscreen");
+if (fullscreenBtn) {
+  fullscreenBtn.onclick = () => {
+    if (typeof SoundFx !== "undefined") SoundFx.playClick();
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.warn("Fullscreen request error:", err);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  };
 
-// Inicialización del sistema de descubrimientos
-if (typeof DiscoverySystem !== "undefined") {
-  DiscoverySystem.init();
+  document.addEventListener("fullscreenchange", () => {
+    if (document.fullscreenElement) {
+      fullscreenBtn.textContent = "Salir Pantalla Completa";
+      fullscreenBtn.classList.add("active-fullscreen");
+    } else {
+      fullscreenBtn.textContent = "Pantalla Completa";
+      fullscreenBtn.classList.remove("active-fullscreen");
+    }
+  });
 }
+
 // Control del Panel de Mision en Modo 3D
 const btnToggle3dMission = document.getElementById("btn-toggle-3d-mission");
 if (btnToggle3dMission) {

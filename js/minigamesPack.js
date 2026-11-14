@@ -1,17 +1,80 @@
-// js/minigamesPack.js — Pack con los minijuegos de supervivencia para el Junior Astronaut Trainer
+// js/minigamesPack.js — Pack con los 10 minijuegos de supervivencia para el Junior Astronaut Trainer
 // 1. MinigameDrill (Extracción de Hielo)
 // 2. MinigameSolar (Mantenimiento y Conexión Solar)
 // 3. MinigameBiodome (Cultivo Hidropónico OSDR)
 // 4. MinigameShield (Deflector de Tormenta Solar DONKI)
 // 5. MinigameWaterFilter (Purificación de Agua y Percloratos)
 // 6. MinigameLeakRepair (Reparación de Fugas de Oxígeno)
+// 7. MinigameCircuit (Red de Energía y Relés)
+// 8. MinigameRoverDrive (Conducción del Rover ROVI)
+// 9. MinigameSpectro (Espectrometría Láser de Muestras PIXL)
+// 10. MinigameDustDefense (Defensa ante Megatormenta Marciana)
+
+// Utilidades visuales compartidas para consolas amigables y táctiles para niños
+function createTechConsole(scene, cx, cy, w, h, accentColor, title, subtitle) {
+  // Capa de fondo oscurecida para enfocar la diversión en el minijuego
+  scene.add.rectangle(cx, cy, scene.scale.width * 2, scene.scale.height * 2, 0x070b14, 0.88);
+
+  // Sombra suave para dar relieve 3D
+  scene.add.rectangle(cx + 6, cy + 6, w, h, 0x000000, 0.6);
+
+  // Marco principal con bordes redondeados y color alegre
+  const frame = scene.add.rectangle(cx, cy, w, h, 0x111a2c).setStrokeStyle(3, accentColor, 0.9);
+
+  // Pantalla interior
+  scene.add.rectangle(cx, cy + 24, w - 24, h - 72, 0x182438, 0.75).setStrokeStyle(1.5, accentColor, 0.3);
+
+  // Detalles en las cuatro esquinas
+  const corners = [
+    [-w / 2 + 16, -h / 2 + 16],
+    [w / 2 - 16, -h / 2 + 16],
+    [-w / 2 + 16, h / 2 - 16],
+    [w / 2 - 16, h / 2 - 16]
+  ];
+  corners.forEach(([ox, oy]) => {
+    scene.add.circle(cx + ox, cy + oy, 4, accentColor, 0.9);
+  });
+
+  // Título y subtítulo con tipografía infantil amigable
+  scene.add.text(cx, cy - h / 2 + 28, title, {
+    fontSize: '22px', fontStyle: 'bold', color: '#ffd000', fontFamily: "'Fredoka', 'Nunito', sans-serif"
+  }).setOrigin(0.5);
+
+  if (subtitle) {
+    scene.add.text(cx, cy - h / 2 + 54, subtitle, {
+      fontSize: '14px', color: '#cbd5e1', fontFamily: "'Fredoka', 'Nunito', sans-serif"
+    }).setOrigin(0.5);
+  }
+
+  return frame;
+}
+
+function spawnBurst(scene, x, y, color, count, speed) {
+  const n = count || 8;
+  const sp = speed || 80;
+  for (let i = 0; i < n; i++) {
+    const p = scene.add.circle(x, y, Phaser.Math.Between(3, 5), color, 1);
+    const angle = (Math.PI * 2 * i) / n + (Math.random() - 0.5) * 0.4;
+    const dist = Phaser.Math.Between(sp * 0.5, sp);
+    scene.tweens.add({
+      targets: p,
+      x: x + Math.cos(angle) * dist,
+      y: y + Math.sin(angle) * dist,
+      alpha: 0,
+      scale: 0.2,
+      duration: Phaser.Math.Between(300, 500),
+      ease: 'Cubic.easeOut',
+      onComplete: () => p.destroy()
+    });
+  }
+}
 
 // ============================================================================
 // 1. MINIJUEGO: ARCADIA ICE DRILL (Extracción de Hielo Subterráneo)
 // ============================================================================
 class MinigameDrill extends Phaser.Scene {
   constructor() {
-    super({ key: "MinigameDrill" });
+    super({ key: 'MinigameDrill' });
   }
 
   init(data) {
@@ -19,16 +82,15 @@ class MinigameDrill extends Phaser.Scene {
   }
 
   create() {
-    this.add.rectangle(450, 250, 900, 500, 0x1e1526);
-    this.add.rectangle(450, 250, 880, 480, 0x2d1f38).setStrokeStyle(2, 0x38bdf8, 0.4);
+    const cx = this.scale.width / 2;
+    const cy = this.scale.height / 2;
+    const w = 860;
+    const h = 480;
 
-    this.add.text(450, 34, "PERFORACION GLACIAR: ARCADIA PLANITIA", {
-      fontSize: "22px", fontStyle: "bold", color: "#38bdf8", fontFamily: "'Segoe UI', sans-serif"
-    }).setOrigin(0.5);
-
-    this.add.text(450, 64, "Mueve la broca con el RATÓN o FLECHAS para extraer 6 CRISTALES DE HIELO y esquivar las ROCAS", {
-      fontSize: "14px", color: "#cbd5e1", fontFamily: "'Segoe UI', sans-serif"
-    }).setOrigin(0.5);
+    createTechConsole(this, cx, cy, w, h, 0x38bdf8,
+      'PERFORACIÓN GLACIAR: ¡BUSCANDO AGUA!',
+      'Mueve la broca con el RATÓN o FLECHAS para atrapar 6 CRISTALES AZULES y esquivar las rocas'
+    );
 
     this.iceCollected = 0;
     this.hits = 0;
@@ -37,43 +99,40 @@ class MinigameDrill extends Phaser.Scene {
     this.ended = false;
     this.timeLeft = 14;
 
-    this.scoreText = this.add.text(40, 95, "Hielo extraido [H2O]: 0 / 6", {
-      fontSize: "20px", fontStyle: "bold", color: "#38bdf8", fontFamily: "'Segoe UI', sans-serif"
+    this.scoreText = this.add.text(cx - 390, cy - 150, 'Hielo recogido: 0 / 6', {
+      fontSize: '18px', fontStyle: 'bold', color: '#38bdf8', fontFamily: "'Fredoka', sans-serif"
     });
 
-    this.livesText = this.add.text(40, 130, "Integridad Broca: 3 / 3", {
-      fontSize: "17px", color: "#f7e396", fontFamily: "'Segoe UI', sans-serif"
+    this.livesText = this.add.text(cx - 390, cy - 122, 'Vidas de la broca: 3 / 3', {
+      fontSize: '16px', color: '#ffd000', fontFamily: "'Fredoka', sans-serif"
     });
 
-    this.timerText = this.add.text(680, 95, "⏱️ Tiempo: 14s", {
-      fontSize: "18px", color: "#f8fafc", fontFamily: "'Segoe UI', sans-serif"
+    this.timerText = this.add.text(cx + 250, cy - 150, 'Tiempo: 14s', {
+      fontSize: '18px', fontStyle: 'bold', color: '#ffffff', fontFamily: "'Fredoka', sans-serif"
     });
 
     // Broca perforadora del jugador
-    this.drill = this.add.triangle(450, 140, 0, 0, 40, 0, 20, 44, 0xf7e396)
-      .setStrokeStyle(2, 0x0f172a);
-    
-    // Núcleo giratorio de la broca
-    this.drillCore = this.add.circle(450, 132, 8, 0x38bdf8);
+    this.drill = this.add.triangle(cx, cy - 90, 0, 0, 42, 0, 21, 46, 0xffd000)
+      .setStrokeStyle(2.5, 0x0f172a);
+    this.drillCore = this.add.circle(cx, cy - 98, 9, 0x38bdf8);
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.items = [];
 
-    // Generador de hielo y rocas
+    // Spawner de hielo y rocas
     this.spawner = this.time.addEvent({
-      delay: 600,
+      delay: 580,
       loop: true,
       callback: () => {
         if (this.ended) return;
-        const x = Phaser.Math.Between(180, 760);
+        const x = Phaser.Math.Between(cx - 340, cx + 340);
         const isIce = Math.random() > 0.40;
-        
         let item;
         if (isIce) {
-          item = this.add.rectangle(x, 520, 32, 32, 0x38bdf8)
+          item = this.add.rectangle(x, cy + 220, 32, 32, 0x38bdf8)
             .setStrokeStyle(2, 0xffffff);
         } else {
-          item = this.add.polygon(x, 520, [0, 15, 12, 0, 28, 6, 32, 26, 16, 34, 4, 28], 0xd96b43)
+          item = this.add.polygon(x, cy + 220, [0, 15, 12, 0, 28, 6, 32, 26, 16, 34, 4, 28], 0xd96b43)
             .setStrokeStyle(2, 0x7c2d12);
         }
         item.isIce = isIce;
@@ -81,14 +140,13 @@ class MinigameDrill extends Phaser.Scene {
       }
     });
 
-    // Reloj
     this.timer = this.time.addEvent({
       delay: 1000,
       repeat: 13,
       callback: () => {
         if (this.ended) return;
         this.timeLeft--;
-        this.timerText.setText(`⏱️ Tiempo: ${this.timeLeft}s`);
+        this.timerText.setText(`Tiempo: ${this.timeLeft}s`);
         if (this.timeLeft <= 0) {
           this.finish();
         }
@@ -98,34 +156,37 @@ class MinigameDrill extends Phaser.Scene {
 
   update(time, delta) {
     if (this.ended) return;
+    const cx = this.scale.width / 2;
+    const cy = this.scale.height / 2;
 
-    // Control de broca
-    if (this.input.activePointer.x > 150 && this.input.activePointer.x < 800) {
+    if (this.input.activePointer.x > cx - 380 && this.input.activePointer.x < cx + 380) {
       this.drill.x = Phaser.Math.Linear(this.drill.x, this.input.activePointer.x, 0.22);
     }
     if (this.cursors.left.isDown) this.drill.x -= 0.42 * delta;
     if (this.cursors.right.isDown) this.drill.x += 0.42 * delta;
-    this.drill.x = Phaser.Math.Clamp(this.drill.x, 170, 780);
+    this.drill.x = Phaser.Math.Clamp(this.drill.x, cx - 350, cx + 350);
     this.drillCore.x = this.drill.x;
 
-    // Mover objetos
     for (let i = this.items.length - 1; i >= 0; i--) {
       const obj = this.items[i];
       obj.y -= 0.24 * delta;
 
-      if (Phaser.Math.Distance.Between(this.drill.x, this.drill.y, obj.x, obj.y) < 36) {
+      if (Phaser.Math.Distance.Between(this.drill.x, this.drill.y, obj.x, obj.y) < 38) {
         if (obj.isIce) {
           this.iceCollected++;
-          if (typeof SoundFx !== "undefined") SoundFx.playResourceGain();
-          this.scoreText.setText(`Hielo extraido [H2O]: ${this.iceCollected} / ${this.targetIce}`);
+          spawnBurst(this, obj.x, obj.y, 0x38bdf8, 12, 80);
+          if (typeof SoundFx !== 'undefined') SoundFx.playResourceGain();
+          this.scoreText.setText(`Hielo recogido: ${this.iceCollected} / ${this.targetIce}`);
           if (this.iceCollected >= this.targetIce) {
             this.finish();
             return;
           }
         } else {
           this.hits++;
-          if (typeof SoundFx !== "undefined") SoundFx.playAlert();
-          this.livesText.setText(`Integridad Broca: ${Math.max(0, this.maxHits - this.hits)} / ${this.maxHits}`);
+          this.cameras.main.shake(160, 0.008);
+          spawnBurst(this, obj.x, obj.y, 0xd96b43, 10, 90);
+          if (typeof SoundFx !== 'undefined') SoundFx.playAlert();
+          this.livesText.setText(`Vidas de la broca: ${Math.max(0, this.maxHits - this.hits)} / ${this.maxHits}`);
           if (this.hits >= this.maxHits) {
             this.finish();
             return;
@@ -133,7 +194,7 @@ class MinigameDrill extends Phaser.Scene {
         }
         obj.destroy();
         this.items.splice(i, 1);
-      } else if (obj.y < 80) {
+      } else if (obj.y < cy - 140) {
         obj.destroy();
         this.items.splice(i, 1);
       }
@@ -142,28 +203,26 @@ class MinigameDrill extends Phaser.Scene {
 
   finish() {
     this.ended = true;
-    this.spawner.remove();
-    this.timer.remove();
+    if (this.spawner) this.spawner.remove();
+    if (this.timer) this.timer.remove();
 
-    let tier = "fail";
+    let tier = 'fail';
     if (this.iceCollected >= this.targetIce && this.hits === 0) {
-      tier = "excellent";
+      tier = 'excellent';
     } else if (this.iceCollected >= this.targetIce || (this.iceCollected >= 4 && this.hits < 2)) {
-      tier = "good";
+      tier = 'good';
     } else if (this.iceCollected >= 3) {
-      tier = "fair";
-    } else {
-      tier = "fail";
+      tier = 'fair';
     }
 
-    this.scene.stop("MinigameDrill");
-    this.scene.resume("MainScene");
+    this.scene.stop('MinigameDrill');
+    this.scene.resume('MainScene');
 
-    if (typeof window.onMinigameComplete === "function") {
+    if (typeof window.onMinigameComplete === 'function') {
       window.onMinigameComplete({
         tier: tier,
         score: Math.round((this.iceCollected / this.targetIce) * 100),
-        minigameName: "Perforación Glaciar Arcadia (Agua)"
+        minigameName: 'Perforación Glaciar Arcadia (Agua)'
       }, this.choiceData);
     }
   }
@@ -174,7 +233,7 @@ class MinigameDrill extends Phaser.Scene {
 // ============================================================================
 class MinigameSolar extends Phaser.Scene {
   constructor() {
-    super({ key: "MinigameSolar" });
+    super({ key: 'MinigameSolar' });
   }
 
   init(data) {
@@ -182,23 +241,23 @@ class MinigameSolar extends Phaser.Scene {
   }
 
   create() {
-    this.add.rectangle(450, 250, 900, 500, 0x0f172a);
-    this.add.rectangle(450, 250, 880, 480, 0x1e293b).setStrokeStyle(2, 0xfacc15, 0.4);
+    const cx = this.scale.width / 2;
+    const cy = this.scale.height / 2;
+    const w = 860;
+    const h = 480;
 
-    this.add.text(450, 34, "MANTENIMIENTO SOLAR: LIMPIEZA Y CONEXION FOTOVOLTAICA", {
-      fontSize: "21px", fontStyle: "bold", color: "#F7E396", fontFamily: "'Segoe UI', sans-serif"
-    }).setOrigin(0.5);
+    createTechConsole(this, cx, cy, w, h, 0xffd000,
+      'LIMPIEZA SOLAR: ¡A QUITAR EL POLVO!',
+      'Haz CLIC sobre las manchas de polvo rojizo para limpiarlas y enciende el interruptor'
+    );
 
-    this.add.text(450, 64, "¡Haz CLIC sobre las manchas de polvo marciano para limpiarlas y activa el interruptor maestro!", {
-      fontSize: "14px", color: "#cbd5e1", fontFamily: "'Segoe UI', sans-serif"
-    }).setOrigin(0.5);
-
-    this.add.rectangle(450, 260, 620, 270, 0x172554).setStrokeStyle(4, 0x38bdf8);
-    for (let c = 180; c <= 720; c += 90) {
-      this.add.line(0, 0, c, 125, c, 395, 0x1e40af).setOrigin(0);
+    // Malla fotovoltaica
+    this.add.rectangle(cx, cy + 10, 620, 260, 0x172554).setStrokeStyle(3, 0x38bdf8);
+    for (let c = cx - 270; c <= cx + 270; c += 90) {
+      this.add.line(0, 0, c, cy - 120, c, cy + 140, 0x1e40af).setOrigin(0);
     }
-    for (let r = 160; r <= 360; r += 45) {
-      this.add.line(0, 0, 140, r, 760, r, 0x1e40af).setOrigin(0);
+    for (let r = cy - 80; r <= cy + 110; r += 45) {
+      this.add.line(0, 0, cx - 310, r, cx + 310, r, 0x1e40af).setOrigin(0);
     }
 
     this.cleaned = 0;
@@ -207,42 +266,52 @@ class MinigameSolar extends Phaser.Scene {
     this.switchActive = false;
     this.ended = false;
 
-    this.statusText = this.add.text(450, 415, "Celdas limpiadas: 0 / 8  |  ⏱️ Tiempo: 11s", {
-      fontSize: "18px", fontStyle: "bold", color: "#4ade80", fontFamily: "'Segoe UI', sans-serif"
+    this.statusText = this.add.text(cx, cy + 155, 'Celdas limpiadas: 0 / 8  |  Tiempo: 11s', {
+      fontSize: '18px', fontStyle: 'bold', color: '#4ade80', fontFamily: "'Fredoka', sans-serif"
     }).setOrigin(0.5);
 
-    this.switchBtn = this.add.rectangle(450, 455, 300, 36, 0x475569)
+    this.switchBtn = this.add.rectangle(cx, cy + 195, 340, 42, 0x475569)
       .setInteractive({ useHandCursor: true });
-    this.switchText = this.add.text(450, 455, "LIMPIA EL POLVO PRIMERO", {
-      fontSize: "14px", fontStyle: "bold", color: "#94a3b8", fontFamily: "'Segoe UI', sans-serif"
+    this.switchText = this.add.text(cx, cy + 195, '¡LIMPIA TODO EL POLVO PRIMERO!', {
+      fontSize: '14px', fontStyle: 'bold', color: '#cbd5e1', fontFamily: "'Fredoka', sans-serif"
     }).setOrigin(0.5);
 
     for (let i = 0; i < this.totalSpots; i++) {
-      const x = Phaser.Math.Between(190, 710);
-      const y = Phaser.Math.Between(155, 365);
-      const dust = this.add.circle(x, y, 28, 0xd96b43, 0.95)
-        .setStrokeStyle(2, 0xf7e396)
+      const px = Phaser.Math.Between(cx - 260, cx + 260);
+      const py = Phaser.Math.Between(cy - 90, cy + 110);
+      const dust = this.add.circle(px, py, 28, 0xd96b43, 0.95)
+        .setStrokeStyle(2.5, 0xffd000)
         .setInteractive({ useHandCursor: true });
 
-      dust.on("pointerdown", () => {
+      dust.on('pointerdown', () => {
         if (this.ended) return;
         dust.destroy();
         this.cleaned++;
-        if (typeof SoundFx !== "undefined") SoundFx.playClick();
-        this.statusText.setText(`Celdas limpiadas: ${this.cleaned} / ${this.totalSpots}  |  ⏱️ Tiempo: ${this.timeLeft}s`);
+        spawnBurst(this, px, py, 0xd96b43, 10, 60);
+        if (typeof SoundFx !== 'undefined') SoundFx.playClick();
+        this.statusText.setText(`Celdas limpiadas: ${this.cleaned} / ${this.totalSpots}  |  Tiempo: ${this.timeLeft}s`);
 
         if (this.cleaned >= this.totalSpots) {
           this.switchBtn.setFillStyle(0x22c55e);
-          this.switchText.setText("ACTIVAR INTERRUPTOR MAESTRO");
-          this.switchText.setColor("#0f172a");
+          this.switchText.setText('¡ACTIVAR ENERGÍA SOLAR AHORA!');
+          this.switchText.setColor('#0f172a');
           this.switchActive = true;
+          this.tweens.add({
+            targets: this.switchBtn,
+            scaleX: 1.05,
+            scaleY: 1.1,
+            duration: 350,
+            yoyo: true,
+            repeat: -1
+          });
         }
       });
     }
 
-    this.switchBtn.on("pointerdown", () => {
+    this.switchBtn.on('pointerdown', () => {
       if (this.switchActive && !this.ended) {
-        if (typeof SoundFx !== "undefined") SoundFx.playSuccess();
+        spawnBurst(this, cx, cy + 195, 0x4ade80, 18, 120);
+        if (typeof SoundFx !== 'undefined') SoundFx.playSuccess();
         this.finish(true);
       }
     });
@@ -253,7 +322,7 @@ class MinigameSolar extends Phaser.Scene {
       callback: () => {
         if (this.ended) return;
         this.timeLeft--;
-        this.statusText.setText(`Celdas limpiadas: ${this.cleaned} / ${this.totalSpots}  |  ⏱️ Tiempo: ${this.timeLeft}s`);
+        this.statusText.setText(`Celdas limpiadas: ${this.cleaned} / ${this.totalSpots}  |  Tiempo: ${this.timeLeft}s`);
         if (this.timeLeft <= 0) {
           this.finish(false);
         }
@@ -263,27 +332,25 @@ class MinigameSolar extends Phaser.Scene {
 
   finish(switchClicked) {
     this.ended = true;
-    this.timer.remove();
+    if (this.timer) this.timer.remove();
 
-    let tier = "fail";
+    let tier = 'fail';
     if (switchClicked && this.timeLeft >= 4) {
-      tier = "excellent";
+      tier = 'excellent';
     } else if (switchClicked || this.cleaned >= 7) {
-      tier = "good";
+      tier = 'good';
     } else if (this.cleaned >= 5) {
-      tier = "fair";
-    } else {
-      tier = "fail";
+      tier = 'fair';
     }
 
-    this.scene.stop("MinigameSolar");
-    this.scene.resume("MainScene");
+    this.scene.stop('MinigameSolar');
+    this.scene.resume('MainScene');
 
-    if (typeof window.onMinigameComplete === "function") {
+    if (typeof window.onMinigameComplete === 'function') {
       window.onMinigameComplete({
         tier: tier,
         score: Math.round((this.cleaned / this.totalSpots) * 100),
-        minigameName: "Mantenimiento Solar (Energía)"
+        minigameName: 'Mantenimiento Solar (Energía)'
       }, this.choiceData);
     }
   }
@@ -294,7 +361,7 @@ class MinigameSolar extends Phaser.Scene {
 // ============================================================================
 class MinigameBiodome extends Phaser.Scene {
   constructor() {
-    super({ key: "MinigameBiodome" });
+    super({ key: 'MinigameBiodome' });
   }
 
   init(data) {
@@ -302,16 +369,15 @@ class MinigameBiodome extends Phaser.Scene {
   }
 
   create() {
-    this.add.rectangle(450, 250, 900, 500, 0x0f2027);
-    this.add.rectangle(450, 250, 880, 480, 0x1a332c).setStrokeStyle(2, 0x4ade80, 0.4);
+    const cx = this.scale.width / 2;
+    const cy = this.scale.height / 2;
+    const w = 860;
+    const h = 480;
 
-    this.add.text(450, 34, "BIODOMO OSDR: CULTIVO HIDROPONICO Y ESPIRULINA", {
-      fontSize: "21px", fontStyle: "bold", color: "#4ade80", fontFamily: "'Segoe UI', sans-serif"
-    }).setOrigin(0.5);
-
-    this.add.text(450, 64, "Mantén las 3 bandejas hidratadas y bajo luz LED pulsando sus botones antes de cosechar", {
-      fontSize: "14px", color: "#cbd5e1", fontFamily: "'Segoe UI', sans-serif"
-    }).setOrigin(0.5);
+    createTechConsole(this, cx, cy, w, h, 0x4ade80,
+      'HUERTO ESPACIAL: ¡CULTIVANDO COMIDA!',
+      'Pulsa los botones de REGAR + LUZ para mantener felices las 3 plantas hasta la cosecha'
+    );
 
     this.plants = [80, 75, 85];
     this.bars = [];
@@ -319,40 +385,42 @@ class MinigameBiodome extends Phaser.Scene {
     this.timeLeft = 10;
     this.ended = false;
 
-    const positions = [220, 450, 680];
-    const cropNames = ["Microgreens Rábano", "Espirulina Nutritiva", "Microgreens Col"];
+    const offsets = [-230, 0, 230];
+    const cropNames = ['Rábano Marciano', 'Espirulina Verde', 'Col Nutritiva'];
 
-    positions.forEach((x, idx) => {
-      this.add.rectangle(x, 255, 190, 230, 0x1e293b).setStrokeStyle(2, 0x4ade80);
-      this.add.text(x, 160, cropNames[idx], {
-        fontSize: "14px", fontStyle: "bold", color: "#f8fafc", fontFamily: "'Segoe UI', sans-serif"
+    offsets.forEach((ox, idx) => {
+      const px = cx + ox;
+      this.add.rectangle(px, cy + 15, 190, 220, 0x1e293b).setStrokeStyle(2.5, 0x4ade80);
+      this.add.text(px, cy - 75, cropNames[idx], {
+        fontSize: '14px', fontStyle: 'bold', color: '#ffffff', fontFamily: "'Fredoka', sans-serif"
       }).setOrigin(0.5);
 
-      const sprout = this.add.circle(x, 215, 18, 0x22c55e);
+      const sprout = this.add.circle(px, cy - 25, 20, 0x22c55e);
       this.sprouts.push(sprout);
 
-      const bar = this.add.text(x, 260, "Vitalidad: 80%", {
-        fontSize: "16px", fontStyle: "bold", color: "#4ade80", fontFamily: "'Segoe UI', sans-serif"
+      const bar = this.add.text(px, cy + 20, 'Vitalidad: 80%', {
+        fontSize: '15px', fontStyle: 'bold', color: '#4ade80', fontFamily: "'Fredoka', sans-serif"
       }).setOrigin(0.5);
       this.bars.push(bar);
 
-      const btn = this.add.rectangle(x, 325, 150, 46, 0x38bdf8)
+      const btn = this.add.rectangle(px, cy + 80, 150, 44, 0x0284c7)
         .setInteractive({ useHandCursor: true });
-      this.add.text(x, 325, "REGAR + LUZ LED", {
-        fontSize: "12px", fontStyle: "bold", color: "#0f172a", fontFamily: "'Segoe UI', sans-serif"
+      this.add.text(px, cy + 80, 'REGAR + LUZ', {
+        fontSize: '13px', fontStyle: 'bold', color: '#ffffff', fontFamily: "'Fredoka', sans-serif"
       }).setOrigin(0.5);
 
-      btn.on("pointerdown", () => {
+      btn.on('pointerdown', () => {
         if (this.ended) return;
         this.plants[idx] = Math.min(100, this.plants[idx] + 25);
-        if (typeof SoundFx !== "undefined") SoundFx.playResourceGain();
-        btn.setFillStyle(0x4ade80);
-        this.time.delayedCall(150, () => btn.setFillStyle(0x38bdf8));
+        spawnBurst(this, px, cy + 80, 0x38bdf8, 10, 50);
+        if (typeof SoundFx !== 'undefined') SoundFx.playResourceGain();
+        btn.setFillStyle(0x22c55e);
+        this.time.delayedCall(150, () => btn.setFillStyle(0x0284c7));
       });
     });
 
-    this.timerText = this.add.text(450, 420, "⏱️ Tiempo para cosecha: 10s", {
-      fontSize: "19px", fontStyle: "bold", color: "#f7e396", fontFamily: "'Segoe UI', sans-serif"
+    this.timerText = this.add.text(cx, cy + 185, 'Tiempo para cosecha: 10s', {
+      fontSize: '18px', fontStyle: 'bold', color: '#ffd000', fontFamily: "'Fredoka', sans-serif"
     }).setOrigin(0.5);
 
     this.timer = this.time.addEvent({
@@ -361,7 +429,7 @@ class MinigameBiodome extends Phaser.Scene {
       callback: () => {
         if (this.ended) return;
         this.timeLeft--;
-        this.timerText.setText(`⏱️ Tiempo para cosecha: ${this.timeLeft}s`);
+        this.timerText.setText(`Tiempo para cosecha: ${this.timeLeft}s`);
         if (this.timeLeft <= 0) {
           this.finish();
         }
@@ -397,29 +465,26 @@ class MinigameBiodome extends Phaser.Scene {
 
   finish() {
     this.ended = true;
-    this.timer.remove();
+    if (this.timer) this.timer.remove();
 
     const avg = Math.round((this.plants[0] + this.plants[1] + this.plants[2]) / 3);
-
-    let tier = "fail";
+    let tier = 'fail';
     if (avg >= 70) {
-      tier = "excellent";
+      tier = 'excellent';
     } else if (avg >= 45) {
-      tier = "good";
+      tier = 'good';
     } else if (avg >= 20) {
-      tier = "fair";
-    } else {
-      tier = "fail";
+      tier = 'fair';
     }
 
-    this.scene.stop("MinigameBiodome");
-    this.scene.resume("MainScene");
+    this.scene.stop('MinigameBiodome');
+    this.scene.resume('MainScene');
 
-    if (typeof window.onMinigameComplete === "function") {
+    if (typeof window.onMinigameComplete === 'function') {
       window.onMinigameComplete({
         tier: tier,
         score: avg,
-        minigameName: "Biodomo Hidropónico (Alimentos)"
+        minigameName: 'Biodomo Hidropónico (Alimentos)'
       }, this.choiceData);
     }
   }
@@ -430,7 +495,7 @@ class MinigameBiodome extends Phaser.Scene {
 // ============================================================================
 class MinigameShield extends Phaser.Scene {
   constructor() {
-    super({ key: "MinigameShield" });
+    super({ key: 'MinigameShield' });
   }
 
   init(data) {
@@ -438,21 +503,24 @@ class MinigameShield extends Phaser.Scene {
   }
 
   create() {
-    this.add.rectangle(450, 250, 900, 500, 0x180f24);
-    this.add.rectangle(450, 250, 880, 480, 0x28163c).setStrokeStyle(2, 0xfb7185, 0.4);
+    const cx = this.scale.width / 2;
+    const cy = this.scale.height / 2;
+    const w = 860;
+    const h = 480;
 
-    this.add.text(450, 34, "ALERTA SOLAR DONKI: ESCUDO DEFLECTOR DE RADIACION", {
-      fontSize: "21px", fontStyle: "bold", color: "#fb7185", fontFamily: "'Segoe UI', sans-serif"
+    createTechConsole(this, cx, cy, w, h, 0xfb7185,
+      'ESCUDO SOLAR: ¡PROTEGE EL HÁBITAT!',
+      'Mueve el escudo con el RATÓN para bloquear 7 partículas de radiación antes de que toquen la base'
+    );
+
+    // Barra de base del hábitat
+    this.add.rectangle(cx, cy + 205, 800, 36, 0x334155).setStrokeStyle(1.5, 0x64748b);
+    this.add.text(cx, cy + 205, 'BARRERA DEFENSIVA OUTPOST BETA', {
+      fontSize: '12px', fontStyle: 'bold', color: '#cbd5e1', fontFamily: "'Fredoka', sans-serif"
     }).setOrigin(0.5);
 
-    this.add.text(450, 64, "Mueve el deflector con el RATÓN para interceptar 7 PROTONES SOLARES antes de que dañen el hábitat", {
-      fontSize: "14px", color: "#cbd5e1", fontFamily: "'Segoe UI', sans-serif"
-    }).setOrigin(0.5);
-
-    this.add.rectangle(450, 475, 900, 50, 0x334155);
-
-    this.paddle = this.add.rectangle(450, 415, 140, 20, 0x38bdf8)
-      .setStrokeStyle(2, 0xffffff);
+    this.paddle = this.add.rectangle(cx, cy + 155, 140, 22, 0x38bdf8)
+      .setStrokeStyle(2.5, 0xffffff);
 
     this.blocked = 0;
     this.missed = 0;
@@ -461,20 +529,20 @@ class MinigameShield extends Phaser.Scene {
     this.ended = false;
     this.rays = [];
 
-    this.scoreText = this.add.text(40, 95, "Particulas bloqueadas: 0 / 7", {
-      fontSize: "19px", fontStyle: "bold", color: "#38bdf8", fontFamily: "'Segoe UI', sans-serif"
+    this.scoreText = this.add.text(cx - 390, cy - 150, 'Partículas bloqueadas: 0 / 7', {
+      fontSize: '18px', fontStyle: 'bold', color: '#38bdf8', fontFamily: "'Fredoka', sans-serif"
     });
-    this.damageText = this.add.text(40, 128, "Impactos permitidos: 0 / 3", {
-      fontSize: "17px", color: "#fb7185", fontFamily: "'Segoe UI', sans-serif"
+    this.damageText = this.add.text(cx - 390, cy - 122, 'Impactos permitidos: 0 / 3', {
+      fontSize: '16px', color: '#fb7185', fontFamily: "'Fredoka', sans-serif"
     });
 
     this.spawner = this.time.addEvent({
-      delay: 720,
+      delay: 700,
       loop: true,
       callback: () => {
         if (this.ended) return;
-        const x = Phaser.Math.Between(160, 760);
-        const ray = this.add.circle(x, 90, 14, 0xfacc15).setStrokeStyle(3, 0xfb7185);
+        const rx = Phaser.Math.Between(cx - 330, cx + 330);
+        const ray = this.add.circle(rx, cy - 140, 14, 0xfacc15).setStrokeStyle(3, 0xfb7185);
         this.rays.push(ray);
       }
     });
@@ -482,8 +550,10 @@ class MinigameShield extends Phaser.Scene {
 
   update(time, delta) {
     if (this.ended) return;
+    const cx = this.scale.width / 2;
+    const cy = this.scale.height / 2;
 
-    if (this.input.activePointer.x > 120 && this.input.activePointer.x < 780) {
+    if (this.input.activePointer.x > cx - 360 && this.input.activePointer.x < cx + 360) {
       this.paddle.x = this.input.activePointer.x;
     }
 
@@ -491,10 +561,11 @@ class MinigameShield extends Phaser.Scene {
       const r = this.rays[i];
       r.y += 0.26 * delta;
 
-      if (Math.abs(r.y - this.paddle.y) < 20 && Math.abs(r.x - this.paddle.x) < 75) {
+      if (Math.abs(r.y - this.paddle.y) < 22 && Math.abs(r.x - this.paddle.x) < 75) {
         this.blocked++;
-        if (typeof SoundFx !== "undefined") SoundFx.playResourceGain();
-        this.scoreText.setText(`Particulas bloqueadas: ${this.blocked} / ${this.targetBlocked}`);
+        spawnBurst(this, r.x, r.y, 0x38bdf8, 12, 90);
+        if (typeof SoundFx !== 'undefined') SoundFx.playResourceGain();
+        this.scoreText.setText(`Partículas bloqueadas: ${this.blocked} / ${this.targetBlocked}`);
         r.destroy();
         this.rays.splice(i, 1);
 
@@ -502,10 +573,12 @@ class MinigameShield extends Phaser.Scene {
           this.finish();
           return;
         }
-      } else if (r.y > 455) {
+      } else if (r.y > cy + 195) {
         this.missed++;
-        if (typeof SoundFx !== "undefined") SoundFx.playAlert();
-        this.damageText.setText(`Impactos en Outpost: ${this.missed} / ${this.maxMisses}`);
+        this.cameras.main.shake(180, 0.01);
+        spawnBurst(this, r.x, cy + 195, 0xfb7185, 10, 80);
+        if (typeof SoundFx !== 'undefined') SoundFx.playAlert();
+        this.damageText.setText(`Impactos permitidos: ${this.missed} / ${this.maxMisses}`);
         r.destroy();
         this.rays.splice(i, 1);
 
@@ -519,38 +592,36 @@ class MinigameShield extends Phaser.Scene {
 
   finish() {
     this.ended = true;
-    this.spawner.remove();
+    if (this.spawner) this.spawner.remove();
 
-    let tier = "fail";
+    let tier = 'fail';
     if (this.blocked >= this.targetBlocked && this.missed === 0) {
-      tier = "excellent";
+      tier = 'excellent';
     } else if (this.blocked >= this.targetBlocked || (this.blocked >= 5 && this.missed < 2)) {
-      tier = "good";
+      tier = 'good';
     } else if (this.blocked >= 4) {
-      tier = "fair";
-    } else {
-      tier = "fail";
+      tier = 'fair';
     }
 
-    this.scene.stop("MinigameShield");
-    this.scene.resume("MainScene");
+    this.scene.stop('MinigameShield');
+    this.scene.resume('MainScene');
 
-    if (typeof window.onMinigameComplete === "function") {
+    if (typeof window.onMinigameComplete === 'function') {
       window.onMinigameComplete({
         tier: tier,
         score: Math.round((this.blocked / this.targetBlocked) * 100),
-        minigameName: "Escudo DONKI (Radiación)"
+        minigameName: 'Escudo DONKI (Radiación)'
       }, this.choiceData);
     }
   }
 }
 
 // ============================================================================
-// 5. NUEVO MINIJUEGO: PURIFICACIÓN Y FILTRADO DE AGUA (Separar Percloratos)
+// 5. MINIJUEGO: PURIFICACIÓN Y FILTRADO DE AGUA (Separar Percloratos)
 // ============================================================================
 class MinigameWaterFilter extends Phaser.Scene {
   constructor() {
-    super({ key: "MinigameWaterFilter" });
+    super({ key: 'MinigameWaterFilter' });
   }
 
   init(data) {
@@ -558,78 +629,85 @@ class MinigameWaterFilter extends Phaser.Scene {
   }
 
   create() {
-    this.add.rectangle(450, 250, 900, 500, 0x091e2b);
-    this.add.rectangle(450, 250, 880, 480, 0x113144).setStrokeStyle(2, 0x38bdf8, 0.4);
+    const cx = this.scale.width / 2;
+    const cy = this.scale.height / 2;
+    const w = 860;
+    const h = 480;
 
-    this.add.text(450, 34, "PURIFICACION DE AGUA: ELIMINACION DE PERCLORATOS", {
-      fontSize: "21px", fontStyle: "bold", color: "#38bdf8", fontFamily: "'Segoe UI', sans-serif"
-    }).setOrigin(0.5);
-
-    this.add.text(450, 64, "Activa los 3 filtros en orden (1: Sedimentos -> 2: Percloratos -> 3: Ósmosis Inversa) para obtener agua potable", {
-      fontSize: "13px", color: "#cbd5e1", fontFamily: "'Segoe UI', sans-serif"
-    }).setOrigin(0.5);
+    createTechConsole(this, cx, cy, w, h, 0x38bdf8,
+      'DEPURADORA DE AGUA: ¡LIMPIANDO PERCLORATOS!',
+      'Activa los 3 filtros en orden (Paso 1 -> Paso 2 -> Paso 3) para conseguir agua limpia'
+    );
 
     this.stagesDone = [false, false, false];
     this.timeLeft = 12;
     this.ended = false;
 
     const stages = [
-      { num: 1, title: "Filtro 1: Sedimentos", desc: "Retener roca y arena", x: 220 },
-      { num: 2, title: "Filtro 2: Percloratos", desc: "Desactivar sales tóxicas", x: 450 },
-      { num: 3, title: "Filtro 3: Ósmosis Inversa", desc: "Agua 100% esterilizada", x: 680 }
+      { num: 1, title: 'Filtro 1: Rocas y Arena', desc: 'Retiene la tierra del suelo', ox: -230 },
+      { num: 2, title: 'Filtro 2: Percloratos', desc: 'Elimina las sales tóxicas', ox: 0 },
+      { num: 3, title: 'Filtro 3: Agua Pura', desc: 'Agua 100% limpia para beber', ox: 230 }
     ];
 
     this.buttons = [];
 
+    // Tubería conectora central
+    this.add.line(0, 0, cx - 230, cy + 10, cx + 230, cy + 10, 0x0284c7, 4).setOrigin(0);
+
     stages.forEach((st, idx) => {
-      this.add.rectangle(st.x, 240, 190, 220, 0x162b3a).setStrokeStyle(2, 0x38bdf8);
-      this.add.text(st.x, 160, st.title, {
-        fontSize: "15px", fontStyle: "bold", color: "#f8fafc", fontFamily: "'Segoe UI', sans-serif"
+      const px = cx + st.ox;
+      this.add.rectangle(px, cy + 15, 190, 210, 0x162b3a).setStrokeStyle(2.5, 0x38bdf8);
+      this.add.text(px, cy - 65, st.title, {
+        fontSize: '14px', fontStyle: 'bold', color: '#ffffff', fontFamily: "'Fredoka', sans-serif"
       }).setOrigin(0.5);
 
-      this.add.text(st.x, 195, st.desc, {
-        fontSize: "12px", color: "#94a3b8", align: "center", fontFamily: "'Segoe UI', sans-serif"
+      this.add.text(px, cy - 35, st.desc, {
+        fontSize: '12px', color: '#cbd5e1', align: 'center', fontFamily: "'Fredoka', sans-serif"
       }).setOrigin(0.5);
 
-      const statusTag = this.add.text(st.x, 240, "ESTADO: BLOQUEADO", {
-        fontSize: "13px", fontStyle: "bold", color: "#fb7185", fontFamily: "'Segoe UI', sans-serif"
+      const statusTag = this.add.text(px, cy + 10, 'Esperando turno', {
+        fontSize: '13px', fontStyle: 'bold', color: '#fb7185', fontFamily: "'Fredoka', sans-serif"
       }).setOrigin(0.5);
 
-      const btn = this.add.rectangle(st.x, 305, 150, 44, idx === 0 ? 0x38bdf8 : 0x475569)
+      const btn = this.add.rectangle(px, cy + 75, 150, 44, idx === 0 ? 0x0284c7 : 0x475569)
         .setInteractive({ useHandCursor: true });
-      const btnText = this.add.text(st.x, 305, idx === 0 ? "ACTIVAR" : "ESPERANDO", {
-        fontSize: "13px", fontStyle: "bold", color: "#0f172a", fontFamily: "'Segoe UI', sans-serif"
+      const btnText = this.add.text(px, cy + 75, idx === 0 ? 'ACTIVAR' : 'BLOQUEADO', {
+        fontSize: '13px', fontStyle: 'bold', color: '#ffffff', fontFamily: "'Fredoka', sans-serif"
       }).setOrigin(0.5);
 
-      btn.on("pointerdown", () => {
+      btn.on('pointerdown', () => {
         if (this.ended) return;
 
         if (idx === 0 || this.stagesDone[idx - 1]) {
           if (!this.stagesDone[idx]) {
             this.stagesDone[idx] = true;
-            statusTag.setText("ESTADO: PURIFICADO [OK]");
-            statusTag.setColor("#4ade80");
+            statusTag.setText('¡Filtro activo!');
+            statusTag.setColor('#4ade80');
             btn.setFillStyle(0x22c55e);
-            btnText.setText("COMPLETADO");
-            if (typeof SoundFx !== "undefined") SoundFx.playResourceGain();
+            btnText.setText('¡LISTO!');
+            spawnBurst(this, px, cy + 75, 0x38bdf8, 12, 70);
+            if (typeof SoundFx !== 'undefined') SoundFx.playResourceGain();
 
             if (idx + 1 < stages.length) {
-              this.buttons[idx + 1].btn.setFillStyle(0x38bdf8);
-              this.buttons[idx + 1].btnText.setText("ACTIVAR");
+              this.buttons[idx + 1].btn.setFillStyle(0x0284c7);
+              this.buttons[idx + 1].btnText.setText('ACTIVAR');
+              this.buttons[idx + 1].statusTag.setText('¡Listo para activar!');
+              this.buttons[idx + 1].statusTag.setColor('#ffd000');
             } else {
               this.time.delayedCall(400, () => this.finish());
             }
           }
         } else {
-          if (typeof SoundFx !== "undefined") SoundFx.playAlert();
+          this.cameras.main.shake(120, 0.005);
+          if (typeof SoundFx !== 'undefined') SoundFx.playAlert();
         }
       });
 
       this.buttons.push({ btn, btnText, statusTag });
     });
 
-    this.timerText = this.add.text(450, 420, "⏱️ Tiempo de presurización: 12s", {
-      fontSize: "18px", fontStyle: "bold", color: "#f7e396", fontFamily: "'Segoe UI', sans-serif"
+    this.timerText = this.add.text(cx, cy + 185, 'Tiempo restante: 12s', {
+      fontSize: '18px', fontStyle: 'bold', color: '#ffd000', fontFamily: "'Fredoka', sans-serif"
     }).setOrigin(0.5);
 
     this.timer = this.time.addEvent({
@@ -638,7 +716,7 @@ class MinigameWaterFilter extends Phaser.Scene {
       callback: () => {
         if (this.ended) return;
         this.timeLeft--;
-        this.timerText.setText(`⏱️ Tiempo de presurización: ${this.timeLeft}s`);
+        this.timerText.setText(`Tiempo restante: ${this.timeLeft}s`);
         if (this.timeLeft <= 0) {
           this.finish();
         }
@@ -648,39 +726,37 @@ class MinigameWaterFilter extends Phaser.Scene {
 
   finish() {
     this.ended = true;
-    this.timer.remove();
+    if (this.timer) this.timer.remove();
 
     const count = this.stagesDone.filter(Boolean).length;
-    let tier = "fail";
+    let tier = 'fail';
     if (count === 3 && this.timeLeft >= 5) {
-      tier = "excellent";
+      tier = 'excellent';
     } else if (count === 3) {
-      tier = "good";
+      tier = 'good';
     } else if (count >= 2) {
-      tier = "fair";
-    } else {
-      tier = "fail";
+      tier = 'fair';
     }
 
-    this.scene.stop("MinigameWaterFilter");
-    this.scene.resume("MainScene");
+    this.scene.stop('MinigameWaterFilter');
+    this.scene.resume('MainScene');
 
-    if (typeof window.onMinigameComplete === "function") {
+    if (typeof window.onMinigameComplete === 'function') {
       window.onMinigameComplete({
         tier: tier,
         score: Math.round((count / 3) * 100),
-        minigameName: "Purificación de Agua y Percloratos (Agua)"
+        minigameName: 'Purificación de Agua y Percloratos (Agua)'
       }, this.choiceData);
     }
   }
 }
 
 // ============================================================================
-// 6. NUEVO MINIJUEGO: REPARACIÓN DE FUGAS DE OXÍGENO EN EL HÁBITAT
+// 6. MINIJUEGO: REPARACIÓN DE FUGAS DE OXÍGENO EN EL HÁBITAT
 // ============================================================================
 class MinigameLeakRepair extends Phaser.Scene {
   constructor() {
-    super({ key: "MinigameLeakRepair" });
+    super({ key: 'MinigameLeakRepair' });
   }
 
   init(data) {
@@ -688,54 +764,64 @@ class MinigameLeakRepair extends Phaser.Scene {
   }
 
   create() {
-    this.add.rectangle(450, 250, 900, 500, 0x161e2e);
-    this.add.rectangle(450, 250, 880, 480, 0x1f2d42).setStrokeStyle(2, 0x38bdf8, 0.4);
+    const cx = this.scale.width / 2;
+    const cy = this.scale.height / 2;
+    const w = 860;
+    const h = 480;
 
-    this.add.text(450, 34, "🫧 REPARACIÓN DE FUGAS: INTEGRIDAD DE CABINA", {
-      fontSize: "21px", fontStyle: "bold", color: "#38bdf8", fontFamily: "'Segoe UI', sans-serif"
-    }).setOrigin(0.5);
-
-    this.add.text(450, 64, "¡Haz CLIC sobre las 5 micro-roturas para sellarlas con espuma antes de que caiga la presión de oxígeno!", {
-      fontSize: "14px", color: "#cbd5e1", fontFamily: "'Segoe UI', sans-serif"
-    }).setOrigin(0.5);
+    createTechConsole(this, cx, cy, w, h, 0x38bdf8,
+      'SELLADO DE FUGAS: ¡SALVA EL OXÍGENO!',
+      'Haz CLIC sobre las 5 fugas marcadas para taparlas antes de que baje el aire de la cabina'
+    );
 
     this.sealed = 0;
     this.totalLeaks = 5;
     this.timeLeft = 10;
     this.ended = false;
-
     this.pressure = 100;
-    this.pressureText = this.add.text(40, 95, "Presión interior: 101.3 kPa (100%)", {
-      fontSize: "18px", fontStyle: "bold", color: "#4ade80", fontFamily: "'Segoe UI', sans-serif"
+
+    this.pressureText = this.add.text(cx - 390, cy - 150, 'Presión de cabina: 100%', {
+      fontSize: '18px', fontStyle: 'bold', color: '#4ade80', fontFamily: "'Fredoka', sans-serif"
     });
 
-    this.statusText = this.add.text(650, 95, "Fugas selladas: 0 / 5", {
-      fontSize: "18px", fontStyle: "bold", color: "#f7e396", fontFamily: "'Segoe UI', sans-serif"
+    this.statusText = this.add.text(cx + 170, cy - 150, 'Fugas selladas: 0 / 5', {
+      fontSize: '18px', fontStyle: 'bold', color: '#ffd000', fontFamily: "'Fredoka', sans-serif"
     });
 
-    this.add.rectangle(450, 275, 700, 260, 0x1e293b).setStrokeStyle(3, 0x475569);
+    // Panel de mamparo del hábitat
+    this.add.rectangle(cx, cy + 25, 720, 260, 0x1e293b).setStrokeStyle(3, 0x475569);
 
     for (let i = 0; i < this.totalLeaks; i++) {
-      const x = Phaser.Math.Between(200, 700);
-      const y = Phaser.Math.Between(175, 375);
+      const lx = Phaser.Math.Between(cx - 280, cx + 280);
+      const ly = Phaser.Math.Between(cy - 75, cy + 115);
 
-      const leakCircle = this.add.circle(x, y, 22, 0x0284c7)
+      const leakCircle = this.add.circle(lx, ly, 24, 0x0284c7)
         .setStrokeStyle(3, 0x38bdf8)
         .setInteractive({ useHandCursor: true });
 
-      const hissText = this.add.text(x, y - 28, "FUGA", {
-        fontSize: "11px", fontStyle: "bold", color: "#38bdf8"
+      this.tweens.add({
+        targets: leakCircle,
+        scale: 1.25,
+        alpha: 0.7,
+        duration: 400,
+        yoyo: true,
+        repeat: -1
+      });
+
+      const hissText = this.add.text(lx, ly - 30, '¡Fuga!', {
+        fontSize: '12px', fontStyle: 'bold', color: '#38bdf8', fontFamily: "'Fredoka', sans-serif"
       }).setOrigin(0.5);
 
-      leakCircle.on("pointerdown", () => {
+      leakCircle.on('pointerdown', () => {
         if (this.ended) return;
         leakCircle.destroy();
         hissText.destroy();
         this.sealed++;
-        if (typeof SoundFx !== "undefined") SoundFx.playResourceGain();
+        spawnBurst(this, lx, ly, 0x38bdf8, 14, 60);
+        if (typeof SoundFx !== 'undefined') SoundFx.playResourceGain();
         this.statusText.setText(`Fugas selladas: ${this.sealed} / ${this.totalLeaks}`);
 
-        this.add.circle(x, y, 16, 0x22c55e).setStrokeStyle(2, 0xffffff);
+        this.add.circle(lx, ly, 18, 0x22c55e).setStrokeStyle(2.5, 0xffffff);
 
         if (this.sealed >= this.totalLeaks) {
           this.finish();
@@ -750,7 +836,11 @@ class MinigameLeakRepair extends Phaser.Scene {
         if (this.ended) return;
         this.timeLeft--;
         this.pressure = Math.max(10, this.pressure - (this.totalLeaks - this.sealed) * 4);
-        this.pressureText.setText(`Presión interior: ${(this.pressure * 1.013).toFixed(1)} kPa (${this.pressure}%)`);
+        this.pressureText.setText(`Presión de cabina: ${this.pressure}%`);
+        if (this.pressure < 50) {
+          this.pressureText.setColor('#fb7185');
+          this.cameras.main.shake(90, 0.004);
+        }
         if (this.timeLeft <= 0) {
           this.finish();
         }
@@ -760,39 +850,36 @@ class MinigameLeakRepair extends Phaser.Scene {
 
   finish() {
     this.ended = true;
-    this.timer.remove();
+    if (this.timer) this.timer.remove();
 
-    let tier = "fail";
+    let tier = 'fail';
     if (this.sealed >= this.totalLeaks && this.timeLeft >= 4) {
-      tier = "excellent";
+      tier = 'excellent';
     } else if (this.sealed >= this.totalLeaks || this.sealed >= 4) {
-      tier = "good";
+      tier = 'good';
     } else if (this.sealed >= 3) {
-      tier = "fair";
-    } else {
-      tier = "fail";
+      tier = 'fair';
     }
 
-    this.scene.stop("MinigameLeakRepair");
-    this.scene.resume("MainScene");
+    this.scene.stop('MinigameLeakRepair');
+    this.scene.resume('MainScene');
 
-    if (typeof window.onMinigameComplete === "function") {
+    if (typeof window.onMinigameComplete === 'function') {
       window.onMinigameComplete({
         tier: tier,
         score: Math.round((this.sealed / this.totalLeaks) * 100),
-        minigameName: "Sellado de Fugas del Hábitat (Oxígeno)"
+        minigameName: 'Sellado de Fugas del Hábitat (Oxígeno)'
       }, this.choiceData);
     }
   }
 }
 
-
 // ============================================================================
-// 7. NUEVO MINIJUEGO: REPARACIÓN ELÉCTRICA Y CONEXIÓN DE CIRCUITOS
+// 7. MINIJUEGO: REPARACIÓN ELÉCTRICA Y CONEXIÓN DE CIRCUITOS
 // ============================================================================
 class MinigameCircuit extends Phaser.Scene {
   constructor() {
-    super({ key: "MinigameCircuit" });
+    super({ key: 'MinigameCircuit' });
   }
 
   init(data) {
@@ -800,68 +887,68 @@ class MinigameCircuit extends Phaser.Scene {
   }
 
   create() {
-    this.add.rectangle(450, 250, 900, 500, 0x0f172a);
-    this.add.rectangle(450, 250, 880, 480, 0x1e293b).setStrokeStyle(2, 0xfacc15, 0.4);
+    const cx = this.scale.width / 2;
+    const cy = this.scale.height / 2;
+    const w = 860;
+    const h = 480;
 
-    this.add.text(450, 34, "REPARACION ELECTRICA: CONEXION DE CIRCUITOS", {
-      fontSize: "21px", fontStyle: "bold", color: "#F7E396", fontFamily: "'Segoe UI', sans-serif"
+    createTechConsole(this, cx, cy, w, h, 0xffd000,
+      'CIRCUITOS: ¡CONECTA LA ENERGÍA!',
+      'Haz clic en los 4 relés para girarlos y hacer que la corriente viaje de los paneles a las baterías'
+    );
+
+    // Entrada y Salida
+    this.add.rectangle(cx - 330, cy + 10, 110, 70, 0x1e3a8a).setStrokeStyle(2.5, 0x38bdf8);
+    this.add.text(cx - 330, cy + 10, 'PANELES\nSOLARES', {
+      fontSize: '13px', fontStyle: 'bold', color: '#38bdf8', align: 'center', fontFamily: "'Fredoka', sans-serif"
     }).setOrigin(0.5);
 
-    this.add.text(450, 64, "Haz clic en los 4 relés de paso para ALINEAR EL FLUJO ELÉCTRICO desde los paneles a las baterías", {
-      fontSize: "13px", color: "#cbd5e1", fontFamily: "'Segoe UI', sans-serif"
+    this.add.rectangle(cx + 330, cy + 10, 110, 70, 0x14532d).setStrokeStyle(2.5, 0x4ade80);
+    this.add.text(cx + 330, cy + 10, 'BATERÍAS\nBASE', {
+      fontSize: '13px', fontStyle: 'bold', color: '#4ade80', align: 'center', fontFamily: "'Fredoka', sans-serif"
     }).setOrigin(0.5);
 
-    // Entrada de energía (izquierda) y Salida a baterías (derecha)
-    this.add.rectangle(120, 250, 110, 70, 0x1e3a8a).setStrokeStyle(2, 0x38bdf8);
-    this.add.text(120, 250, "PANELES\nENTRADA", {
-      fontSize: "12px", fontStyle: "bold", color: "#38bdf8", align: "center", fontFamily: "'Segoe UI', sans-serif"
-    }).setOrigin(0.5);
-
-    this.add.rectangle(780, 250, 110, 70, 0x14532d).setStrokeStyle(2, 0x4ade80);
-    this.add.text(780, 250, "BATERIAS\nOUTPOST", {
-      fontSize: "12px", fontStyle: "bold", color: "#4ade80", align: "center", fontFamily: "'Segoe UI', sans-serif"
-    }).setOrigin(0.5);
-
-    // 4 Nodos relé centrales que el jugador rota
     this.relays = [
-      { x: 260, y: 250, state: 1, target: 0 },
-      { x: 390, y: 190, state: 2, target: 0 },
-      { x: 520, y: 310, state: 3, target: 0 },
-      { x: 650, y: 250, state: 1, target: 0 }
+      { ox: -190, oy: 10, state: 1, target: 0 },
+      { ox: -60, oy: -50, state: 2, target: 0 },
+      { ox: 70, oy: 70, state: 3, target: 0 },
+      { ox: 200, oy: 10, state: 1, target: 0 }
     ];
 
     this.relayObjects = [];
     this.timeLeft = 12;
     this.ended = false;
 
-    // Cables guía entre nodos
     this.wireLine = this.add.graphics();
     this.drawWires(false);
 
     this.relays.forEach((r, idx) => {
-      const box = this.add.rectangle(r.x, r.y, 76, 76, 0x1e293b)
+      const rx = cx + r.ox;
+      const ry = cy + r.oy;
+
+      const box = this.add.rectangle(rx, ry, 74, 74, 0x1e293b)
         .setStrokeStyle(3, 0x64748b)
         .setInteractive({ useHandCursor: true });
 
-      const indicator = this.add.rectangle(r.x, r.y, 48, 12, 0xfacc15);
+      const indicator = this.add.rectangle(rx, ry, 48, 12, 0xffd000);
       indicator.setAngle(r.state * 90);
 
-      const label = this.add.text(r.x, r.y - 48, `Relé #${idx + 1}`, {
-        fontSize: "11px", color: "#94a3b8", fontFamily: "'Segoe UI', sans-serif"
+      this.add.text(rx, ry - 48, `Relé ${idx + 1}`, {
+        fontSize: '12px', fontStyle: 'bold', color: '#cbd5e1', fontFamily: "'Fredoka', sans-serif"
       }).setOrigin(0.5);
 
-      box.on("pointerdown", () => {
+      box.on('pointerdown', () => {
         if (this.ended) return;
         r.state = (r.state + 1) % 4;
         indicator.setAngle(r.state * 90);
-        if (typeof SoundFx !== "undefined") SoundFx.playClick();
+        if (typeof SoundFx !== 'undefined') SoundFx.playClick();
 
         if (r.state === r.target) {
           box.setStrokeStyle(3, 0x22c55e);
           indicator.setFillStyle(0x4ade80);
         } else {
           box.setStrokeStyle(3, 0x64748b);
-          indicator.setFillStyle(0xfacc15);
+          indicator.setFillStyle(0xffd000);
         }
 
         this.checkCircuitComplete();
@@ -870,8 +957,8 @@ class MinigameCircuit extends Phaser.Scene {
       this.relayObjects.push({ box, indicator });
     });
 
-    this.timerText = this.add.text(450, 420, "⏱️ Tiempo de diagnóstico: 12s", {
-      fontSize: "18px", fontStyle: "bold", color: "#f7e396", fontFamily: "'Segoe UI', sans-serif"
+    this.timerText = this.add.text(cx, cy + 185, 'Tiempo restante: 12s', {
+      fontSize: '18px', fontStyle: 'bold', color: '#ffd000', fontFamily: "'Fredoka', sans-serif"
     }).setOrigin(0.5);
 
     this.timer = this.time.addEvent({
@@ -880,7 +967,7 @@ class MinigameCircuit extends Phaser.Scene {
       callback: () => {
         if (this.ended) return;
         this.timeLeft--;
-        this.timerText.setText(`⏱️ Tiempo de diagnóstico: ${this.timeLeft}s`);
+        this.timerText.setText(`Tiempo restante: ${this.timeLeft}s`);
         if (this.timeLeft <= 0) {
           this.finish();
         }
@@ -889,64 +976,65 @@ class MinigameCircuit extends Phaser.Scene {
   }
 
   drawWires(isPowered) {
+    const cx = this.scale.width / 2;
+    const cy = this.scale.height / 2;
     this.wireLine.clear();
-    this.wireLine.lineStyle(4, isPowered ? 0xfacc15 : 0x334155);
-
+    this.wireLine.lineStyle(4, isPowered ? 0xffd000 : 0x334155);
     this.wireLine.beginPath();
-    this.wireLine.moveTo(175, 250);
-    this.wireLine.lineTo(260, 250);
-    this.wireLine.lineTo(390, 190);
-    this.wireLine.lineTo(520, 310);
-    this.wireLine.lineTo(650, 250);
-    this.wireLine.lineTo(725, 250);
+    this.wireLine.moveTo(cx - 275, cy + 10);
+    this.wireLine.lineTo(cx - 190, cy + 10);
+    this.wireLine.lineTo(cx - 60, cy - 50);
+    this.wireLine.lineTo(cx + 70, cy + 70);
+    this.wireLine.lineTo(cx + 200, cy + 10);
+    this.wireLine.lineTo(cx + 275, cy + 10);
     this.wireLine.strokePath();
   }
 
   checkCircuitComplete() {
     const isComplete = this.relays.every(r => r.state === r.target);
     if (isComplete && !this.ended) {
+      const cx = this.scale.width / 2;
+      const cy = this.scale.height / 2;
       this.drawWires(true);
-      if (typeof SoundFx !== "undefined") SoundFx.playSuccess();
+      spawnBurst(this, cx, cy + 10, 0xffd000, 20, 130);
+      if (typeof SoundFx !== 'undefined') SoundFx.playSuccess();
       this.time.delayedCall(450, () => this.finish());
     }
   }
 
   finish() {
     this.ended = true;
-    this.timer.remove();
+    if (this.timer) this.timer.remove();
 
     const alignedCount = this.relays.filter(r => r.state === r.target).length;
-
-    let tier = "fail";
+    let tier = 'fail';
     if (alignedCount === 4 && this.timeLeft >= 5) {
-      tier = "excellent";
+      tier = 'excellent';
     } else if (alignedCount === 4) {
-      tier = "good";
+      tier = 'good';
     } else if (alignedCount >= 2) {
-      tier = "fair";
-    } else {
-      tier = "fail";
+      tier = 'fair';
     }
 
-    this.scene.stop("MinigameCircuit");
-    this.scene.resume("MainScene");
+    this.scene.stop('MinigameCircuit');
+    this.scene.resume('MainScene');
 
-    if (typeof window.onMinigameComplete === "function") {
+    if (typeof window.onMinigameComplete === 'function') {
       window.onMinigameComplete({
         tier: tier,
         score: Math.round((alignedCount / 4) * 100),
-        minigameName: "Conexión de Circuitos (Energía)"
+        minigameName: 'Conexión de Circuitos (Energía)'
       }, this.choiceData);
     }
   }
 }
 
 // ============================================================================
-// 8. NUEVO MINIJUEGO: CONDUCCIÓN Y EXPLORACIÓN DEL ROVER ROVI
+// 8. MINIJUEGO: CONDUCCIÓN Y EXPLORACIÓN DEL ROVER ROVI
 // ============================================================================
 class MinigameRoverDrive extends Phaser.Scene {
   constructor() {
-    super({ key: "MinigameRoverDrive" });
+    super({ key: 'MinigameRoverDrive' });
   }
 
   init(data) {
@@ -954,56 +1042,64 @@ class MinigameRoverDrive extends Phaser.Scene {
   }
 
   create() {
-    this.add.rectangle(450, 250, 900, 500, 0x1f1424);
-    this.add.rectangle(450, 250, 880, 480, 0x2b1b30).setStrokeStyle(2, 0xfacc15, 0.4);
+    const cx = this.scale.width / 2;
+    const cy = this.scale.height / 2;
+    const w = 860;
+    const h = 480;
 
-    this.add.text(450, 34, "EXPLORACION Y CONDUCCION CON EL ROVER ROVI", {
-      fontSize: "21px", fontStyle: "bold", color: "#F7E396", fontFamily: "'Segoe UI', sans-serif"
-    }).setOrigin(0.5);
-
-    this.add.text(450, 64, "Conduce a ROVI con FLECHAS o WASD para desplegar 4 SENSORES CIENTÍFICOS evitando cráteres", {
-      fontSize: "13px", color: "#cbd5e1", fontFamily: "'Segoe UI', sans-serif"
-    }).setOrigin(0.5);
+    createTechConsole(this, cx, cy, w, h, 0xffd000,
+      'ROVER ROVI: ¡EXPLORACIÓN MARCIANA!',
+      'Conduce a ROVI con FLECHAS o WASD para recoger 4 balizas científicas esquivando los cráteres'
+    );
 
     this.sensorsCollected = 0;
     this.targetSensors = 4;
     this.timeLeft = 14;
     this.ended = false;
 
-    // Obstáculos (cráteres y rocas)
+    // Obstáculos
     this.obstacles = [];
     const obsPos = [
-      { x: 300, y: 190, r: 28 },
-      { x: 600, y: 220, r: 32 },
-      { x: 420, y: 340, r: 26 },
-      { x: 700, y: 360, r: 30 }
+      { ox: -150, oy: -60, r: 28 },
+      { ox: 150, oy: -30, r: 32 },
+      { ox: -30, oy: 90, r: 26 },
+      { ox: 250, oy: 110, r: 30 }
     ];
 
     obsPos.forEach(p => {
-      const crat = this.add.circle(p.x, p.y, p.r, 0x170f1a).setStrokeStyle(3, 0x8a3822);
-      this.add.text(p.x, p.y, "[X]", { fontSize: "16px" }).setOrigin(0.5);
+      const crat = this.add.circle(cx + p.ox, cy + p.oy, p.r, 0x170f1a).setStrokeStyle(3, 0x8a3822);
+      this.add.text(cx + p.ox, cy + p.oy, 'Cráter', { fontSize: '11px', fontStyle: 'bold', color: '#fb7185', fontFamily: "'Fredoka', sans-serif" }).setOrigin(0.5);
       this.obstacles.push(crat);
     });
 
-    // 4 Balizas / Sensores científicos a recoger
+    // 4 Balizas científicas
     this.beacons = [];
     const beaconCoords = [
-      { x: 220, y: 150 },
-      { x: 740, y: 160 },
-      { x: 320, y: 390 },
-      { x: 760, y: 380 }
+      { ox: -230, oy: -100 },
+      { ox: 290, oy: -90 },
+      { ox: -130, oy: 140 },
+      { ox: 310, oy: 130 }
     ];
 
-    beaconCoords.forEach((b, idx) => {
-      const beacon = this.add.circle(b.x, b.y, 16, 0x38bdf8).setStrokeStyle(2, 0xffffff);
-      const icon = this.add.text(b.x, b.y, "[RAD]", { fontSize: "14px" }).setOrigin(0.5);
+    beaconCoords.forEach(b => {
+      const beacon = this.add.circle(cx + b.ox, cy + b.oy, 16, 0x38bdf8).setStrokeStyle(2.5, 0xffffff);
+      const icon = this.add.text(cx + b.ox, cy + b.oy, 'Baliza', { fontSize: '10px', fontStyle: 'bold', color: '#ffffff', fontFamily: "'Fredoka', sans-serif" }).setOrigin(0.5);
       beacon.icon = icon;
       this.beacons.push(beacon);
+
+      this.tweens.add({
+        targets: beacon,
+        scale: 1.15,
+        alpha: 0.85,
+        duration: 450,
+        yoyo: true,
+        repeat: -1
+      });
     });
 
-    // Rover ROVI controlado por el jugador
-    this.rover = this.add.rectangle(450, 250, 36, 24, 0xfacc15).setStrokeStyle(2, 0x0f172a);
-    this.roverSensor = this.add.circle(450 + 12, 250, 5, 0x0284c7);
+    // Rover ROVI
+    this.rover = this.add.rectangle(cx, cy + 10, 36, 24, 0xffd000).setStrokeStyle(2, 0x0f172a);
+    this.roverSensor = this.add.circle(cx + 12, cy + 10, 5, 0x0284c7);
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.wasd = {
@@ -1013,12 +1109,12 @@ class MinigameRoverDrive extends Phaser.Scene {
       right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
     };
 
-    this.scoreText = this.add.text(40, 95, "Balizas cientificas desplegadas: 0 / 4", {
-      fontSize: "18px", fontStyle: "bold", color: "#38bdf8", fontFamily: "'Segoe UI', sans-serif"
+    this.scoreText = this.add.text(cx - 390, cy - 150, 'Balizas colocadas: 0 / 4', {
+      fontSize: '18px', fontStyle: 'bold', color: '#38bdf8', fontFamily: "'Fredoka', sans-serif"
     });
 
-    this.timerText = this.add.text(680, 95, "⏱️ Tiempo: 14s", {
-      fontSize: "18px", fontStyle: "bold", color: "#f7e396", fontFamily: "'Segoe UI', sans-serif"
+    this.timerText = this.add.text(cx + 250, cy - 150, 'Tiempo: 14s', {
+      fontSize: '18px', fontStyle: 'bold', color: '#ffd000', fontFamily: "'Fredoka', sans-serif"
     });
 
     this.timer = this.time.addEvent({
@@ -1027,7 +1123,7 @@ class MinigameRoverDrive extends Phaser.Scene {
       callback: () => {
         if (this.ended) return;
         this.timeLeft--;
-        this.timerText.setText(`⏱️ Tiempo: ${this.timeLeft}s`);
+        this.timerText.setText(`Tiempo: ${this.timeLeft}s`);
         if (this.timeLeft <= 0) {
           this.finish();
         }
@@ -1037,6 +1133,8 @@ class MinigameRoverDrive extends Phaser.Scene {
 
   update(time, delta) {
     if (this.ended) return;
+    const cx = this.scale.width / 2;
+    const cy = this.scale.height / 2;
 
     let moveX = 0;
     let moveY = 0;
@@ -1047,11 +1145,6 @@ class MinigameRoverDrive extends Phaser.Scene {
     if (this.cursors.down.isDown || this.wasd.down.isDown) moveY += 1;
 
     if (moveX !== 0 || moveY !== 0) {
-      // Normalizar vector de movimiento diagonal para velocidad constante
-      const len = Math.hypot(moveX, moveY);
-      moveX /= len;
-      moveY /= len;
-
       const speed = 0.22 * delta;
       this.rover.x += moveX * speed;
       this.rover.y += moveY * speed;
@@ -1062,16 +1155,16 @@ class MinigameRoverDrive extends Phaser.Scene {
       this.roverSensor.y = this.rover.y + Math.sin(angle) * 12;
     }
 
-    this.rover.x = Phaser.Math.Clamp(this.rover.x, 80, 820);
-    this.rover.y = Phaser.Math.Clamp(this.rover.y, 110, 450);
+    this.rover.x = Phaser.Math.Clamp(this.rover.x, cx - 370, cx + 370);
+    this.rover.y = Phaser.Math.Clamp(this.rover.y, cy - 140, cy + 200);
 
-    // Detección de balizas científicas
     for (let i = this.beacons.length - 1; i >= 0; i--) {
       const b = this.beacons[i];
       if (Phaser.Math.Distance.Between(this.rover.x, this.rover.y, b.x, b.y) < 28) {
         this.sensorsCollected++;
-        if (typeof SoundFx !== "undefined") SoundFx.playResourceGain();
-        this.scoreText.setText(`Balizas cientificas desplegadas: ${this.sensorsCollected} / ${this.targetSensors}`);
+        spawnBurst(this, b.x, b.y, 0x38bdf8, 12, 80);
+        if (typeof SoundFx !== 'undefined') SoundFx.playResourceGain();
+        this.scoreText.setText(`Balizas colocadas: ${this.sensorsCollected} / ${this.targetSensors}`);
 
         b.icon.destroy();
         b.destroy();
@@ -1087,39 +1180,36 @@ class MinigameRoverDrive extends Phaser.Scene {
 
   finish() {
     this.ended = true;
-    this.timer.remove();
+    if (this.timer) this.timer.remove();
 
-    let tier = "fail";
+    let tier = 'fail';
     if (this.sensorsCollected >= this.targetSensors && this.timeLeft >= 5) {
-      tier = "excellent";
+      tier = 'excellent';
     } else if (this.sensorsCollected >= this.targetSensors) {
-      tier = "good";
+      tier = 'good';
     } else if (this.sensorsCollected >= 2) {
-      tier = "fair";
-    } else {
-      tier = "fail";
+      tier = 'fair';
     }
 
-    this.scene.stop("MinigameRoverDrive");
-    this.scene.resume("MainScene");
+    this.scene.stop('MinigameRoverDrive');
+    this.scene.resume('MainScene');
 
-    if (typeof window.onMinigameComplete === "function") {
+    if (typeof window.onMinigameComplete === 'function') {
       window.onMinigameComplete({
         tier: tier,
         score: Math.round((this.sensorsCollected / this.targetSensors) * 100),
-        minigameName: "Exploración con Rover ROVI (Ciencia)"
+        minigameName: 'Exploración con Rover ROVI (Ciencia)'
       }, this.choiceData);
     }
   }
 }
-
 
 // ============================================================================
 // 9. MINIJUEGO: ESPECTROMETRÍA LÁSER DE MUESTRAS MARCIANAS (NASA PIXL)
 // ============================================================================
 class MinigameSpectro extends Phaser.Scene {
   constructor() {
-    super("MinigameSpectro");
+    super('MinigameSpectro');
   }
 
   init(data) {
@@ -1131,53 +1221,53 @@ class MinigameSpectro extends Phaser.Scene {
   }
 
   create() {
-    this.add.rectangle(450, 250, 900, 500, 0x090d16);
-    this.add.rectangle(450, 250, 880, 480, 0x111827).setStrokeStyle(2, 0x38bdf8, 0.4);
+    const cx = this.scale.width / 2;
+    const cy = this.scale.height / 2;
+    const w = 860;
+    const h = 480;
 
-    this.add.text(450, 32, "ESPECTROMETRO LASER PIXL: ANALISIS DE MUESTRAS MARCIANAS", {
-      fontSize: "20px", fontStyle: "bold", color: "#F7E396", fontFamily: "'Segoe UI', sans-serif"
-    }).setOrigin(0.5);
+    createTechConsole(this, cx, cy, w, h, 0x38bdf8,
+      'LÁSER PIXL: ¡ANALIZA LAS ROCAS DE MARTE!',
+      'Haz clic en cada roca para disparar el láser y descubrir qué minerales contiene'
+    );
 
-    this.add.text(450, 62, "Haz clic en cada muestra para disparar el laser PIXL y analizar su composicion quimica.", {
-      fontSize: "13px", color: "#94a3b8", fontFamily: "'Segoe UI', sans-serif"
-    }).setOrigin(0.5);
-
-    this.timerText = this.add.text(40, 90, "Tiempo restante: 16.0s", {
-      fontSize: "15px", color: "#f7e396", fontFamily: "'Segoe UI', sans-serif"
+    this.timerText = this.add.text(cx - 390, cy - 150, 'Tiempo restante: 16.0s', {
+      fontSize: '16px', color: '#ffd000', fontFamily: "'Fredoka', sans-serif"
     });
 
-    this.scoreText = this.add.text(40, 115, "Muestras analizadas: 0 / 4", {
-      fontSize: "15px", fontStyle: "bold", color: "#38bdf8", fontFamily: "'Segoe UI', sans-serif"
+    this.scoreText = this.add.text(cx - 390, cy - 125, 'Muestras analizadas: 0 / 4', {
+      fontSize: '16px', fontStyle: 'bold', color: '#38bdf8', fontFamily: "'Fredoka', sans-serif"
     });
 
     const samplesData = [
-      { name: "Basalto Volcanico", sub: "Silicio + Hierro (Regolito)", color: 0x475569, x: 160 },
-      { name: "Esferas Hematita", sub: "Evidencia de Agua Pasada", color: 0x991b1b, x: 350 },
-      { name: "Arcilla Lacustre", sub: "Sedimentos de Antiguo Lago", color: 0xb45309, x: 540 },
-      { name: "Sulfatos Hidratados", sub: "Reserva de H2O Atrapada", color: 0x0284c7, x: 730 }
+      { name: 'Basalto Volcánico', sub: 'Roca volcánica marciana', color: 0x475569, ox: -270 },
+      { name: 'Esferas de Hematita', sub: 'Huellas de agua del pasado', color: 0x991b1b, ox: -90 },
+      { name: 'Arcilla de Lago', sub: 'Barro de un antiguo lago', color: 0xb45309, ox: 90 },
+      { name: 'Sulfatos con Agua', sub: '¡Tiene agua atrapada dentro!', color: 0x0284c7, ox: 270 }
     ];
 
     this.samples = [];
 
     samplesData.forEach((sd, idx) => {
-      const container = this.add.container(sd.x, 280);
+      const px = cx + sd.ox;
+      const py = cy + 40;
 
-      this.add.circle(sd.x, 280, 62, 0x1e293b).setStrokeStyle(3, 0x334155);
+      this.add.circle(px, py, 60, 0x1e293b).setStrokeStyle(3, 0x334155);
 
-      const rock = this.add.polygon(sd.x, 280, [-35, -15, 0, -42, 38, -12, 30, 35, -25, 30], sd.color)
+      const rock = this.add.polygon(px, py, [-35, -15, 0, -42, 38, -12, 30, 35, -25, 30], sd.color)
         .setInteractive({ useHandCursor: true });
 
-      const nameLabel = this.add.text(sd.x, 355, sd.name, {
-        fontSize: "13px", fontStyle: "bold", color: "#ffffff", align: "center", fontFamily: "'Segoe UI', sans-serif"
+      const nameLabel = this.add.text(px, py + 75, sd.name, {
+        fontSize: '13px', fontStyle: 'bold', color: '#ffffff', align: 'center', fontFamily: "'Fredoka', sans-serif"
       }).setOrigin(0.5);
 
-      const statusTag = this.add.text(sd.x, 375, "[PENDIENTE]", {
-        fontSize: "11px", color: "#94a3b8", fontFamily: "'Segoe UI', sans-serif"
+      const statusTag = this.add.text(px, py + 95, 'Pendiente', {
+        fontSize: '12px', fontStyle: 'bold', color: '#94a3b8', fontFamily: "'Fredoka', sans-serif"
       }).setOrigin(0.5);
 
-      const specBox = this.add.rectangle(sd.x, 190, 130, 48, 0x0f172a).setStrokeStyle(1, 0x334155);
-      const specText = this.add.text(sd.x, 190, sd.sub, {
-        fontSize: "10px", color: "#cbd5e1", align: "center", wordWrap: { width: 120 }, fontFamily: "'Segoe UI', sans-serif"
+      const specBox = this.add.rectangle(px, py - 90, 130, 48, 0x0f172a).setStrokeStyle(1.5, 0x38bdf8);
+      const specText = this.add.text(px, py - 90, sd.sub, {
+        fontSize: '11px', color: '#f1f5f9', align: 'center', wordWrap: { width: 120 }, fontFamily: "'Fredoka', sans-serif"
       }).setOrigin(0.5);
       specBox.setVisible(false);
       specText.setVisible(false);
@@ -1188,12 +1278,12 @@ class MinigameSpectro extends Phaser.Scene {
         statusTag,
         specBox,
         specText,
-        x: sd.x,
-        y: 280,
+        x: px,
+        y: py,
         scanned: false
       };
 
-      rock.on("pointerdown", () => {
+      rock.on('pointerdown', () => {
         if (sampleObj.scanned || this.ended) return;
         this.scanSample(sampleObj);
       });
@@ -1201,7 +1291,7 @@ class MinigameSpectro extends Phaser.Scene {
       this.samples.push(sampleObj);
     });
 
-    this.laserBeam = this.add.line(0, 0, 0, 0, 0, 0, 0x38bdf8, 3).setOrigin(0);
+    this.laserBeam = this.add.line(0, 0, 0, 0, 0, 0, 0x38bdf8, 3.5).setOrigin(0);
     this.laserBeam.setVisible(false);
 
     this.timer = this.time.addEvent({
@@ -1220,10 +1310,12 @@ class MinigameSpectro extends Phaser.Scene {
 
   scanSample(sample) {
     sample.scanned = true;
-    if (typeof SoundFx !== "undefined") SoundFx.playClick();
+    if (typeof SoundFx !== 'undefined') SoundFx.playClick();
 
-    const startX = 450;
-    const startY = 80;
+    const cx = this.scale.width / 2;
+    const cy = this.scale.height / 2;
+    const startX = cx;
+    const startY = cy - 140;
     const targetX = sample.x;
     const targetY = sample.y;
 
@@ -1232,14 +1324,15 @@ class MinigameSpectro extends Phaser.Scene {
 
     this.time.delayedCall(400, () => {
       this.laserBeam.setVisible(false);
-      sample.rock.setFillStyle(0xfacc15);
-      sample.statusTag.setText("[ANALIZADO - OK]");
-      sample.statusTag.setColor("#4ade80");
+      sample.rock.setFillStyle(0xffd000);
+      sample.statusTag.setText('¡Analizado!');
+      sample.statusTag.setColor('#4ade80');
       sample.specBox.setVisible(true);
       sample.specText.setVisible(true);
 
       this.samplesScanned++;
-      if (typeof SoundFx !== "undefined") SoundFx.playResourceGain();
+      spawnBurst(this, sample.x, sample.y, 0xffd000, 14, 70);
+      if (typeof SoundFx !== 'undefined') SoundFx.playResourceGain();
       this.scoreText.setText(`Muestras analizadas: ${this.samplesScanned} / ${this.targetSamples}`);
 
       if (this.samplesScanned >= this.targetSamples) {
@@ -1250,25 +1343,25 @@ class MinigameSpectro extends Phaser.Scene {
 
   finish() {
     this.ended = true;
-    this.timer.remove();
+    if (this.timer) this.timer.remove();
 
-    let tier = "fail";
+    let tier = 'fail';
     if (this.samplesScanned >= this.targetSamples && this.timeLeft >= 5) {
-      tier = "excellent";
+      tier = 'excellent';
     } else if (this.samplesScanned >= this.targetSamples) {
-      tier = "good";
+      tier = 'good';
     } else if (this.samplesScanned >= 2) {
-      tier = "fair";
+      tier = 'fair';
     }
 
-    this.scene.stop("MinigameSpectro");
-    this.scene.resume("MainScene");
+    this.scene.stop('MinigameSpectro');
+    this.scene.resume('MainScene');
 
-    if (typeof window.onMinigameComplete === "function") {
+    if (typeof window.onMinigameComplete === 'function') {
       window.onMinigameComplete({
         tier: tier,
         score: Math.round((this.samplesScanned / this.targetSamples) * 100),
-        minigameName: "Espectrometria Laser PIXL (Muestras)"
+        minigameName: 'Espectrometría Láser PIXL (Muestras)'
       }, this.choiceData);
     }
   }
@@ -1279,7 +1372,7 @@ class MinigameSpectro extends Phaser.Scene {
 // ============================================================================
 class MinigameDustDefense extends Phaser.Scene {
   constructor() {
-    super("MinigameDustDefense");
+    super('MinigameDustDefense');
   }
 
   init(data) {
@@ -1291,56 +1384,58 @@ class MinigameDustDefense extends Phaser.Scene {
   }
 
   create() {
-    this.add.rectangle(450, 250, 900, 500, 0x180b08);
-    this.add.rectangle(450, 250, 880, 480, 0x27140e).setStrokeStyle(2, 0xf97316, 0.5);
+    const cx = this.scale.width / 2;
+    const cy = this.scale.height / 2;
+    const w = 860;
+    const h = 480;
 
-    this.add.text(450, 32, "ALERTA DE TORMENTA: PROTOCOLO DE ASEGURAMIENTO DE BASE", {
-      fontSize: "20px", fontStyle: "bold", color: "#F7E396", fontFamily: "'Segoe UI', sans-serif"
-    }).setOrigin(0.5);
+    createTechConsole(this, cx, cy, w, h, 0xf97316,
+      '¡ALERTA DE TORMENTA!: PROTEGE LA BASE',
+      'El viento sopla fuerte. Pulsa en PROTEGER en los 4 sistemas antes de que llegue la arena'
+    );
 
-    this.add.text(450, 62, "Vientos de 110 km/h acercandose. Asegura los 4 sistemas criticos antes del impacto.", {
-      fontSize: "13px", color: "#fdba74", fontFamily: "'Segoe UI', sans-serif"
-    }).setOrigin(0.5);
-
-    this.timerText = this.add.text(40, 90, "Tiempo hasta impacto: 15.0s", {
-      fontSize: "16px", fontStyle: "bold", color: "#fb7185", fontFamily: "'Segoe UI', sans-serif"
+    this.timerText = this.add.text(cx - 390, cy - 150, 'Tiempo antes del viento: 15.0s', {
+      fontSize: '16px', fontStyle: 'bold', color: '#fb7185', fontFamily: "'Fredoka', sans-serif"
     });
 
-    this.scoreText = this.add.text(40, 115, "Sistemas asegurados: 0 / 4", {
-      fontSize: "15px", fontStyle: "bold", color: "#38bdf8", fontFamily: "'Segoe UI', sans-serif"
+    this.scoreText = this.add.text(cx - 390, cy - 125, 'Sistemas protegidos: 0 / 4', {
+      fontSize: '16px', fontStyle: 'bold', color: '#38bdf8', fontFamily: "'Fredoka', sans-serif"
     });
 
     const systems = [
-      { id: "solar", title: "PANELES SOLARES", task: "Inclinar a 85 deg contra el polvo", x: 250, y: 220 },
-      { id: "mast", title: "ANTENA CAPCOM", task: "Plegar mastil de alta ganancia", x: 650, y: 220 },
-      { id: "airlock", title: "ESCLUSA OUTPOST", task: "Bloquear triple sello de presion", x: 250, y: 370 },
-      { id: "rover", title: "ROVER ROVI", task: "Anclar al hangar electromagnetico", x: 650, y: 370 }
+      { id: 'solar', title: 'PANELES SOLARES', task: 'Plegar para evitar la arena', ox: -195, oy: -25 },
+      { id: 'mast', title: 'ANTENA DE RADIO', task: 'Bajar mástil de comunicaciones', ox: 195, oy: -25 },
+      { id: 'airlock', title: 'PUERTA DEL HÁBITAT', task: 'Cerrar triple sello hermético', ox: -195, oy: 105 },
+      { id: 'rover', title: 'ROVER ROVI', task: 'Anclar al garaje seguro', ox: 195, oy: 105 }
     ];
 
     this.systemCards = [];
 
     systems.forEach((sys) => {
-      const cardBg = this.add.rectangle(sys.x, sys.y, 380, 110, 0x1f1412)
-        .setStrokeStyle(2, 0x7c2d12);
+      const px = cx + sys.ox;
+      const py = cy + sys.oy;
 
-      this.add.text(sys.x - 170, sys.y - 38, sys.title, {
-        fontSize: "14px", fontStyle: "bold", color: "#ffffff", fontFamily: "'Segoe UI', sans-serif"
+      const cardBg = this.add.rectangle(px, py, 360, 105, 0x1f1412)
+        .setStrokeStyle(2.5, 0x7c2d12);
+
+      this.add.text(px - 160, py - 36, sys.title, {
+        fontSize: '14px', fontStyle: 'bold', color: '#ffffff', fontFamily: "'Fredoka', sans-serif"
       });
 
-      this.add.text(sys.x - 170, sys.y - 14, sys.task, {
-        fontSize: "12px", color: "#94a3b8", fontFamily: "'Segoe UI', sans-serif"
+      this.add.text(px - 160, py - 14, sys.task, {
+        fontSize: '12px', color: '#cbd5e1', fontFamily: "'Fredoka', sans-serif"
       });
 
-      const statusTag = this.add.text(sys.x - 170, sys.y + 16, "ESTADO: [EXPUESTO]", {
-        fontSize: "12px", fontStyle: "bold", color: "#fb7185", fontFamily: "'Segoe UI', sans-serif"
+      const statusTag = this.add.text(px - 160, py + 16, '¡Peligro de tormenta!', {
+        fontSize: '12px', fontStyle: 'bold', color: '#fb7185', fontFamily: "'Fredoka', sans-serif"
       });
 
-      const btn = this.add.rectangle(sys.x + 105, sys.y, 110, 44, 0xef4444)
+      const btn = this.add.rectangle(px + 105, py, 110, 44, 0xef4444)
         .setInteractive({ useHandCursor: true })
-        .setStrokeStyle(2, 0xffffff);
+        .setStrokeStyle(2.5, 0xffffff);
 
-      const btnText = this.add.text(sys.x + 105, sys.y, "ASEGURAR", {
-        fontSize: "12px", fontStyle: "bold", color: "#ffffff", fontFamily: "'Segoe UI', sans-serif"
+      const btnText = this.add.text(px + 105, py, 'PROTEGER', {
+        fontSize: '12px', fontStyle: 'bold', color: '#ffffff', fontFamily: "'Fredoka', sans-serif"
       }).setOrigin(0.5);
 
       const item = {
@@ -1352,7 +1447,7 @@ class MinigameDustDefense extends Phaser.Scene {
         secured: false
       };
 
-      btn.on("pointerdown", () => {
+      btn.on('pointerdown', () => {
         if (item.secured || this.ended) return;
         this.secureSystem(item);
       });
@@ -1362,7 +1457,7 @@ class MinigameDustDefense extends Phaser.Scene {
 
     this.dustParticles = [];
     for (let i = 0; i < 40; i++) {
-      const p = this.add.circle(Phaser.Math.Between(0, 900), Phaser.Math.Between(100, 480), Phaser.Math.Between(1, 3), 0xca8a04, 0.4);
+      const p = this.add.circle(Phaser.Math.Between(0, this.scale.width), Phaser.Math.Between(cy - 200, cy + 220), Phaser.Math.Between(1, 3), 0xca8a04, 0.45);
       p.speed = Phaser.Math.Between(180, 450);
       this.dustParticles.push(p);
     }
@@ -1372,7 +1467,7 @@ class MinigameDustDefense extends Phaser.Scene {
       callback: () => {
         if (this.ended) return;
         this.timeLeft -= 0.1;
-        this.timerText.setText(`Tiempo hasta impacto: ${Math.max(0, this.timeLeft).toFixed(1)}s`);
+        this.timerText.setText(`Tiempo antes del viento: ${Math.max(0, this.timeLeft).toFixed(1)}s`);
         if (this.timeLeft <= 0) {
           this.finish();
         }
@@ -1384,11 +1479,13 @@ class MinigameDustDefense extends Phaser.Scene {
   update(time, delta) {
     if (this.ended) return;
     const dt = delta / 1000;
+    const w = this.scale.width;
+    const cy = this.scale.height / 2;
     this.dustParticles.forEach(p => {
       p.x -= p.speed * dt;
       if (p.x < -10) {
-        p.x = 910;
-        p.y = Phaser.Math.Between(100, 480);
+        p.x = w + 10;
+        p.y = Phaser.Math.Between(cy - 200, cy + 220);
       }
     });
   }
@@ -1396,14 +1493,15 @@ class MinigameDustDefense extends Phaser.Scene {
   secureSystem(item) {
     item.secured = true;
     item.btn.setFillStyle(0x22c55e);
-    item.btnText.setText("[OK]");
-    item.statusTag.setText("ESTADO: [ASEGURADO]");
-    item.statusTag.setColor("#4ade80");
-    item.cardBg.setStrokeStyle(2, 0x22c55e);
+    item.btnText.setText('¡LISTO!');
+    item.statusTag.setText('¡Protegido con éxito!');
+    item.statusTag.setColor('#4ade80');
+    item.cardBg.setStrokeStyle(2.5, 0x22c55e);
 
+    spawnBurst(this, item.btn.x, item.btn.y, 0x22c55e, 14, 80);
     this.securedCount++;
-    if (typeof SoundFx !== "undefined") SoundFx.playSuccess();
-    this.scoreText.setText(`Sistemas asegurados: ${this.securedCount} / ${this.totalSystems}`);
+    if (typeof SoundFx !== 'undefined') SoundFx.playSuccess();
+    this.scoreText.setText(`Sistemas protegidos: ${this.securedCount} / ${this.totalSystems}`);
 
     if (this.securedCount >= this.totalSystems) {
       this.finish();
@@ -1412,25 +1510,25 @@ class MinigameDustDefense extends Phaser.Scene {
 
   finish() {
     this.ended = true;
-    this.timer.remove();
+    if (this.timer) this.timer.remove();
 
-    let tier = "fail";
+    let tier = 'fail';
     if (this.securedCount >= this.totalSystems && this.timeLeft >= 4) {
-      tier = "excellent";
+      tier = 'excellent';
     } else if (this.securedCount >= this.totalSystems) {
-      tier = "good";
+      tier = 'good';
     } else if (this.securedCount >= 2) {
-      tier = "fair";
+      tier = 'fair';
     }
 
-    this.scene.stop("MinigameDustDefense");
-    this.scene.resume("MainScene");
+    this.scene.stop('MinigameDustDefense');
+    this.scene.resume('MainScene');
 
-    if (typeof window.onMinigameComplete === "function") {
+    if (typeof window.onMinigameComplete === 'function') {
       window.onMinigameComplete({
         tier: tier,
         score: Math.round((this.securedCount / this.totalSystems) * 100),
-        minigameName: "Defensa ante Megatormenta Marciana"
+        minigameName: 'Defensa ante Megatormenta Marciana'
       }, this.choiceData);
     }
   }
