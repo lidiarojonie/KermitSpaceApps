@@ -678,8 +678,17 @@ document.getElementById("btn-new-game").onclick = () => {
   if (typeof SoundFx !== "undefined") SoundFx.playClick();
   if (!GameState.load()) GameState.reset();
   startScreen.classList.add("hidden");
-  switchViewMode("2d");
-  loadCurrentSol();
+
+  // Siempre reproducir la cinemática del accidente al empezar misión
+  if (typeof IntroAccident !== "undefined") {
+    IntroAccident.start(() => {
+      switchViewMode("2d");
+      loadCurrentSol();
+    });
+  } else {
+    switchViewMode("2d");
+    loadCurrentSol();
+  }
 };
 
 // =========================================================================

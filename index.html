@@ -18,6 +18,109 @@
   <!-- CONTENEDOR DE INDICADORES FLOTANTES DE RECURSOS (+25, -4, etc.) -->
   <div id="floating-indicators" class="floating-container"></div>
 
+  <!-- OVERLAY DE LA INTRO: RECREACIÓN DEL ACCIDENTE ARES-VII -->
+  <div id="intro-accident-overlay" class="intro-screen hidden">
+    <!-- Canvas de efectos visuales (Marte, estrellas, reentrada, fuego, cockpit, shake, polvo) -->
+    <canvas id="intro-accident-canvas"></canvas>
+
+    <!-- Interfaz HUD de la cabina Ares-VII -->
+    <div id="intro-hud" class="intro-hud-layer">
+      <!-- Barra superior de telemetría y botón de saltar -->
+      <div class="intro-top-bar">
+        <div class="intro-mission-badge">
+          <span class="intro-blinking-dot"></span>
+          <span class="intro-mission-title">ARES-VII // MISIÓN MARTE // PROTOCOLO DE DESCENSO EDL</span>
+        </div>
+        <button id="btn-skip-intro" class="btn-skip-intro" title="Saltar recreación">Saltar Intro &rarr;</button>
+      </div>
+
+      <!-- Cuadros laterales de telemetría en tiempo real -->
+      <div class="intro-telemetry-panel left-panel">
+        <div class="telemetry-gauge">
+          <span class="gauge-label">ALTITUD</span>
+          <span id="telemetry-alt" class="gauge-value">85.000 m</span>
+        </div>
+        <div class="telemetry-gauge">
+          <span class="gauge-label">VELOCIDAD</span>
+          <span id="telemetry-speed" class="gauge-value">Mach 24.2</span>
+        </div>
+        <div class="telemetry-gauge">
+          <span class="gauge-label">ESCUDO TÉRMICO</span>
+          <span id="telemetry-temp" class="gauge-value">1.480 °C</span>
+        </div>
+      </div>
+
+      <div class="intro-telemetry-panel right-panel">
+        <div class="telemetry-gauge">
+          <span class="gauge-label">ESTADO EDL</span>
+          <span id="telemetry-status" class="gauge-value text-green">NOMINAL</span>
+        </div>
+        <div class="telemetry-gauge">
+          <span class="gauge-label">PROPULSIÓN</span>
+          <span id="telemetry-prop" class="gauge-value text-green">ACTIVA 100%</span>
+        </div>
+        <div class="telemetry-gauge">
+          <span class="gauge-label">ZONA DESTINO</span>
+          <span class="gauge-value">Arcadia Planitia</span>
+        </div>
+      </div>
+
+      <!-- Banner central de alerta roja (oculto al inicio, parpadea durante la emergencia) -->
+      <div id="intro-alarm-banner" class="intro-alarm-banner hidden">
+        <div class="alarm-icon">&#9888;</div>
+        <div class="alarm-texts">
+          <strong id="alarm-main-text">¡ADVERTENCIA DE COLISIÓN!</strong>
+          <span id="alarm-sub-text">FALLO CRÍTICO DE PROPULSIÓN AUXILIAR</span>
+        </div>
+      </div>
+
+      <!-- Cuadro de diálogo / comunicación con radio y transcripción -->
+      <div id="intro-comm-box" class="intro-comm-box">
+        <div class="intro-speaker-header">
+          <div id="intro-speaker-avatar" class="speaker-avatar houston-avatar"></div>
+          <div class="speaker-details">
+            <strong id="intro-speaker-name">HOUSTON // CONTROL DE MISIÓN</strong>
+            <span id="intro-comm-channel" class="comm-channel">Canal Seguro Tierra-Marte</span>
+          </div>
+          <span id="intro-comm-pulse" class="comm-signal-pulse"></span>
+        </div>
+        <p id="intro-speech-text" class="intro-speech-text">...</p>
+        <div class="intro-comm-footer">
+          <span id="intro-step-hint" class="step-hint">Haz clic o pulsa ESPACIO para avanzar &bull; 1 / 4</span>
+          <button id="btn-next-intro-step" class="btn-intro-next">Siguiente &rarr;</button>
+        </div>
+      </div>
+
+      <!-- Panel final de despertar tras el impacto -->
+      <div id="intro-wakeup-card" class="intro-wakeup-card hidden">
+        <div class="wakeup-badge">&#128680; IMPACTO REGISTRADO &bull; SOL 1</div>
+        <h2 class="wakeup-title">¡HAS SOBREVIVIDO AL ATERRIZAJE FORZOSO!</h2>
+        <div class="wakeup-rovi-box">
+          <div class="rovi-face-avatar wakeup-rovi-avatar">
+            <div class="rovi-antenna"></div>
+            <div class="rovi-head">
+              <div class="rovi-eyes"><span class="eye"></span><span class="eye"></span></div>
+              <div class="rovi-smile"></div>
+            </div>
+          </div>
+          <p class="wakeup-rovi-msg">
+            «¡Bip bop! ¡Comandante! ¡Menudo golpe...! La cápsula Ares-VII ha quedado inoperativa junto al Outpost Beta. 
+            El depósito de agua ha sufrido fisuras y el polvo de regolito cubre las placas solares a -65 °C. 
+            ¡Tenemos que asegurar el hábitat y poner en marcha los sistemas de soporte vital antes de que se agoten las baterías!»
+          </p>
+        </div>
+        <div class="wakeup-stats-row">
+          <div class="stat-pill text-amber">&#9889; Baterías: 50% (Bajando por frío)</div>
+          <div class="stat-pill text-cyan">&#128167; Agua: 50% (Daño por impacto)</div>
+          <div class="stat-pill text-green">&#127793; Outpost Beta: Estructura intacta</div>
+        </div>
+        <button id="btn-intro-finish" class="btn-primary btn-chunky btn-wakeup-action">
+          ¡ENTRAR AL OUTPOST BETA Y EMPEZAR SOL 1! &rarr;
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- PANTALLA DE INICIO -->
   <div id="start-screen" class="overlay-screen">
     <div class="modal-card start-card">
@@ -374,6 +477,7 @@
   <script src="js/minigamesPack.js"></script>
   <script src="js/scene3d.js"></script>
   <script src="js/minigames3D.js"></script>
+  <script src="js/introAccident.js"></script>
   <script src="js/game.js"></script>
 </body>
 </html>
