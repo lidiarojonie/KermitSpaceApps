@@ -250,6 +250,19 @@ function loadCurrentSol() {
 
 // 9. Manejo de la decisión elegida (abre briefing si hay minijuego o resuelve de inmediato)
 function handleChoiceSelection(choice) {
+  // El minijuego de ascenso orbital del MAV solo puede jugarse en el último día (Sol 15)
+  if (choice.minigame === "MinigameMavLaunch3D" && typeof GameState !== "undefined" && GameState.sol < 15) {
+    if (typeof SoundFx !== "undefined") SoundFx.playAlert();
+    const roviMsg = document.getElementById("rovi-msg");
+    if (roviMsg) {
+      roviMsg.textContent = "ROVI: «¡El cohete MAV aún está completando sus etapas de combustible! El ascenso orbital solo se activará en el último día (Sol 15).»";
+    }
+    if (typeof GameState.showFloatingIndicator === "function") {
+      GameState.showFloatingIndicator("Cohete MAV: Bloqueado hasta el Sol 15", "#f43f5e");
+    }
+    return;
+  }
+
   const is3DMinigame = typeof Minigames3D !== "undefined" && Minigames3D.has(choice.minigame);
   const hasMinigameScene =
     choice.minigame &&
@@ -319,6 +332,12 @@ document.getElementById("btn-start-minigame").onclick = () => {
   briefingModal.classList.add("hidden");
   decisionPanel.classList.add("hidden");
 
+  // Esconder las tarjetas de fase y ROVI durante el minijuego
+  const roviAssistant = document.getElementById("rovi-assistant");
+  if (roviAssistant) roviAssistant.classList.add("hidden");
+  const earthComm = document.getElementById("earth-comm");
+  if (earthComm) earthComm.classList.add("hidden");
+
   isMinigameRunning = true;
   toggleViewBtn.disabled = true;
   toggleViewBtn.style.opacity = "0.5";
@@ -335,6 +354,14 @@ document.getElementById("btn-start-minigame").onclick = () => {
 
 function launchPendingMinigame() {
   if (!pendingMinigameChoice) return;
+
+  // Asegurar que las tarjetas de fase y ROVI estén ocultas durante la partida
+  decisionPanel.classList.add("hidden");
+  const roviAssistant = document.getElementById("rovi-assistant");
+  if (roviAssistant) roviAssistant.classList.add("hidden");
+  const earthComm = document.getElementById("earth-comm");
+  if (earthComm) earthComm.classList.add("hidden");
+
   const is3DMinigame = typeof Minigames3D !== "undefined" && Minigames3D.has(pendingMinigameChoice.minigame);
 
   if (is3DMinigame) {
@@ -386,6 +413,12 @@ document.getElementById("btn-cancel-briefing").onclick = () => {
   toggleViewBtn.disabled = false;
   toggleViewBtn.style.opacity = "1";
 
+  // Volver a mostrar ROVI y la tarjeta de fase al cancelar
+  const roviAssistant = document.getElementById("rovi-assistant");
+  if (roviAssistant) roviAssistant.classList.remove("hidden");
+  const earthComm = document.getElementById("earth-comm");
+  if (earthComm) earthComm.classList.remove("hidden");
+
   if (currentViewMode === "3d") {
     if (typeof Scene3D !== "undefined") Scene3D.start();
   } else {
@@ -404,6 +437,12 @@ window.onMinigameComplete = function (result, choice) {
   if (typeof Minigames3D !== "undefined") {
     Minigames3D.cleanup();
   }
+
+  // Volver a mostrar las tarjetas de ROVI y comunicaciones tras terminar el minijuego
+  const roviAssistant = document.getElementById("rovi-assistant");
+  if (roviAssistant) roviAssistant.classList.remove("hidden");
+  const earthComm = document.getElementById("earth-comm");
+  if (earthComm) earthComm.classList.remove("hidden");
 
   let tier = "good";
   let score = 100;
@@ -872,17 +911,30 @@ function openArcadeModal() {
   ARCADE_MINIGAMES_3D.forEach(g => {
     const card = document.createElement("div");
     card.className = "arcade-item-card";
+    const isMavLocked = g.minigame === "MinigameMavLaunch3D" && typeof GameState !== "undefined" && GameState.sol < 15;
+    const badgeText = isMavLocked ? "SOL 15 (MISIÓN FINAL)" : g.badge;
+    const badgeStyle = isMavLocked ? 'style="background: #e11d48; color: #fff;"' : '';
+    const btnText = isMavLocked ? "DESBLOQUEO EN SOL 15" : "¡JUGAR 3D!";
+    const btnStyle = isMavLocked ? 'style="opacity: 0.6; cursor: not-allowed; background: #475569; border-color: #334155;"' : '';
+
     card.innerHTML = `
       <div>
         <div class="arcade-item-header">
-          <span class="arcade-item-badge badge-3d">${g.badge}</span>
+          <span class="arcade-item-badge badge-3d" ${badgeStyle}>${badgeText}</span>
         </div>
         <h4 class="arcade-item-title">${g.minigameTitle}</h4>
         <p class="arcade-item-desc">${g.desc}</p>
       </div>
-      <button class="btn-primary btn-arcade-play">¡JUGAR 3D!</button>
+      <button class="btn-primary btn-arcade-play" ${btnStyle}>${btnText}</button>
     `;
     card.querySelector("button").onclick = () => {
+      if (isMavLocked) {
+        if (typeof SoundFx !== "undefined") SoundFx.playAlert();
+        if (typeof GameState.showFloatingIndicator === "function") {
+          GameState.showFloatingIndicator("Cohete MAV: Disponible en el Sol 15", "#f43f5e");
+        }
+        return;
+      }
       modal.classList.add("hidden");
       startScreen.classList.add("hidden");
       if (typeof SoundFx !== "undefined") SoundFx.playClick();

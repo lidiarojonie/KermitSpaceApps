@@ -1406,6 +1406,19 @@ const Scene3D = {
   interactWithStation(station) {
     if (!station) return;
 
+    // El cohete MAV solo permite despegue y ascenso orbital en el último día (Sol 15)
+    if (station.id === "mav" && typeof GameState !== "undefined" && GameState.sol < 15) {
+      if (typeof SoundFx !== "undefined") SoundFx.playAlert();
+      const roviMsg = document.getElementById("rovi-msg");
+      if (roviMsg) {
+        roviMsg.textContent = "ROVI: «¡Comandante! El cohete MAV está completando sus etapas de combustible. El ascenso orbital solo se activará en el último día (Sol 15) ante la megatormenta.»";
+      }
+      if (typeof GameState.showFloatingIndicator === "function") {
+        GameState.showFloatingIndicator("Cohete MAV: Bloqueado hasta el Sol 15", "#f43f5e");
+      }
+      return;
+    }
+
     if (typeof SoundFx !== "undefined") SoundFx.playClick();
 
     if (station.discoveryId && typeof DiscoverySystem !== "undefined") {
@@ -1745,7 +1758,13 @@ const Scene3D = {
     if (nearest) {
       this.activePromptStation = nearest;
       if (promptCard) promptCard.classList.remove("hidden");
-      if (promptText) promptText.textContent = nearest.actionText;
+      if (promptText) {
+        if (nearest.id === "mav" && typeof GameState !== "undefined" && GameState.sol < 15) {
+          promptText.textContent = "Cohete MAV en preparación (Despegue disponible en el Sol 15)";
+        } else {
+          promptText.textContent = nearest.actionText;
+        }
+      }
     } else {
       this.activePromptStation = null;
       if (promptCard) promptCard.classList.add("hidden");
