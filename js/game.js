@@ -676,11 +676,40 @@ document.getElementById("btn-demo-3d").onclick = () => {
 // 16. Controles de inicio, reinicio y modales
 document.getElementById("btn-new-game").onclick = () => {
   if (typeof SoundFx !== "undefined") SoundFx.playClick();
-  if (!GameState.load()) GameState.reset();
+  const hasSaved = GameState.load();
+  if (!hasSaved) GameState.reset();
   startScreen.classList.add("hidden");
-  switchViewMode("2d");
-  loadCurrentSol();
+
+  // Si estamos en el Sol 1 (partida nueva o primer día), reproducir la cinemática del accidente
+  if (typeof IntroAccident !== "undefined" && GameState.sol === 1) {
+    IntroAccident.start(() => {
+      switchViewMode("2d");
+      loadCurrentSol();
+    });
+  } else {
+    switchViewMode("2d");
+    loadCurrentSol();
+  }
 };
+
+const btnReplayIntro = document.getElementById("btn-replay-intro");
+if (btnReplayIntro) {
+  btnReplayIntro.onclick = () => {
+    if (typeof SoundFx !== "undefined") SoundFx.playClick();
+    startScreen.classList.add("hidden");
+    if (typeof IntroAccident !== "undefined") {
+      IntroAccident.start(() => {
+        if (!GameState.load()) GameState.reset();
+        switchViewMode("2d");
+        loadCurrentSol();
+      });
+    } else {
+      if (!GameState.load()) GameState.reset();
+      switchViewMode("2d");
+      loadCurrentSol();
+    }
+  };
+}
 
 // =========================================================================
 // SALA DE ENTRENAMIENTO / SELECTOR DIRECTO DE MINIJUEGOS (ARCADE NASA)
