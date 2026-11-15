@@ -89,7 +89,7 @@ class MinigameDrill extends Phaser.Scene {
 
     createTechConsole(this, cx, cy, w, h, 0x38bdf8,
       'PERFORACIÓN GLACIAR: ¡BUSCANDO AGUA!',
-      'Mueve la broca con el RATÓN o FLECHAS para atrapar 6 CRISTALES AZULES y esquivar las rocas'
+      'Mueve la broca con el RATÓN, FLECHAS o teclas A / D para atrapar 6 CRISTALES AZULES y esquivar las rocas'
     );
 
     this.iceCollected = 0;
@@ -117,6 +117,10 @@ class MinigameDrill extends Phaser.Scene {
     this.drillCore = this.add.circle(cx, cy - 98, 9, 0x38bdf8);
 
     this.cursors = this.input.keyboard.createCursorKeys();
+    this.wasd = {
+      left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
+      right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
+    };
     this.items = [];
 
     // Spawner de hielo y rocas
@@ -159,11 +163,15 @@ class MinigameDrill extends Phaser.Scene {
     const cx = this.scale.width / 2;
     const cy = this.scale.height / 2;
 
-    if (this.input.activePointer.x > cx - 380 && this.input.activePointer.x < cx + 380) {
+    const isLeft = (this.cursors && this.cursors.left.isDown) || (this.wasd && this.wasd.left.isDown);
+    const isRight = (this.cursors && this.cursors.right.isDown) || (this.wasd && this.wasd.right.isDown);
+    if (isLeft) {
+      this.drill.x -= 0.45 * delta;
+    } else if (isRight) {
+      this.drill.x += 0.45 * delta;
+    } else if (this.input.activePointer.x > cx - 380 && this.input.activePointer.x < cx + 380) {
       this.drill.x = Phaser.Math.Linear(this.drill.x, this.input.activePointer.x, 0.22);
     }
-    if (this.cursors.left.isDown) this.drill.x -= 0.42 * delta;
-    if (this.cursors.right.isDown) this.drill.x += 0.42 * delta;
     this.drill.x = Phaser.Math.Clamp(this.drill.x, cx - 350, cx + 350);
     this.drillCore.x = this.drill.x;
 
@@ -510,7 +518,7 @@ class MinigameShield extends Phaser.Scene {
 
     createTechConsole(this, cx, cy, w, h, 0xfb7185,
       'ESCUDO SOLAR: ¡PROTEGE EL HÁBITAT!',
-      'Mueve el escudo con el RATÓN para bloquear 7 partículas de radiación antes de que toquen la base'
+      'Mueve el escudo con el RATÓN, FLECHAS o teclas A / D para bloquear 7 partículas de radiación'
     );
 
     // Barra de base del hábitat
@@ -521,6 +529,12 @@ class MinigameShield extends Phaser.Scene {
 
     this.paddle = this.add.rectangle(cx, cy + 155, 140, 22, 0x38bdf8)
       .setStrokeStyle(2.5, 0xffffff);
+
+    this.cursors = this.input.keyboard.createCursorKeys();
+    this.wasd = {
+      left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
+      right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
+    };
 
     this.blocked = 0;
     this.missed = 0;
@@ -553,9 +567,17 @@ class MinigameShield extends Phaser.Scene {
     const cx = this.scale.width / 2;
     const cy = this.scale.height / 2;
 
-    if (this.input.activePointer.x > cx - 360 && this.input.activePointer.x < cx + 360) {
+    const isLeft = (this.cursors && this.cursors.left.isDown) || (this.wasd && this.wasd.left.isDown);
+    const isRight = (this.cursors && this.cursors.right.isDown) || (this.wasd && this.wasd.right.isDown);
+
+    if (isLeft) {
+      this.paddle.x -= 0.55 * delta;
+    } else if (isRight) {
+      this.paddle.x += 0.55 * delta;
+    } else if (this.input.activePointer.x > cx - 360 && this.input.activePointer.x < cx + 360) {
       this.paddle.x = this.input.activePointer.x;
     }
+    this.paddle.x = Phaser.Math.Clamp(this.paddle.x, cx - 350, cx + 350);
 
     for (let i = this.rays.length - 1; i >= 0; i--) {
       const r = this.rays[i];
@@ -1145,11 +1167,14 @@ class MinigameRoverDrive extends Phaser.Scene {
     if (this.cursors.down.isDown || this.wasd.down.isDown) moveY += 1;
 
     if (moveX !== 0 || moveY !== 0) {
+      const len = Math.hypot(moveX, moveY);
+      const nx = moveX / len;
+      const ny = moveY / len;
       const speed = 0.22 * delta;
-      this.rover.x += moveX * speed;
-      this.rover.y += moveY * speed;
+      this.rover.x += nx * speed;
+      this.rover.y += ny * speed;
 
-      const angle = Math.atan2(moveY, moveX);
+      const angle = Math.atan2(ny, nx);
       this.rover.rotation = angle;
       this.roverSensor.x = this.rover.x + Math.cos(angle) * 12;
       this.roverSensor.y = this.rover.y + Math.sin(angle) * 12;

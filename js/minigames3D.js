@@ -404,11 +404,11 @@ const Minigames3D = {
     const wallMat = new THREE.MeshStandardMaterial({ color: 0x6e2a18, roughness: 0.9 });
 
     const leftWall = new THREE.Mesh(wallGeo, wallMat);
-    leftWall.position.set(-14, 5, 40);
+    leftWall.position.set(14, 5, 40);
     this.scene.add(leftWall);
 
     const rightWall = new THREE.Mesh(wallGeo, wallMat);
-    rightWall.position.set(14, 5, 40);
+    rightWall.position.set(-14, 5, 40);
     this.scene.add(rightWall);
 
     // Rover ROVI en 3D
@@ -501,14 +501,14 @@ const Minigames3D = {
   updateRoverRace(delta, elapsed) {
     const d = this.gameData;
 
-    // Manejo de entrada
+    // Manejo de entrada: la cámara mira hacia +Z (Pantalla Izquierda = +X, Pantalla Derecha = -X)
     let moveDir = 0;
-    if (this.keys["KeyA"] || this.keys["ArrowLeft"]) moveDir -= 1;
-    if (this.keys["KeyD"] || this.keys["ArrowRight"]) moveDir += 1;
+    if (this.keys["KeyA"] || this.keys["ArrowLeft"]) moveDir += 1;
+    if (this.keys["KeyD"] || this.keys["ArrowRight"]) moveDir -= 1;
 
     // Control tactil / puntero
     if (this.isPointerDown) {
-      d.targetX = this.pointerX * 7.5;
+      d.targetX = -this.pointerX * 7.5;
     } else if (moveDir !== 0) {
       d.targetX += moveDir * 18 * delta;
     }
@@ -703,16 +703,16 @@ const Minigames3D = {
   updateMavLaunch(delta, elapsed) {
     const d = this.gameData;
 
-    // Manejo de controles
+    // Manejo de controles: cámara mirando hacia +Z (Pantalla Izquierda = +X, Pantalla Derecha = -X)
     let moveX = 0;
     let moveY = 0;
-    if (this.keys["KeyA"] || this.keys["ArrowLeft"]) moveX -= 1;
-    if (this.keys["KeyD"] || this.keys["ArrowRight"]) moveX += 1;
+    if (this.keys["KeyA"] || this.keys["ArrowLeft"]) moveX += 1;
+    if (this.keys["KeyD"] || this.keys["ArrowRight"]) moveX -= 1;
     if (this.keys["KeyW"] || this.keys["ArrowUp"]) moveY += 1;
     if (this.keys["KeyS"] || this.keys["ArrowDown"]) moveY -= 1;
 
     if (this.isPointerDown) {
-      d.targetX = this.pointerX * 6.5;
+      d.targetX = -this.pointerX * 6.5;
       d.targetY = this.pointerY * 4.5;
     } else {
       d.targetX += moveX * 14 * delta;
@@ -905,7 +905,7 @@ const Minigames3D = {
     let ax = 0;
     let ay = 0;
     if (this.keys["KeyA"] || this.keys["ArrowLeft"]) ax -= 1;
-    if (this.keys["KeyD"] || this.keys["ArrowRight"]) moveRight: ax += 1;
+    if (this.keys["KeyD"] || this.keys["ArrowRight"]) ax += 1;
     if (this.keys["KeyW"] || this.keys["ArrowUp"]) ay += 1;
     if (this.keys["KeyS"] || this.keys["ArrowDown"]) ay -= 1;
 
@@ -1065,9 +1065,21 @@ const Minigames3D = {
     d.rock.rotation.y += delta * 0.45;
     d.rock.rotation.x = Math.sin(elapsed * 0.5) * 0.2;
 
-    // Apuntado del laser con el puntero
-    d.aimX += (this.pointerX * 3.5 - d.aimX) * 0.2;
-    d.aimY += (this.pointerY * 2.5 - d.aimY) * 0.2;
+    // Apuntado del laser con el puntero o con teclas WASD / Flechas
+    let keyX = 0;
+    let keyY = 0;
+    if (this.keys["KeyA"] || this.keys["ArrowLeft"]) keyX -= 1;
+    if (this.keys["KeyD"] || this.keys["ArrowRight"]) keyX += 1;
+    if (this.keys["KeyW"] || this.keys["ArrowUp"]) keyY += 1;
+    if (this.keys["KeyS"] || this.keys["ArrowDown"]) keyY -= 1;
+
+    if (keyX !== 0 || keyY !== 0) {
+      d.aimX = Math.max(-3.5, Math.min(3.5, d.aimX + keyX * 5.0 * delta));
+      d.aimY = Math.max(-2.5, Math.min(2.5, d.aimY + keyY * 5.0 * delta));
+    } else if (this.isPointerDown) {
+      d.aimX += (this.pointerX * 3.5 - d.aimX) * 0.2;
+      d.aimY += (this.pointerY * 2.5 - d.aimY) * 0.2;
+    }
     d.laserHead.position.x = d.aimX;
     d.laserHead.position.y = d.aimY;
 
