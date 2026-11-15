@@ -384,7 +384,7 @@ body {
    ========================================================================== */
 .rovi-bubble {
   position: absolute;
-  top: 86px;
+  top: 124px;
   right: 20px;
   width: 350px;
   background: #ffffff;
@@ -561,10 +561,12 @@ body {
    ========================================================================== */
 .decision-card {
   position: absolute;
-  top: 96px;
+  top: 124px;
   left: 20px;
   width: 440px;
   max-width: 90vw;
+  max-height: calc(100vh - 145px);
+  overflow-y: auto;
   background: rgba(15, 23, 42, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -575,6 +577,14 @@ body {
   z-index: 40;
   pointer-events: auto;
   animation: slideInLeft 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.decision-card::-webkit-scrollbar {
+  width: 6px;
+}
+.decision-card::-webkit-scrollbar-thumb {
+  background: rgba(56, 189, 248, 0.4);
+  border-radius: 99px;
 }
 
 @keyframes slideInLeft {
@@ -1115,7 +1125,7 @@ body {
 /* Banner de evento aleatorio */
 .event-toast {
   position: absolute;
-  top: 86px;
+  top: 124px;
   left: 50%;
   transform: translateX(-50%);
   background: #ffd000;
