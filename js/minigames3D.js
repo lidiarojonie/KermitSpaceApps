@@ -554,25 +554,27 @@ const Minigames3D = {
         item.rotation.z += delta * 3;
       }
 
-      // Comprobar colision con el rover (cerca de Z = 0)
-      if (Math.abs(item.position.z) < 1.4 && Math.abs(item.position.x - d.roverX) < 1.6) {
-        if (!item.userData.collected) {
-          item.userData.collected = true;
-          item.visible = false;
+      // Hitbox mejorada: ventana Z más amplia + radio X según tipo de objeto
+      // El rover tiene ~2.2 unidades de ancho; radio de colisión ~1.4 (cuerpo) + margen táctil
+      const hitRadiusX = item.userData.type === "rock" ? 1.5 : 1.8; // rocas más estrechas, cristales/turbos más fáciles
+      const hitDepthZ = item.userData.type === "rock" ? 1.6 : 2.0;  // ventana Z generosa para coleccionables
 
-          if (item.userData.type === "crystal") {
-            this.score += item.userData.value;
-            if (typeof SoundFx !== "undefined") SoundFx.playResourceGain();
-          } else if (item.userData.type === "turbo") {
-            this.score += item.userData.value;
-            d.speed = 42;
-            setTimeout(() => { d.speed = 28; }, 2200);
-            if (typeof SoundFx !== "undefined") SoundFx.playResourceGain();
-          } else if (item.userData.type === "rock") {
-            this.score = Math.max(0, this.score + item.userData.value);
-            d.bumpTimer = 0.3;
-            if (typeof SoundFx !== "undefined") SoundFx.playAlert();
-          }
+      if (!item.userData.collected && Math.abs(item.position.z) < hitDepthZ && Math.abs(item.position.x - d.roverX) < hitRadiusX) {
+        item.userData.collected = true;
+        item.visible = false;
+
+        if (item.userData.type === "crystal") {
+          this.score += item.userData.value;
+          if (typeof SoundFx !== "undefined") SoundFx.playResourceGain();
+        } else if (item.userData.type === "turbo") {
+          this.score += item.userData.value;
+          d.speed = 42;
+          setTimeout(() => { d.speed = 28; }, 2200);
+          if (typeof SoundFx !== "undefined") SoundFx.playResourceGain();
+        } else if (item.userData.type === "rock") {
+          this.score = Math.max(0, this.score + item.userData.value);
+          d.bumpTimer = 0.4;
+          if (typeof SoundFx !== "undefined") SoundFx.playAlert();
         }
       }
 
@@ -589,6 +591,15 @@ const Minigames3D = {
     if (this.score >= 80) this.tier = "excellent";
     else if (this.score >= 45) this.tier = "good";
     else this.tier = "fair";
+
+    // Feedback visual: colorear el rover según velocidad (turbo = azul)
+    if (d.bumpTimer > 0) {
+      d.rover.children.forEach(c => { if (c.material && c.material.color) c.material.color.setHex(0xef4444); });
+    } else if (d.speed > 30) {
+      d.rover.children.forEach(c => { if (c.material && c.material.color) c.material.color.setHex(0x38bdf8); });
+    } else {
+      d.rover.children[0] && d.rover.children[0].material && d.rover.children[0].material.color.setHex(0xfacc15);
+    }
   },
 
   // =========================================================================
@@ -753,13 +764,16 @@ const Minigames3D = {
     d.rings.forEach((ring) => {
       ring.position.z -= d.ascentSpeed * delta;
 
-      // Colision con el cohete (cerca de Z = 0)
-      if (Math.abs(ring.position.z) < 1.8 && !ring.userData.hit) {
+      // Hitbox mejorada del anillo: comprueba cuando el cohete cruza el plano del aro
+      // El anillo tiene radio 3.2; el cohete tiene ~1.4 de radio → umbral generoso de 3.4
+      // Ventana Z ampliada a 2.5 para compensar variaciones de velocidad de frame
+      if (Math.abs(ring.position.z) < 2.5 && !ring.userData.hit) {
         const dist = Math.hypot(ring.position.x - d.posX, ring.position.y - d.posY);
-        if (dist < 3.2) {
+        if (dist < 3.4) {
           ring.userData.hit = true;
           this.score += 15;
           ring.material.color.setHex(0x38bdf8);
+          ring.material.opacity !== undefined && (ring.material.transparent = true);
           if (typeof SoundFx !== "undefined") SoundFx.playResourceGain();
         }
       }
@@ -776,6 +790,20 @@ const Minigames3D = {
     if (this.score >= 90) this.tier = "excellent";
     else if (this.score >= 50) this.tier = "good";
     else this.tier = "fair";
+
+    // Feedback visual: iluminar en verde el anillo más cercano que aún no se ha pasado
+    d.rings.forEach((ring) => {
+      if (!ring.userData.hit) {
+        const dist = Math.hypot(ring.position.x - d.posX, ring.position.y - d.posY);
+        // Si está muy cerca y en la ventana de los próximos 20 unidades, parpadear en blanco
+        if (ring.position.z > 0 && ring.position.z < 20 && dist < 4.5) {
+          const pulse = 0.5 + Math.sin(this.clock.getElapsedTime() * 10) * 0.5;
+          ring.material.color.setRGB(0.13 + pulse * 0.87, 0.77 + pulse * 0.23, 0.13 + pulse * 0.87);
+        } else if (!ring.userData.hit) {
+          ring.material.color.setHex(0x22c55e);
+        }
+      }
+    });
   },
 
   // =========================================================================
@@ -928,9 +956,10 @@ const Minigames3D = {
     d.astro.position.set(d.posX, d.posY, d.posZ + Math.sin(elapsed * 2) * 0.15);
     d.astro.rotation.z = -d.vx * 0.08;
 
-    // Buscar nodo mas cercano
+    // Buscar nodo mas cercano — radio de deteccion ampliado a 4.5 (era 3.8)
+    // para compensar la perspectiva 3D y el retardo de movimiento con inercia
     let nearest = null;
-    let minDist = 3.8;
+    let minDist = 4.5;
 
     d.nodes.forEach((node) => {
       if (!node.userData.repaired) {
@@ -938,7 +967,11 @@ const Minigames3D = {
         const pulse = 0.5 + Math.sin(elapsed * 8) * 0.5;
         node.scale.set(1 + pulse * 0.2, 1 + pulse * 0.2, 1 + pulse * 0.2);
 
-        const dist = Math.hypot(node.position.x - d.posX, node.position.y - d.posY);
+        // Distancia 3D real (incluye Z) para que la detección sea más precisa en perspectiva
+        const dx = node.position.x - d.posX;
+        const dy = node.position.y - d.posY;
+        const dz = node.position.z - d.posZ;
+        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
         if (dist < minDist) {
           minDist = dist;
           nearest = node;
@@ -1090,13 +1123,14 @@ const Minigames3D = {
       d.beam.position.y = d.aimY;
 
       // Comprobar si apunta a algun mineral
+      // Hitbox ampliada a 1.3 (era 0.9): la roca rota y los minerales son pequeños en pantalla
       d.targets.forEach((tar) => {
         const worldPos = new THREE.Vector3();
         tar.getWorldPosition(worldPos);
 
         if (worldPos.z > 0) { // Solo si esta en la cara frontal visible
           const dist = Math.hypot(worldPos.x - d.aimX, worldPos.y - d.aimY);
-          if (dist < 0.9 && !tar.userData.scanned) {
+          if (dist < 1.3 && !tar.userData.scanned) {
             tar.userData.progress += delta * 60;
             if (tar.userData.progress >= 100) {
               tar.userData.scanned = true;
@@ -1112,6 +1146,14 @@ const Minigames3D = {
     if (this.score >= 100) this.tier = "excellent";
     else if (this.score >= 50) this.tier = "good";
     else this.tier = "fair";
+
+    // Feedback visual del láser PIXL: mostrar cursor de puntería
+    if (d.laserHead) {
+      // Escala del cabezal según si está disparando
+      const isFiring = this.keys["Space"] || this.isPointerDown;
+      const targetScale = isFiring ? 1.4 : 1.0;
+      d.laserHead.scale.lerp ? d.laserHead.scale.setScalar(targetScale) : null;
+    }
   }
 };
 

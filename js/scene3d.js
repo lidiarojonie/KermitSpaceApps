@@ -419,6 +419,7 @@ const Scene3D = {
   // 5. PAISAJE MARCIANO (DUNAS, CRÁTERES Y ROCAS BASÁLTICAS)
   // ==========================================================================
   buildMartianLandscape() {
+    this.obstacles = []; // Reinicia los obstáculos una sola vez por escena
     // Malla continua de terreno de 280x280 metros
     const groundGeo = new THREE.PlaneGeometry(280, 280, 80, 80);
     groundGeo.rotateX(-Math.PI / 2);
@@ -478,9 +479,8 @@ const Scene3D = {
       rock.receiveShadow = true;
       this.scene.add(rock);
 
-      if (scale > 1.8) {
-        this.obstacles.push({ x: rx, z: rz, r: scale * 0.8 });
-      }
+      // Todas las rocas son sólidas (radio ajustado a su tamaño real)
+      this.obstacles.push({ x: rx, z: rz, r: scale * 0.95 });
     }
 
     // Balizas luminosas del perímetro del campamento
@@ -516,7 +516,8 @@ const Scene3D = {
   // ==========================================================================
   buildBaseOutpost() {
     this.stations = [];
-    this.obstacles = [];
+    // No vaciar this.obstacles: las rocas del paisaje ya se registraron antes
+    if (!this.obstacles) this.obstacles = [];
 
     // ------------------------------------------------------------------------
     // A. CÚPULA CENTRAL DEL HÁBITAT (OUTPOST BETA)
@@ -603,7 +604,14 @@ const Scene3D = {
 
     this.obstacles.push({ x: 0, z: 0, r: 7.5 });
     this.obstacles.push({ x: 0, z: 7.2, r: 2.4 });
-    this.obstacles.push({ x: -8.5, z: 2.5, r: 1.8 });
+    // Túnel: cápsula a lo largo de todo su eje (longitud 8.5, rotado -30° en Y)
+    this.obstacles.push({
+      x: -8.5 - Math.cos(Math.PI / 6) * 4.25,
+      z: 2.5 - Math.sin(Math.PI / 6) * 4.25,
+      x2: -8.5 + Math.cos(Math.PI / 6) * 4.25,
+      z2: 2.5 + Math.sin(Math.PI / 6) * 4.25,
+      r: 1.3
+    });
 
     // ------------------------------------------------------------------------
     // B. INVERNADERO BIODOMO HIDROPÓNICO (CULTIVOS ESPACIALES OSDR)
@@ -1582,18 +1590,36 @@ const Scene3D = {
     }
 
     // Colisión física con estructuras y rocas gigantes
-    this.obstacles.forEach(obs => {
-      const dx = this.player.position.x - obs.x;
-      const dz = this.player.position.z - obs.z;
-      const dist = Math.sqrt(dx * dx + dz * dz);
-      const minSafeDist = obs.r + 0.65;
+    // Se admiten obstáculos circulares {x,z,r} y alargados (cápsulas) {x,z,x2,z2,r}
+    for (let pass = 0; pass < 2; pass++) {
+      this.obstacles.forEach(obs => {
+        let cx = obs.x;
+        let cz = obs.z;
+        if (obs.x2 !== undefined) {
+          const sx = obs.x2 - obs.x;
+          const sz = obs.z2 - obs.z;
+          const lenSq = sx * sx + sz * sz;
+          let t = lenSq > 0 ? ((this.player.position.x - obs.x) * sx + (this.player.position.z - obs.z) * sz) / lenSq : 0;
+          t = Math.max(0, Math.min(1, t));
+          cx = obs.x + sx * t;
+          cz = obs.z + sz * t;
+        }
+        const dx = this.player.position.x - cx;
+        const dz = this.player.position.z - cz;
+        const dist = Math.sqrt(dx * dx + dz * dz);
+        const minSafeDist = obs.r + 0.65;
 
-      if (dist < minSafeDist && dist > 0.001) {
-        const push = minSafeDist - dist;
-        this.player.position.x += (dx / dist) * push;
-        this.player.position.z += (dz / dist) * push;
-      }
-    });
+        if (dist < minSafeDist) {
+          if (dist > 0.001) {
+            const push = minSafeDist - dist;
+            this.player.position.x += (dx / dist) * push;
+            this.player.position.z += (dz / dist) * push;
+          } else {
+            this.player.position.x += minSafeDist;
+          }
+        }
+      });
+    }
 
     // Límite de perímetro del campamento
     const distFromCenter = Math.sqrt(this.player.position.x ** 2 + this.player.position.z ** 2);
