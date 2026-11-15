@@ -600,7 +600,14 @@ document.getElementById("btn-next-sol").onclick = () => {
 
   if (GameState.sol > 15) {
     if (GameState.mav >= 3) {
-      showEndScreen(true, "¡Has sobrevivido con éxito los 15 Soles en Arcadia Planitia, completado las 3 etapas del cohete MAV y despegado junto a ROVI rumbo a la órbita de retorno a la Tierra!");
+      const victoryText = "¡Has sobrevivido con éxito los 15 Soles en Arcadia Planitia, completado las 3 etapas del cohete MAV y despegado junto a ROVI rumbo a la órbita de retorno a la Tierra!";
+      if (typeof OutroReturn !== "undefined") {
+        OutroReturn.start(() => {
+          showEndScreen(true, victoryText);
+        });
+      } else {
+        showEndScreen(true, victoryText);
+      }
     } else {
       showEndScreen(false, "Sobreviviste los 15 Soles, pero el cohete MAV no completó todas sus etapas de combustible antes de la megatormenta.");
     }
@@ -1025,3 +1032,14 @@ window.addEventListener("keydown", (e) => {
     if (typeof SoundFx !== "undefined") SoundFx.playClick();
   }
 });
+
+// Helper de depuración para probar la cinemática de retorno en cualquier momento
+window.testOutro = () => {
+  if (typeof OutroReturn !== "undefined") {
+    OutroReturn.start(() => {
+      showEndScreen(true, "¡Has sobrevivido con éxito los 15 Soles en Arcadia Planitia, completado las 3 etapas del cohete MAV y despegado junto a ROVI rumbo a la órbita de retorno a la Tierra!");
+    });
+  } else {
+    console.warn("OutroReturn no está cargado");
+  }
+};
