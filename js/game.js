@@ -325,6 +325,16 @@ document.getElementById("btn-start-minigame").onclick = () => {
 
   if (typeof SoundFx !== "undefined") SoundFx.playClick();
 
+  // Mini-intro con el problema a resolver; al terminar arranca el minijuego
+  if (typeof MinigameIntro !== "undefined" && MinigameIntro.has(pendingMinigameChoice.minigame)) {
+    MinigameIntro.play(pendingMinigameChoice.minigame, launchPendingMinigame);
+  } else {
+    launchPendingMinigame();
+  }
+};
+
+function launchPendingMinigame() {
+  if (!pendingMinigameChoice) return;
   const is3DMinigame = typeof Minigames3D !== "undefined" && Minigames3D.has(pendingMinigameChoice.minigame);
 
   if (is3DMinigame) {
