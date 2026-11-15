@@ -1485,3 +1485,451 @@ body {
   border-radius: 14px;
   margin-top: 4px;
 }
+
+/* ==========================================================================
+   CINEMÁTICA INTRO: RECREACIÓN DEL ACCIDENTE ARES-VII
+   ========================================================================== */
+.btn-amber {
+  background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%) !important;
+  border-bottom-color: #b45309 !important;
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.45) !important;
+  color: #ffffff !important;
+}
+
+.btn-amber:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(245, 158, 11, 0.6) !important;
+}
+
+.intro-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #030712;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fredoka', sans-serif;
+  transition: opacity 0.4s ease;
+}
+
+.intro-screen.hidden {
+  display: none !important;
+}
+
+.intro-fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#intro-accident-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.intro-hud-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 22px;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.intro-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  pointer-events: auto;
+}
+
+.intro-mission-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1.5px solid rgba(56, 189, 248, 0.45);
+  border-radius: 99px;
+  padding: 8px 18px;
+  color: #38bdf8;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+.intro-blinking-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 10px #ef4444;
+  animation: blinkFast 0.8s infinite alternate;
+}
+
+.btn-skip-intro {
+  background: rgba(15, 23, 42, 0.85);
+  color: #cbd5e1;
+  border: 1.5px solid rgba(203, 213, 225, 0.35);
+  padding: 8px 18px;
+  border-radius: 99px;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 700;
+  font-size: 0.86rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  pointer-events: auto;
+}
+
+.btn-skip-intro:hover {
+  background: #38bdf8;
+  color: #0f172a;
+  border-color: #38bdf8;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(56, 189, 248, 0.4);
+}
+
+.intro-telemetry-panel {
+  position: absolute;
+  top: 86px;
+  width: 175px;
+  background: rgba(15, 23, 42, 0.82);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 18px;
+  padding: 14px 16px;
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+}
+
+.left-panel {
+  left: 22px;
+}
+
+.right-panel {
+  right: 22px;
+}
+
+.telemetry-gauge {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+
+.gauge-label {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.gauge-value {
+  font-size: 1.05rem;
+  color: #f8fafc;
+  font-weight: 800;
+  font-family: 'Nunito', monospace;
+}
+
+.intro-alarm-banner {
+  position: absolute;
+  top: 96px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(185, 28, 28, 0.95));
+  border: 2px solid #fecaca;
+  border-radius: 20px;
+  padding: 12px 28px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 0 35px rgba(239, 68, 68, 0.85);
+  animation: alarmPulse 0.5s infinite alternate;
+  pointer-events: auto;
+  z-index: 10;
+}
+
+.alarm-icon {
+  font-size: 1.8rem;
+  color: #ffffff;
+}
+
+.alarm-texts {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  color: #ffffff;
+}
+
+#alarm-main-text {
+  font-size: 1.15rem;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+}
+
+#alarm-sub-text {
+  font-size: 0.82rem;
+  font-weight: 700;
+  opacity: 0.95;
+}
+
+.intro-comm-box {
+  width: 90%;
+  max-width: 760px;
+  margin: 0 auto;
+  background: rgba(15, 23, 42, 0.92);
+  border: 2.5px solid #38bdf8;
+  border-radius: 24px;
+  padding: 20px 26px;
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(56, 189, 248, 0.25);
+  backdrop-filter: blur(12px);
+  pointer-events: auto;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.2s ease;
+}
+
+.intro-comm-box:hover {
+  border-color: #7dd3fc;
+  transform: translateY(-2px);
+}
+
+.intro-speaker-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.speaker-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1.5px solid #38bdf8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.houston-icon {
+  font-size: 1.5rem;
+}
+
+.speaker-details {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  text-align: left;
+}
+
+#intro-speaker-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #ffd000;
+  letter-spacing: 0.5px;
+}
+
+.comm-channel {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.comm-signal-pulse {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 10px #22c55e;
+  animation: pulse 1s infinite;
+}
+
+.intro-speech-text {
+  font-size: 1.12rem;
+  line-height: 1.55;
+  color: #f8fafc;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  min-height: 64px;
+  text-align: left;
+}
+
+.intro-comm-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 10px;
+}
+
+.step-hint {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.btn-intro-next {
+  background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+  color: #041226;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  border: none;
+  border-bottom: 3px solid #0369a1;
+  border-radius: 14px;
+  padding: 7px 20px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-intro-next:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(56, 189, 248, 0.4);
+}
+
+.intro-wakeup-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 660px;
+  background: #0f172a;
+  border: 3px solid #f59e0b;
+  border-radius: 28px;
+  padding: 30px 34px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 40px rgba(245, 158, 11, 0.35);
+  pointer-events: auto;
+  text-align: center;
+  animation: modalFadeIn 0.3s ease-out;
+  z-index: 20;
+}
+
+.wakeup-badge {
+  display: inline-block;
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1.5px solid rgba(245, 158, 11, 0.5);
+  border-radius: 99px;
+  padding: 6px 18px;
+  font-size: 0.84rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  margin-bottom: 12px;
+}
+
+.wakeup-title {
+  font-size: 1.65rem;
+  font-weight: 900;
+  color: #ffffff;
+  margin: 0 0 16px 0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.wakeup-rovi-box {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  background: rgba(17, 26, 44, 0.85);
+  border: 1.5px solid rgba(56, 189, 248, 0.35);
+  border-radius: 20px;
+  padding: 16px 18px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.wakeup-rovi-avatar {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+}
+
+.wakeup-rovi-msg {
+  font-size: 0.98rem;
+  color: #e2e8f0;
+  line-height: 1.5;
+  font-weight: 600;
+  margin: 0;
+}
+
+.wakeup-stats-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.stat-pill {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 6px 14px;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.btn-wakeup-action {
+  width: 100%;
+  font-size: 1.15rem;
+  padding: 14px 24px;
+}
+
+.rovi-head-alert {
+  background: #f97316 !important;
+  border-color: #ea580c !important;
+}
+
+.rovi-scared {
+  border-radius: 50% !important;
+  width: 10px !important;
+  height: 10px !important;
+  background: #0f172a !important;
+}
+
+@keyframes alarmPulse {
+  from {
+    transform: translateX(-50%) scale(1);
+    filter: brightness(1);
+  }
+  to {
+    transform: translateX(-50%) scale(1.04);
+    filter: brightness(1.25);
+  }
+}
+
+@keyframes blinkFast {
+  from { opacity: 0.2; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 860px) {
+  .intro-telemetry-panel {
+    display: none;
+  }
+  .intro-comm-box {
+    padding: 16px 18px;
+  }
+  .intro-speech-text {
+    font-size: 0.98rem;
+    min-height: 52px;
+  }
+  .wakeup-title {
+    font-size: 1.35rem;
+  }
+}
+
