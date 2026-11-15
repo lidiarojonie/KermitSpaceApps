@@ -1166,6 +1166,12 @@ body {
   z-index: 1;
 }
 
+#minigame-3d-canvas-wrap canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
 .m3d-hud-top {
   position: absolute;
   top: 18px;
