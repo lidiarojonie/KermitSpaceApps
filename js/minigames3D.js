@@ -248,7 +248,11 @@ const Minigames3D = {
     }
 
     if (scoreEl) {
-      scoreEl.textContent = `${this.score}`;
+      if (this.activeGame === "MinigameEvaRepair3D" && this.gameData && this.gameData.totalNodes) {
+        scoreEl.textContent = `${this.gameData.repairedCount} / ${this.gameData.totalNodes}`;
+      } else {
+        scoreEl.textContent = `${this.score}`;
+      }
     }
 
     if (starsEl) {
@@ -782,29 +786,31 @@ const Minigames3D = {
   // MINIJUEGO 3: PASEO ESPACIAL Y REPARACION EN GRAVEDAD CERO (Three.js)
   // =========================================================================
   initEvaRepair() {
-    this.timeRemaining = 28;
+    this.timeRemaining = 30;
     this.score = 0;
     this.tier = "fair";
 
     const titleEl = document.getElementById("m3d-game-title");
     const labelEl = document.getElementById("m3d-score-label");
+    const scoreEl = document.getElementById("m3d-score-val");
     const instrEl = document.getElementById("m3d-instructions-text");
 
     if (titleEl) titleEl.textContent = "Reparación Espacial en Gravedad Cero";
-    if (labelEl) labelEl.textContent = "Nodos Sellados";
-    if (instrEl) instrEl.textContent = "Usa A/D o Flechas para flotar y mantén Clic, Espacio o ACCIÓN para soldar los 4 puntos.";
+    if (labelEl) labelEl.textContent = "Puntos Reparados";
+    if (scoreEl) scoreEl.textContent = "0 / 5";
+    if (instrEl) instrEl.textContent = "Flota con A/D o Flechas y mantén Clic, Espacio o ACCIÓN para soldar los 5 componentes dañados.";
 
     this.scene.background = new THREE.Color(0x060913);
     this.scene.fog = new THREE.Fog(0x060913, 25, 160);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
     this.scene.add(ambientLight);
 
     const sunLight = new THREE.DirectionalLight(0xffffff, 2.5);
     sunLight.position.set(20, 25, 25);
     this.scene.add(sunLight);
 
-    // Fondo cosmico con estrellas
+    // Fondo cósmico con estrellas
     const starGeo = new THREE.BufferGeometry();
     const starCoords = [];
     for (let s = 0; s < 350; s++) {
@@ -825,7 +831,7 @@ const Minigames3D = {
     habModule.rotation.z = Math.PI / 2;
     stationGroup.add(habModule);
 
-    // Cúpula / Cabina de observación en el extremo izquierdo
+    // Cúpula / Cabina de observación en el extremo izquierdo (proa)
     const domeGeo = new THREE.SphereGeometry(2.28, 20, 16, 0, Math.PI * 2, 0, Math.PI / 2);
     const domeMat = new THREE.MeshStandardMaterial({
       color: 0x38bdf8,
@@ -839,7 +845,7 @@ const Minigames3D = {
     dome.position.set(-3.8, 0, 0);
     stationGroup.add(dome);
 
-    // Tobera y módulo de propulsión en el extremo derecho
+    // Tobera y motor de propulsión en el extremo derecho (popa)
     const thrusterGeo = new THREE.ConeGeometry(1.6, 2.2, 20, 1, true);
     const thrusterMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.85, roughness: 0.4 });
     const thruster = new THREE.Mesh(thrusterGeo, thrusterMat);
@@ -859,8 +865,23 @@ const Minigames3D = {
     band2.position.set(1.8, 0, 0);
     stationGroup.add(band2);
 
-    // Vigas de soporte de paneles solares
+    // Antena de telecomunicaciones en la parte superior del casco
     const trussMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.6 });
+    const antennaMast = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.4, 8), trussMat);
+    antennaMast.position.set(-1.2, 2.7, 0);
+    stationGroup.add(antennaMast);
+
+    const antennaDish = new THREE.Mesh(new THREE.SphereGeometry(0.7, 14, 14, 0, Math.PI * 2, 0, Math.PI / 2), bandMat);
+    antennaDish.position.set(-1.2, 3.4, 0);
+    antennaDish.rotation.x = -Math.PI / 3;
+    stationGroup.add(antennaDish);
+
+    // Módulo de baterías y soporte vital en la parte inferior del casco
+    const batteryBox = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.0, 1.4), new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8 }));
+    batteryBox.position.set(0.5, -2.6, 0);
+    stationGroup.add(batteryBox);
+
+    // Vigas de soporte de paneles solares
     const truss1 = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.35, 0.35), trussMat);
     truss1.position.set(-4.8, 0, 0);
     stationGroup.add(truss1);
@@ -885,24 +906,45 @@ const Minigames3D = {
     stationGroup.position.set(0, 0, 0);
     this.scene.add(stationGroup);
 
-    // 4 Nodos dañados con destellos de alerta (bien distribuidos y centrados)
+    // 5 Nodos de avería claramente visibles y distribuidos por toda la nave
     const nodes = [];
-    const nodeOffsets = [
-      { x: -6.8, y: 0.9, z: 0.35 },  // Panel solar izquierdo
-      { x: -2.3, y: -1.2, z: 0.5 },  // Casco izquierdo
-      { x: 2.3, y: 1.2, z: 0.5 },    // Casco derecho
-      { x: 6.8, y: -0.9, z: 0.35 }   // Panel solar derecho
+    const nodeConfigs = [
+      { id: 0, name: "Panel Solar Izquierdo", x: -7.0, y: 1.0, z: 1.0 },
+      { id: 1, name: "Antena de Comunicaciones", x: -1.2, y: 3.5, z: 1.0 },
+      { id: 2, name: "Módulo de Baterías Central", x: 0.5, y: -2.9, z: 1.0 },
+      { id: 3, name: "Inyector del Motor Cohete", x: 5.2, y: 1.2, z: 1.0 },
+      { id: 4, name: "Panel Solar Derecho", x: 7.0, y: -1.0, z: 1.0 }
     ];
 
-    nodeOffsets.forEach((pos, idx) => {
-      const nMesh = new THREE.Mesh(
-        new THREE.SphereGeometry(0.5, 14, 14),
+    nodeConfigs.forEach((cfg) => {
+      const nodeGroup = new THREE.Group();
+      nodeGroup.position.set(cfg.x, cfg.y, cfg.z);
+
+      // Núcleo esférico brillante
+      const coreMesh = new THREE.Mesh(
+        new THREE.SphereGeometry(0.52, 16, 16),
         new THREE.MeshBasicMaterial({ color: 0xef4444 })
       );
-      nMesh.position.set(pos.x, pos.y, pos.z);
-      nMesh.userData = { id: idx, repaired: false, progress: 0 };
-      this.scene.add(nMesh);
-      nodes.push(nMesh);
+      nodeGroup.add(coreMesh);
+
+      // Aro exterior pulsante de baliza (facilita que los niños lo vean claramente)
+      const ringMesh = new THREE.Mesh(
+        new THREE.TorusGeometry(0.85, 0.08, 8, 24),
+        new THREE.MeshBasicMaterial({ color: 0xf87171, transparent: true, opacity: 0.85 })
+      );
+      nodeGroup.add(ringMesh);
+
+      nodeGroup.userData = {
+        id: cfg.id,
+        name: cfg.name,
+        repaired: false,
+        progress: 0,
+        coreMesh: coreMesh,
+        ringMesh: ringMesh
+      };
+
+      this.scene.add(nodeGroup);
+      nodes.push(nodeGroup);
     });
 
     // Astronauta flotante (controlado por el jugador)
@@ -945,6 +987,8 @@ const Minigames3D = {
       posZ: 3.5,
       vx: 0,
       vy: 0,
+      repairedCount: 0,
+      totalNodes: nodes.length,
       activeTarget: null
     };
   },
@@ -960,21 +1004,25 @@ const Minigames3D = {
     if (this.keys["KeyW"] || this.keys["ArrowUp"]) moveY += 1;
     if (this.keys["KeyS"] || this.keys["ArrowDown"]) moveY -= 1;
 
-    // 2. Localizar el nodo dañado más cercano
+    // 2. Animar balizas de alerta y localizar el nodo dañado más cercano
     let nearest = null;
-    let minDist = 3.4;
+    let minDist = 3.6;
 
     d.nodes.forEach((node) => {
       if (!node.userData.repaired) {
-        // Parpadeo de alerta
-        const pulse = 0.5 + Math.sin(elapsed * 8) * 0.5;
-        node.scale.set(1 + pulse * 0.25, 1 + pulse * 0.25, 1 + pulse * 0.25);
+        // Parpadeo y rotación visual de alerta en 3D
+        const pulse = 0.5 + Math.sin(elapsed * 7 + node.userData.id * 1.5) * 0.5;
+        node.userData.coreMesh.scale.set(1 + pulse * 0.25, 1 + pulse * 0.25, 1 + pulse * 0.25);
+        node.userData.ringMesh.scale.set(1 + pulse * 0.35, 1 + pulse * 0.35, 1 + pulse * 0.35);
+        node.userData.ringMesh.rotation.z += delta * 1.8;
 
         const dist = Math.hypot(node.position.x - d.posX, node.position.y - d.posY);
         if (dist < minDist) {
           minDist = dist;
           nearest = node;
         }
+      } else {
+        node.userData.ringMesh.rotation.z += delta * 0.5;
       }
     });
 
@@ -1055,25 +1103,46 @@ const Minigames3D = {
       d.laserBeam.scale.set(1, length, 1);
       d.laserBeam.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), end.clone().sub(start).normalize());
 
-      nearest.userData.progress += delta * 45;
+      // Feedback visual durante la soldadura
+      nearest.userData.ringMesh.rotation.z += delta * 8;
+      nearest.userData.coreMesh.material.color.setHex(0xfacc15);
+
+      nearest.userData.progress += delta * 50;
 
       if (nearest.userData.progress >= 100) {
         nearest.userData.repaired = true;
-        nearest.material.color.setHex(0x22c55e);
-        this.score += 25;
+        nearest.userData.coreMesh.material.color.setHex(0x22c55e);
+        nearest.userData.ringMesh.material.color.setHex(0x4ade80);
+        nearest.userData.ringMesh.scale.set(1.4, 1.4, 1.4);
+
+        d.repairedCount++;
+        this.score = Math.round((d.repairedCount / d.totalNodes) * 100);
+        this.updateHUD();
+
         if (typeof SoundFx !== "undefined") SoundFx.playResourceGain();
 
-        // Si se completaron los 4 nodos, finalizar el minijuego con victoria
-        if (this.score >= 100) {
-          setTimeout(() => this.finishGame(), 700);
+        // ¡EN CUANTO SE REPAREN TODOS LOS NODOS, TERMINAR INMEDIATAMENTE EL MINIJUEGO!
+        if (d.repairedCount >= d.totalNodes) {
+          this.score = 100;
+          this.tier = "excellent";
+          this.updateHUD();
+          d.laserBeam.visible = false;
+          setTimeout(() => this.finishGame(), 350);
+          return;
         }
       }
     } else {
       d.laserBeam.visible = false;
+      // Restaurar color rojo en nodos aún no completados
+      d.nodes.forEach((n) => {
+        if (!n.userData.repaired && n.userData.progress < 100) {
+          n.userData.coreMesh.material.color.setHex(0xef4444);
+        }
+      });
     }
 
-    if (this.score >= 100) this.tier = "excellent";
-    else if (this.score >= 50) this.tier = "good";
+    if (d.repairedCount >= d.totalNodes) this.tier = "excellent";
+    else if (d.repairedCount >= 3) this.tier = "good";
     else this.tier = "fair";
   },
 

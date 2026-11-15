@@ -311,7 +311,7 @@ const MISSION_DAYS = [
         cost: { energy: -3 },
         minigame: "MinigameEvaRepair3D",
         minigameTitle: "Reparación Espacial EVA en 3D",
-        minigameBrief: "Flota en gravedad cero con tu traje de astronauta y suelda los 4 conectores de los paneles solares dañados.",
+        minigameBrief: "Flota en gravedad cero con tu traje de astronauta y suelda los 5 componentes dañados de la nave.",
         successReward: { energy: 28, shield: 12 },
         failReward: { energy: 15, shield: 6 },
         nasaFact: "Los paseos espaciales (EVA) permiten a los astronautas realizar reparaciones complejas en el exterior de naves y estaciones espaciales."

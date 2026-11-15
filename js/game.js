@@ -678,8 +678,17 @@ document.getElementById("btn-new-game").onclick = () => {
   if (typeof SoundFx !== "undefined") SoundFx.playClick();
   if (!GameState.load()) GameState.reset();
   startScreen.classList.add("hidden");
-  switchViewMode("2d");
-  loadCurrentSol();
+
+  // Siempre reproducir la cinemática del accidente al empezar misión
+  if (typeof IntroAccident !== "undefined") {
+    IntroAccident.start(() => {
+      switchViewMode("2d");
+      loadCurrentSol();
+    });
+  } else {
+    switchViewMode("2d");
+    loadCurrentSol();
+  }
 };
 
 // =========================================================================
@@ -711,7 +720,7 @@ const ARCADE_MINIGAMES_3D = [
   {
     minigame: "MinigameEvaRepair3D",
     minigameTitle: "Paseo Espacial EVA en Gravedad Cero",
-    minigameBrief: "Flota en gravedad cero con tu traje espacial y repara los 4 paneles solares dañados usando el rayo láser de microsoldadura.",
+    minigameBrief: "Flota en gravedad cero con tu traje espacial y repara los 5 componentes dañados usando el rayo láser de microsoldadura.",
     badge: "GRAVEDAD CERO 3D",
     desc: "Actividad extravehicular (EVA) en ingravidez para reparar paneles de la estación.",
     cost: {},
